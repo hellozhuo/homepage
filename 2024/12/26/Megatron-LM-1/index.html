@@ -17,21 +17,21 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha256-5eIC48iZUHmSlSUz9XtjRyK2mzQkHScZY1WdMaoz74E=" crossorigin="anonymous">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
 
-<script class="next-config" data-name="main" type="application/json">{"hostname":"zhuogege1943.com","root":"/blogs/","images":"/blogs/images","scheme":"Muse","darkmode":false,"version":"8.21.1","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"always","padding":18,"offset":12},"hljswrap":true,"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}}</script><script src="/blogs/js/config.js"></script>
+<script class="next-config" data-name="main" type="application/json">{"hostname":"zhuogege1943.com","root":"/blogs/","images":"/blogs/images","scheme":"Muse","darkmode":false,"version":"8.21.1","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}}</script><script src="/blogs/js/config.js"></script>
 
-    <meta name="description" content="Resources about distributed training with Megatron-LM  Github: https:&#x2F;&#x2F;github.com&#x2F;NVIDIA&#x2F;Megatron-LMDocument on NeMo: https:&#x2F;&#x2F;docs.nvidia.com&#x2F;nemo-framework&#x2F;user-guide&#x2F;latest&#x2F;overview.html   NeMo is">
+    <meta name="description" content="Resources about distributed training with Megatron-LMGithub: https:&#x2F;&#x2F;github.com&#x2F;NVIDIA&#x2F;Megatron-LMDocument on NeMo: https:&#x2F;&#x2F;docs.nvidia.com&#x2F;nemo-framework&#x2F;user-guide&#x2F;latest&#x2F;overview.html   NeMo is a c">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Megatron-LM (1)">
 <meta property="og:url" content="https://zhuogege1943.com/blogs/2024/12/26/Megatron-LM-1/index.html">
 <meta property="og:site_name" content="Zhuo&#39;s Blog">
-<meta property="og:description" content="Resources about distributed training with Megatron-LM  Github: https:&#x2F;&#x2F;github.com&#x2F;NVIDIA&#x2F;Megatron-LMDocument on NeMo: https:&#x2F;&#x2F;docs.nvidia.com&#x2F;nemo-framework&#x2F;user-guide&#x2F;latest&#x2F;overview.html   NeMo is">
+<meta property="og:description" content="Resources about distributed training with Megatron-LMGithub: https:&#x2F;&#x2F;github.com&#x2F;NVIDIA&#x2F;Megatron-LMDocument on NeMo: https:&#x2F;&#x2F;docs.nvidia.com&#x2F;nemo-framework&#x2F;user-guide&#x2F;latest&#x2F;overview.html   NeMo is a c">
 <meta property="og:locale" content="en_US">
 <meta property="og:image" content="https://zhuogege1943.com/blogs/joplin_resources/fa846f2d8740035590fed9a5b6e21774.png">
 <meta property="og:image" content="https://zhuogege1943.com/blogs/joplin_resources/ea97528d7e5fcdf8c5320fd26d4ef537.png">
 <meta property="og:image" content="https://zhuogege1943.com/blogs/joplin_resources/c49cabcf330bbd76d7f63d0cf30a0da4.png">
 <meta property="og:image" content="https://zhuogege1943.com/blogs/joplin_resources/798943eea9a9e4d297607659287469f7.png">
 <meta property="article:published_time" content="2024-12-26T06:54:32.000Z">
-<meta property="article:modified_time" content="2024-12-27T21:56:54.011Z">
+<meta property="article:modified_time" content="2024-12-27T22:00:08.872Z">
 <meta property="article:author" content="Zhuo ge ge">
 <meta property="article:tag" content="Optimization">
 <meta property="article:tag" content="Distributed training">
@@ -69,6 +69,9 @@
       <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
   <div class="site-nav-toggle">
     <div class="toggle" aria-label="Toggle navigation bar" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
     </div>
   </div>
 
@@ -89,6 +92,10 @@
 
 
 
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/blogs/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a></li><li class="menu-item menu-item-about"><a href="/blogs/about/" rel="section"><i class="fa fa-user fa-fw"></i>About</a></li><li class="menu-item menu-item-tags"><a href="/blogs/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a></li><li class="menu-item menu-item-categories"><a href="/blogs/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a></li><li class="menu-item menu-item-all-blogs"><a href="/blogs/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>All blogs</a></li>
+  </ul>
+</nav>
 
 
 
@@ -111,7 +118,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Megatron-LM-Training-Multi-Billion-Parameter-Language-Models-Using-Model-Parallelism"><span class="nav-number">1.</span> <span class="nav-text">Megatron-LM: Training Multi-Billion Parameter Language Models Using Model Parallelism</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Contributions"><span class="nav-number">1.1.</span> <span class="nav-text">Contributions</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Methods"><span class="nav-number">1.2.</span> <span class="nav-text">Methods</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Other-notes"><span class="nav-number">1.2.1.</span> <span class="nav-text">Other notes</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Scaling-evaluation-on-GPT-2"><span class="nav-number">1.3.</span> <span class="nav-text">Scaling evaluation on GPT-2</span></a></li></ol></li></ol></div>
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Resources-about-distributed-training-with-Megatron-LM"><span class="nav-number">1.</span> <span class="nav-text">Resources about distributed training with Megatron-LM</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Megatron-LM-Training-Multi-Billion-Parameter-Language-Models-Using-Model-Parallelism"><span class="nav-number">2.</span> <span class="nav-text">Megatron-LM: Training Multi-Billion Parameter Language Models Using Model Parallelism</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Contributions"><span class="nav-number">2.1.</span> <span class="nav-text">Contributions</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Methods"><span class="nav-number">2.2.</span> <span class="nav-text">Methods</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Other-notes"><span class="nav-number">2.2.1.</span> <span class="nav-text">Other notes</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Scaling-evaluation-on-GPT-2"><span class="nav-number">2.3.</span> <span class="nav-text">Scaling evaluation on GPT-2</span></a></li></ol></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -131,12 +138,14 @@
         </a>
       </div>
       <div class="site-state-item site-state-categories">
+          <a href="/blogs/categories/">
         <span class="site-state-item-count">1</span>
-        <span class="site-state-item-name">categories</span>
+        <span class="site-state-item-name">categories</span></a>
       </div>
       <div class="site-state-item site-state-tags">
+          <a href="/blogs/tags/">
         <span class="site-state-item-count">5</span>
-        <span class="site-state-item-name">tags</span>
+        <span class="site-state-item-name">tags</span></a>
       </div>
   </nav>
 </div>
@@ -148,7 +157,7 @@
         <a href="mailto:zuike2013@outlook.com" title="E-Mail → mailto:zuike2013@outlook.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
       </span>
       <span class="links-of-author-item">
-        <a href="https://zhuogege1943.com/" title="Zhuo&#39;s personal homepage → https:&#x2F;&#x2F;zhuogege1943.com" rel="noopener me"><i class="fas fa-home fa-fw"></i>Zhuo's personal homepage</a>
+        <a href="https://zhuogege1943.com/" title="Zhuo&#39;s personal homepage → https:&#x2F;&#x2F;zhuogege1943.com" rel="noopener me" target="_blank"><i class="fas fa-home fa-fw"></i>Zhuo's personal homepage</a>
       </span>
   </div>
 
@@ -209,7 +218,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">Edited on</span>
-      <time title="Modified: 2024-12-27 23:56:54" itemprop="dateModified" datetime="2024-12-27T23:56:54+02:00">2024-12-27</time>
+      <time title="Modified: 2024-12-28 00:00:08" itemprop="dateModified" datetime="2024-12-28T00:00:08+02:00">2024-12-28</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -230,10 +239,7 @@
     
     
     
-    <div class="post-body" itemprop="articleBody"><blockquote>
-<p>Resources about distributed training with Megatron-LM</p>
-</blockquote>
-<p>Github: <a target="_blank" rel="noopener" href="https://github.com/NVIDIA/Megatron-LM">https://github.com/NVIDIA/Megatron-LM</a><br>Document on NeMo: <a target="_blank" rel="noopener" href="https://docs.nvidia.com/nemo-framework/user-guide/latest/overview.html">https://docs.nvidia.com/nemo-framework/user-guide/latest/overview.html</a></p>
+    <div class="post-body" itemprop="articleBody"><h2 id="Resources-about-distributed-training-with-Megatron-LM"><a href="#Resources-about-distributed-training-with-Megatron-LM" class="headerlink" title="Resources about distributed training with Megatron-LM"></a>Resources about distributed training with Megatron-LM</h2><p>Github: <a target="_blank" rel="noopener" href="https://github.com/NVIDIA/Megatron-LM">https://github.com/NVIDIA/Megatron-LM</a><br>Document on NeMo: <a target="_blank" rel="noopener" href="https://docs.nvidia.com/nemo-framework/user-guide/latest/overview.html">https://docs.nvidia.com/nemo-framework/user-guide/latest/overview.html</a></p>
 <blockquote>
 <blockquote>
 <p>NeMo is a cloud-native generative AI framework built on top of Megatron-LM.</p>
@@ -304,6 +310,7 @@
 
 
 
+    <div class="comments gitalk-container"></div>
 </div>
   </main>
 
@@ -357,6 +364,10 @@
 
 
 
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/gitalk/1.8.0/gitalk.css" integrity="sha256-AJnUHL7dBv6PGaeyPQJcgQPDjt/Hn/PvYZde1iqfp8U=" crossorigin="anonymous">
+
+<script class="next-config" data-name="gitalk" type="application/json">{"enable":true,"github_id":"hellozhuo","repo":"blogs","client_id":"Ov23li2015fKCnsTEMvS","client_secret":"3ae207f1d7c7ddd4a005d3b6c492300c18895fd9","admin_user":"hellozhuo","distraction_free_mode":true,"proxy":"https://cors-anywhere.azm.workers.dev/https://github.com/login/oauth/access_token","language":null,"js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/gitalk/1.8.0/gitalk.min.js","integrity":"sha256-MVK9MGD/XJaGyIghSVrONSnoXoGh3IFxLw0zfvzpxR4="},"path_md5":"74e38e6375409298b199dda7e31315f6"}</script>
+<script src="/blogs/js/third-party/comments/gitalk.js"></script>
 
 </body>
 </html>
