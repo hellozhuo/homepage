@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/blogs/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/blogs/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/blogs/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/blogs/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/blogs/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha256-5eIC48iZUHmSlSUz9XtjRyK2mzQkHScZY1WdMaoz74E=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"zhuogege1943.com","root":"/blogs/","images":"/blogs/images","scheme":"Muse","darkmode":false,"version":"8.21.1","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}}</script><script src="/blogs/js/config.js"></script>
+
+    <meta name="description" content="Efficient Large-Scale Language Model Training on GPU Clusters Using Megatron-LMpaper (2021 arxiv): https:&#x2F;&#x2F;arxiv.org&#x2F;abs&#x2F;2104.04473 ContributionsBased on Megatron-LM, the authors further adopt pipelin">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Megatron-LM (2)">
+<meta property="og:url" content="https://zhuogege1943.com/blogs/2024/12/26/Megatron-LM-2/index.html">
+<meta property="og:site_name" content="Zhuo&#39;s Blog">
+<meta property="og:description" content="Efficient Large-Scale Language Model Training on GPU Clusters Using Megatron-LMpaper (2021 arxiv): https:&#x2F;&#x2F;arxiv.org&#x2F;abs&#x2F;2104.04473 ContributionsBased on Megatron-LM, the authors further adopt pipelin">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://zhuogege1943.com/blogs/joplin_resources/5bc748b36099a88976c17f640972d76b.png">
+<meta property="og:image" content="https://zhuogege1943.com/blogs/joplin_resources/98465e80b56627ea161b155d620a0b07.png">
+<meta property="og:image" content="https://zhuogege1943.com/blogs/joplin_resources/6575e9290eb6cf6aa228877c5239e812.png">
+<meta property="og:image" content="https://zhuogege1943.com/blogs/joplin_resources/6e4ffba59ca4f57b0bbc132fd516ee3b.png">
+<meta property="og:image" content="https://zhuogege1943.com/blogs/joplin_resources/8650bd09481bc21b74e8e18f303e065f.png">
+<meta property="og:image" content="https://zhuogege1943.com/blogs/joplin_resources/e6acb1a769d391f7aaa6b4d449df3a7f.png">
+<meta property="og:image" content="https://zhuogege1943.com/blogs/joplin_resources/c63f7301c8ccbcbdd2535c492b8ecd36.png">
+<meta property="article:published_time" content="2024-12-26T08:22:32.000Z">
+<meta property="article:modified_time" content="2024-12-27T14:30:49.738Z">
+<meta property="article:author" content="Zhuo ge ge">
+<meta property="article:tag" content="Optimization">
+<meta property="article:tag" content="Distributed training">
+<meta property="article:tag" content="LLM">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://zhuogege1943.com/blogs/joplin_resources/5bc748b36099a88976c17f640972d76b.png">
+
+
+<link rel="canonical" href="https://zhuogege1943.com/blogs/2024/12/26/Megatron-LM-2/">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"en","comments":true,"permalink":"https://zhuogege1943.com/blogs/2024/12/26/Megatron-LM-2/","path":"2024/12/26/Megatron-LM-2/","title":"Megatron-LM (2)"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>Megatron-LM (2) | Zhuo's Blog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/blogs/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar" role="button">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/blogs/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Zhuo's Blog</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="Search" role="button">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Efficient-Large-Scale-Language-Model-Training-on-GPU-Clusters-Using-Megatron-LM"><span class="nav-number">1.</span> <span class="nav-text">Efficient Large-Scale Language Model Training on GPU Clusters Using Megatron-LM</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Contributions"><span class="nav-number">1.1.</span> <span class="nav-text">Contributions</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Methods"><span class="nav-number">1.2.</span> <span class="nav-text">Methods</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#GPipe-pipeline-schedule"><span class="nav-number">1.2.1.</span> <span class="nav-text">GPipe pipeline schedule</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#PipeDream-Flush-schedule-upper-part-of-the-following-figure"><span class="nav-number">1.2.2.</span> <span class="nav-text">PipeDream-Flush schedule (upper part of the following figure)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Interleaved-1F1B-pipeline-schedule-lower-part-of-the-above-figure"><span class="nav-number">1.2.3.</span> <span class="nav-text">Interleaved 1F1B pipeline schedule (lower part of the above figure)</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Higher-level-experimental-and-analytical-conclusion"><span class="nav-number">1.3.</span> <span class="nav-text">Higher-level experimental and analytical conclusion</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Communication-optimization"><span class="nav-number">1.4.</span> <span class="nav-text">Communication optimization</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#General-accelerator-agnostic-ideas"><span class="nav-number">1.5.</span> <span class="nav-text">General accelerator-agnostic ideas</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Experiment-results"><span class="nav-number">1.6.</span> <span class="nav-text">Experiment results</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Zhuo ge ge</p>
+  <div class="site-description" itemprop="description">Hi, nice to meet you</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/blogs/archives/">
+          <span class="site-state-item-count">5</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+        <span class="site-state-item-count">1</span>
+        <span class="site-state-item-name">categories</span>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">tags</span>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://zhuogege1943.com/blogs/2024/12/26/Megatron-LM-2/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/blogs/images/avatar.gif">
+      <meta itemprop="name" content="Zhuo ge ge">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zhuo's Blog">
+      <meta itemprop="description" content="Hi, nice to meet you">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="Megatron-LM (2) | Zhuo's Blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Megatron-LM (2)
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2024-12-26 10:22:32" itemprop="dateCreated datePublished" datetime="2024-12-26T10:22:32+02:00">2024-12-26</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">Edited on</span>
+      <time title="Modified: 2024-12-27 16:30:49" itemprop="dateModified" datetime="2024-12-27T16:30:49+02:00">2024-12-27</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">In</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/blogs/categories/Paper-reading/" itemprop="url" rel="index"><span itemprop="name">Paper reading</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h2 id="Efficient-Large-Scale-Language-Model-Training-on-GPU-Clusters-Using-Megatron-LM"><a href="#Efficient-Large-Scale-Language-Model-Training-on-GPU-Clusters-Using-Megatron-LM" class="headerlink" title="Efficient Large-Scale Language Model Training on GPU Clusters Using Megatron-LM"></a>Efficient Large-Scale Language Model Training on GPU Clusters Using Megatron-LM</h2><p>paper (2021 arxiv): <a target="_blank" rel="noopener" href="https://arxiv.org/abs/2104.04473">https://arxiv.org/abs/2104.04473</a></p>
+<h3 id="Contributions"><a href="#Contributions" class="headerlink" title="Contributions"></a>Contributions</h3><p>Based on Megatron-LM, the authors further adopt pipeline model parallelism via the proposed interleaved 1F1B pipeline schedules to scale the LLM training to thousands of GPUs, because of the dramatic increase in model sizes.<br><img src="/blogs/joplin_resources/5bc748b36099a88976c17f640972d76b.png"></p>
+<h3 id="Methods"><a href="#Methods" class="headerlink" title="Methods"></a>Methods</h3><p><img src="/blogs/joplin_resources/98465e80b56627ea161b155d620a0b07.png"></p>
+<p>Basically, it combines tensor parallelism (proposed in Megatron-LM) and pipeline parallelism for model parallelism. Assume tensor-parallel size is $t$, pipeline-parallel size is $p$ (also said as the number of pipeline stages), and data-parallel size is $d$, then the total number of GPUs is $ptd$.</p>
+<p>First, let&#39;s get familiar with some concepts:</p>
+<h4 id="GPipe-pipeline-schedule"><a href="#GPipe-pipeline-schedule" class="headerlink" title="GPipe pipeline schedule"></a>GPipe pipeline schedule</h4><p><img src="/blogs/joplin_resources/6575e9290eb6cf6aa228877c5239e812.png"></p>
+<blockquote>
+<p>The grey area represents <span style="color: red;">pipeline bubble</span> where devices are idle. <span style="color: red;">Pipeline flush</span>, I guess, is the end point of the backward pass at each iteration.</p>
+</blockquote>
+<p>Here, the number of microbatches in batch is $m$, and assume the time to execute a single microbatch’s forward and backward pass as $t_f$ and $t_b$. Then the total amount of time spent in the pipeline bubble is $t_{pb} &#x3D; (p-1)\cdot (t_f + t_b)$, and the ideal processing time for the batch is $t_{id} &#x3D; m\cdot (t_f + t_b)$. Therefore, the fraction of ideal computation time spent in the pipeline bubble (or called the <span style="color: red;">bubble time fraction</span>) is:</p>
+<p>$$<br>\frac{t_{pb}}{t_{id}} &#x3D; \frac{p - 1}{m}.<br>$$</p>
+<p>The bubble time fraction should be as small as possible. The naive solution is to make $m \gg p$, however, this needs each device to store all the m microbatches’ activations for the gradient calculation in the backward pass, having a high memory footprint. In other words, the number of in-flight microbatches equal to the total number of microbatches $m$, so we have:</p>
+<h4 id="PipeDream-Flush-schedule-upper-part-of-the-following-figure"><a href="#PipeDream-Flush-schedule-upper-part-of-the-following-figure" class="headerlink" title="PipeDream-Flush schedule (upper part of the following figure)"></a>PipeDream-Flush schedule (upper part of the following figure)</h4><p><img src="/blogs/joplin_resources/6e4ffba59ca4f57b0bbc132fd516ee3b.png"></p>
+<p>In this schedule, there is a warmup phase for each device for the forward pass. After the warmup, the device goes with a one forward pass followed by one backward pass, which is the so-called <span style="color: red;">1F1B</span> schedule. In this way, the number of in-flight microbatches reduces to $p$ in maximum, while the bubble fraction time is the same. Therefore, PipeDream-Flush can be much more memory-efficient when $p \ll m$. </p>
+<p>To reduce the bubble fraction time and keep the schedule memory efficient, the authors propose:</p>
+<h4 id="Interleaved-1F1B-pipeline-schedule-lower-part-of-the-above-figure"><a href="#Interleaved-1F1B-pipeline-schedule-lower-part-of-the-above-figure" class="headerlink" title="Interleaved 1F1B pipeline schedule (lower part of the above figure)"></a>Interleaved 1F1B pipeline schedule (lower part of the above figure)</h4><p>Briefly, each device can perform computation for multiple subsets of layers (or a <span style="color: red;">model chunk</span>), for example, device 1 has layers 1, 2, 9, 10, device 2 has layers 3, 4, 11, 12, and so on. Then just like the 1F1B schedule, they do an interleaved 1F1B schedule. </p>
+<ul>
+<li>Property 1: this needs the number of microbatches $m$ to be an integer multiple of $p$;</li>
+<li>Property 2: this reduce the pipeline bubble time to $(p-1)\cdot(t_f+t_b)&#x2F;v$ where $v$ is the number of model chunks in each stage. Then the bubble time fraction reduces to $(p-1)&#x2F;(m\cdot v)$.</li>
+<li>Property 3 (drawback): this introduces extra communication with the increase of $v$.</li>
+</ul>
+<h3 id="Higher-level-experimental-and-analytical-conclusion"><a href="#Higher-level-experimental-and-analytical-conclusion" class="headerlink" title="Higher-level experimental and analytical conclusion"></a>Higher-level experimental and analytical conclusion</h3><p>The actual throughput for each device is affected by all the hyperparameters $p, t, d, B, b$ etc., where $B$ is the global batch size and $b$ is the microbatch size due to the communication overhead between devices. There are three takeaways</p>
+<ol>
+<li><p>When using $g$-GPU servers, the tensor model parallelism should generally be set up to $g$. Based on that, pipeline model parallelism can be used across servers.</p>
+</li>
+<li><p>When combine data and model parallelism, for model parallelism, a total number of $t\cdot p$ GPUs should be used to fit the model memory, then data parallelism is used to scale up training.</p>
+</li>
+<li><p>The optimal $b$ depends on the characteristics and throughput of the model, $p$, $d$ and $B$.</p>
+</li>
+</ol>
+<h3 id="Communication-optimization"><a href="#Communication-optimization" class="headerlink" title="Communication optimization"></a>Communication optimization</h3><p><img src="/blogs/joplin_resources/8650bd09481bc21b74e8e18f303e065f.png"></p>
+<p>Simply, shown in the above figure, assume we have $t&#x3D;2$, when send and receive between two consecutive pipeline stage (i.e., two servers according to conclusion 1), the naive way is to send the tensor on each GPU on the previous pipeline stage (server) to the second stage, where each pair of GPUs on the sender and receiver communicate with the exact same set of tensor.  Instead, we can first divide (scatter) the tensor to be sent into $t$ parts equally and each GPU on the sender server send its part to the GPU on the receiver server, then use all-gather operator to gather the tensor. We call this scatter&#x2F;gather optimization that reduce the communication to $1&#x2F;t$. </p>
+<h3 id="General-accelerator-agnostic-ideas"><a href="#General-accelerator-agnostic-ideas" class="headerlink" title="General accelerator-agnostic ideas"></a>General accelerator-agnostic ideas</h3><ol>
+<li>Smartly partitioning the model training graph to minimize the amount of communication while still keeping device active (they are saying the interleaved 1F1B pipeline schedule).</li>
+<li>Minimizing the number of memory bound kernels with operator fusion and careful data layout (they might be saying the fusion of output embedding with the cross entropy loss function to reduce the communication overhead).</li>
+<li>Other domain-specific optimizations (like the scatter-gather optimization).</li>
+</ol>
+<h3 id="Experiment-results"><a href="#Experiment-results" class="headerlink" title="Experiment results"></a>Experiment results</h3><p><img src="/blogs/joplin_resources/e6acb1a769d391f7aaa6b4d449df3a7f.png"></p>
+<p>  <img src="/blogs/joplin_resources/c63f7301c8ccbcbdd2535c492b8ecd36.png"></p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/blogs/tags/Optimization/" rel="tag"># Optimization</a>
+              <a href="/blogs/tags/Distributed-training/" rel="tag"># Distributed training</a>
+              <a href="/blogs/tags/LLM/" rel="tag"># LLM</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/blogs/2024/12/26/Megatron-LM-1/" rel="prev" title="Megatron-LM (1)">
+                  <i class="fa fa-angle-left"></i> Megatron-LM (1)
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/blogs/2024/12/27/hello-world/" rel="next" title="Hello World">
+                  Hello World <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2024</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Zhuo ge ge</span>
+  </div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="Back to top">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/blogs/js/comments.js"></script><script src="/blogs/js/utils.js"></script><script src="/blogs/js/motion.js"></script><script src="/blogs/js/sidebar.js"></script><script src="/blogs/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

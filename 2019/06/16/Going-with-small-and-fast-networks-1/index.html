@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/blogs/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/blogs/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/blogs/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/blogs/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/blogs/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha256-5eIC48iZUHmSlSUz9XtjRyK2mzQkHScZY1WdMaoz74E=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"zhuogege1943.com","root":"/blogs/","images":"/blogs/images","scheme":"Muse","darkmode":false,"version":"8.21.1","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}}</script><script src="/blogs/js/config.js"></script>
+
+    <meta name="description" content="OverviewIn this post, we are going to look at the following neural network models: MobileNet v1[^1] &amp; v2[^2], SqueezeNet[^3], ShuffleNet v1[^4] &amp; v2[^5], NasNet[^6]. We consider the following">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Going with small and fast networks (1)">
+<meta property="og:url" content="https://zhuogege1943.com/blogs/2019/06/16/Going-with-small-and-fast-networks-1/index.html">
+<meta property="og:site_name" content="Zhuo&#39;s Blog">
+<meta property="og:description" content="OverviewIn this post, we are going to look at the following neural network models: MobileNet v1[^1] &amp; v2[^2], SqueezeNet[^3], ShuffleNet v1[^4] &amp; v2[^5], NasNet[^6]. We consider the following">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://zhuogege1943.com/blogs/2019/06/16/Going-with-small-and-fast-networks-1/Going-with-small-and-fast-networks-1/mobilenetv1.png">
+<meta property="og:image" content="https://zhuogege1943.com/blogs/2019/06/16/Going-with-small-and-fast-networks-1/Going-with-small-and-fast-networks-1/mobilenetv1_2.png">
+<meta property="og:image" content="https://zhuogege1943.com/blogs/2019/06/16/Going-with-small-and-fast-networks-1/Going-with-small-and-fast-networks-1/mobilenetv1_3.png">
+<meta property="og:image" content="https://zhuogege1943.com/blogs/2019/06/16/Going-with-small-and-fast-networks-1/Going-with-small-and-fast-networks-1/3.1.png">
+<meta property="og:image" content="https://zhuogege1943.com/blogs/2019/06/16/Going-with-small-and-fast-networks-1/Going-with-small-and-fast-networks-1/3.2.png">
+<meta property="og:image" content="https://zhuogege1943.com/blogs/2019/06/16/Going-with-small-and-fast-networks-1/Going-with-small-and-fast-networks-1/4.2.png">
+<meta property="og:image" content="https://zhuogege1943.com/blogs/2019/06/16/Going-with-small-and-fast-networks-1/Going-with-small-and-fast-networks-1/4.3.png">
+<meta property="og:image" content="https://zhuogege1943.com/blogs/2019/06/16/Going-with-small-and-fast-networks-1/Going-with-small-and-fast-networks-1/4.4.png">
+<meta property="og:image" content="https://zhuogege1943.com/blogs/2019/06/16/Going-with-small-and-fast-networks-1/Going-with-small-and-fast-networks-1/5.1.png">
+<meta property="og:image" content="https://zhuogege1943.com/blogs/2019/06/16/Going-with-small-and-fast-networks-1/Going-with-small-and-fast-networks-1/5.3.png">
+<meta property="og:image" content="https://zhuogege1943.com/blogs/2019/06/16/Going-with-small-and-fast-networks-1/Going-with-small-and-fast-networks-1/5.4.png">
+<meta property="og:image" content="https://zhuogege1943.com/blogs/2019/06/16/Going-with-small-and-fast-networks-1/Going-with-small-and-fast-networks-1/5.5.png">
+<meta property="og:image" content="https://zhuogege1943.com/blogs/2019/06/16/Going-with-small-and-fast-networks-1/Going-with-small-and-fast-networks-1/6.1.png">
+<meta property="og:image" content="https://zhuogege1943.com/blogs/2019/06/16/Going-with-small-and-fast-networks-1/Going-with-small-and-fast-networks-1/6.3.png">
+<meta property="article:published_time" content="2019-06-16T13:13:53.000Z">
+<meta property="article:modified_time" content="2019-06-18T11:10:38.708Z">
+<meta property="article:author" content="Zhuo ge ge">
+<meta property="article:tag" content="Network compression">
+<meta property="article:tag" content="CNN">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://zhuogege1943.com/blogs/2019/06/16/Going-with-small-and-fast-networks-1/Going-with-small-and-fast-networks-1/mobilenetv1.png">
+
+
+<link rel="canonical" href="https://zhuogege1943.com/blogs/2019/06/16/Going-with-small-and-fast-networks-1/">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"en","comments":true,"permalink":"https://zhuogege1943.com/blogs/2019/06/16/Going-with-small-and-fast-networks-1/","path":"2019/06/16/Going-with-small-and-fast-networks-1/","title":"Going with small and fast networks (1)"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>Going with small and fast networks (1) | Zhuo's Blog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/blogs/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar" role="button">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/blogs/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Zhuo's Blog</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="Search" role="button">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Overview"><span class="nav-number">1.</span> <span class="nav-text">Overview</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MobileNet-v1-vs-Standard-CNN-models"><span class="nav-number">2.</span> <span class="nav-text">MobileNet v1 vs. Standard CNN models</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MobileNet-v1-vs-SqueezeNet"><span class="nav-number">3.</span> <span class="nav-text">MobileNet v1 vs. SqueezeNet</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MobileNet-v1-vs-MobileNet-v2"><span class="nav-number">4.</span> <span class="nav-text">MobileNet v1 vs. MobileNet v2</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MobileNet-v2-vs-ShuffleNet-v1-vs-NasNet"><span class="nav-number">5.</span> <span class="nav-text">MobileNet v2 vs. ShuffleNet v1 vs. NasNet</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ShuffleNet-v2-vs-All"><span class="nav-number">6.</span> <span class="nav-text">ShuffleNet v2 vs. All</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Conclusion"><span class="nav-number">7.</span> <span class="nav-text">Conclusion</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Zhuo ge ge</p>
+  <div class="site-description" itemprop="description">Hi, nice to meet you</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/blogs/archives/">
+          <span class="site-state-item-count">5</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+        <span class="site-state-item-count">1</span>
+        <span class="site-state-item-name">categories</span>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">tags</span>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://zhuogege1943.com/blogs/2019/06/16/Going-with-small-and-fast-networks-1/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/blogs/images/avatar.gif">
+      <meta itemprop="name" content="Zhuo ge ge">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zhuo's Blog">
+      <meta itemprop="description" content="Hi, nice to meet you">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="Going with small and fast networks (1) | Zhuo's Blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Going with small and fast networks (1)
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2019-06-16 16:13:53" itemprop="dateCreated datePublished" datetime="2019-06-16T16:13:53+03:00">2019-06-16</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">Edited on</span>
+      <time title="Modified: 2019-06-18 14:10:38" itemprop="dateModified" datetime="2019-06-18T14:10:38+03:00">2019-06-18</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">In</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/blogs/categories/Paper-reading/" itemprop="url" rel="index"><span itemprop="name">Paper reading</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h2 id="Overview"><a href="#Overview" class="headerlink" title="Overview"></a>Overview</h2><p>In this post, we are going to look at the following neural network models: MobileNet v1[^1] &amp; v2[^2], SqueezeNet[^3], ShuffleNet v1[^4] &amp; v2[^5], NasNet[^6]. We consider the following questions:</p>
+<ol>
+<li><p>What in the world do they look like?</p>
+</li>
+<li><p>Why are they fast? Why are they small? Which one is better and Why?</p>
+</li>
+<li><p>Why the authors design them like that?</p>
+</li>
+</ol>
+<p>So, let’s try to solve these doubts step by step.</p>
+<span id="more"></span>
+
+<h2 id="MobileNet-v1-vs-Standard-CNN-models"><a href="#MobileNet-v1-vs-Standard-CNN-models" class="headerlink" title="MobileNet v1 vs. Standard CNN models"></a>MobileNet v1 vs. Standard CNN models</h2><p>MobileNet v1 is smart enough to decompose the standard convolution operation into two separate operations: depth-wise (or channel-wise) convolution and point-wise convolution.</p>
+<p>We can take the following figure as an illustration:</p>
+<img src="Going-with-small-and-fast-networks-1/mobilenetv1.png" width="400">
+
+<p>Suppose we have the convolutional layer with kernel size $K$, input size $C_{in}\times H\times W$ and output size $C_{out} \times H \times W$ (stride&#x3D;1). For a standard convolution operation, the computation complexity, here we use MACC (Multiply-accumulate, also known as MADD), is calculated as (for how to calculate FLOPs or MACC, we kindly recommend this great post: <a target="_blank" rel="noopener" href="https://machinethink.net/blog/how-fast-is-my-model/">How Fast is my model?</a>):</p>
+<p>$$\begin{equation}<br>K\times K\times C_{in}\times C_{out}\times H\times W.<br>\end{equation}\label{eq1}$$</p>
+<p>With decomposition, the two separate operation parts lead to output feature maps with exactly the same size as the standard counterpart does while with much less computation cost. How does that works? </p>
+<p>OK, depth-wise convolution takes as input a single channel and output a single channel for each channel of the input volume, and then concatenates the output channels for the second stage, in which the point-wise convolution takes place. According to this, its corresponding computation cost is:</p>
+<p>$$ K\times K\times H\times W\times C_{in}. $$</p>
+<p>The point-wise convolution is a simple 1x1 convolution (also known as network-in-network), which transfers the $C_{in}\times H\times W$ volume produced by the depth-wise operation to  a $C_{out}\times H\times W$ output volume. Since we have dealt with the input volume with a channel-by-channel strategy at first, so the purpose of point-wise operation is to combine the information of different channels and fuse them to new features. The point-wise operation costs</p>
+<p>$$ 1\times 1\times C_{in}\times C_{out}\times H\times W &#x3D; C_{in}\times C_{out}\times H\times W.$$ </p>
+<p>As a result, with the above decomposition, the total MACC is<br>$$\begin{equation} K\times K\times H\times W\times C_{in} + C_{in}\times C_{out}.<br>\end{equation}\label{eq2}$$</p>
+<p>Compared with equation $\eqref{eq1}$, the reduction of computation is $\eqref{eq2}$&#x2F;$\eqref{eq1}$ $&#x3D;\frac{1}{C_{out}} + \frac{1}{K^2}$. </p>
+<p>In addition, the number of parameters of the standard convolution filters is $K\times K\times C_{in}\times C_{out}$. With depth-wise and point-wise convolution, the number of parameters becomes $K\times K\times C_{in} + C_{in}\times C_{out} &#x3D; C_{in}\times (K\times K + C_{out})$. In this way, both computation cost and model size can be considerably reduced. What’s more, this can be further done by applying the <em>Resolution Multipier</em> and <em>Width Pultipier</em>, which reduce the resolution of the input images and channels of all layers by a multipier coefficient. </p>
+<p>If you are not clear, the following is the whole MobielNet v1 structure with all the bells and whistles.<br><img src="Going-with-small-and-fast-networks-1/mobilenetv1_2.png"></p>
+<p>The structure was drawn according to the code in <a target="_blank" rel="noopener" href="https://github.com/marvis/pytorch-mobilenet">https://github.com/marvis/pytorch-mobilenet</a>, where filter in each row of the table takes the input with size written immediately in the same row, and therefore, outputs a volume with size written in the following row, and then, processed by the next filter. Finally, <code>BR</code> means Batch normalization and Relu layers after a certain filter. </p>
+<p>What surprised me was that there is no residual module at all, what if we add some residuals or shortcuts like ResNet? Afterall, the author got his purpose and the accuracy on ImageNet classification task is comparable to the one using the standard convolution filters instead as well as other famous CNN models.<br><img src="Going-with-small-and-fast-networks-1/mobilenetv1_3.png" width="500"></p>
+<h2 id="MobileNet-v1-vs-SqueezeNet"><a href="#MobileNet-v1-vs-SqueezeNet" class="headerlink" title="MobileNet v1 vs. SqueezeNet"></a>MobileNet v1 vs. SqueezeNet</h2><p>First, let’s compare these two networks directly,</p>
+<img src="Going-with-small-and-fast-networks-1/3.1.png" width="500">
+
+<p>where, <code>0.50 MobileNet-160</code> means halving the channels for all layers and setting the resolution of input images as $160\times 160$. We can see from the table that the only highlight of SqueezeNet is its model size. It is not ignorable that we also need the speed of computation when we embed our model into resource-restricted devices like Mobile phones. It’s hard to say that SqueezeNet is good enough when we see that its MACC is even more than AlexNet, with a large margin. </p>
+<p>However, it’s worth thinking why SqueezeNet has so few parameters. Take a look at it basic unit (a fire module):</p>
+<img src="Going-with-small-and-fast-networks-1/3.2.png" width="450">
+
+<p>The basic idea behind SqueezeNet comes from three principles. First, using 1x1 filters as possible as we can; Second, decreasing the number of input channels to 3x3 filters. The last pinciple is to downsample feature maps after the merging operation of residual blocks so that to keep more activations. </p>
+<p>By stacking fire modules, we get a small model, while also having numerous computations. </p>
+<h2 id="MobileNet-v1-vs-MobileNet-v2"><a href="#MobileNet-v1-vs-MobileNet-v2" class="headerlink" title="MobileNet v1 vs. MobileNet v2"></a>MobileNet v1 vs. MobileNet v2</h2><p>Keep it in mind that MobileNet v1’s success attributes to using the <strong>depth-wise</strong> and <strong>point-wise</strong> convolutions. These two kinds of filters become the very basic tools for most of the following works focusing on network compression and speeding up, including MobileNet v2, ShuffleNet v1 and v2. </p>
+<p>For the MobileNet v2, similar to the above illustration, let’s first take a look at its <a href="Going-with-small-and-fast-networks-1/4.1.png" target="_blank">whole structure</a>. For analysis, we take part of it as the whole structure is stacked with similar components. </p>
+<img src="Going-with-small-and-fast-networks-1/4.2.png">
+
+<p>In this illustration, the green unit means a residual block while the orange one means a normal block (without residual) with stride 2 to do downsampling. The main characteristic of MobileNet v2 architecture is for every unit or block, it first expands the number of channels by point-wise convolutions, then applies depth-wise convolutions with kernel size 3x3 on the expanded space, and finally projects back to low-channel feature spaces using point-wise convolutions again. For a block doesn’t having to downsample its input volume, an additional residual component is applied to enhance the performance. Another feature is, as illustrated in the above figure with a single <code>B</code> after each block which means Batch normalization only, it doesn’t use non-linearity at the output of blocks. Now, I have the following questions:</p>
+<ol>
+<li>When building a residual block, why connect the shortcut between two low-channel ends? Why not connect the “fat part” just like the original ResNet does? </li>
+<li>Why it needs to be “fat” in the middle of block? Why not just keep it slim so that to further reduce its size and parameters? Why not apply ReLu at the end of block? </li>
+<li>Comparing with ResNet, which applies ReLU on its “slim part” of each block, it seems like the two designing strategies (ResNet block and MobileNet v2 block) conflict with each other, why?</li>
+</ol>
+<p>OK, let’s try to answer these questions (if you have any different idea, please do not hesitate to contact me, the email can be found in my profile). </p>
+<p>For question 1, there is a intuition when designing MobileNet v2: bottlenecks actually contains all the necessary informations. So it would not cause information loss if we do like that. On the other hand, connecting the “fat parts” is possible, but that also means we should connect two volumes produced by two depth-wise convolutions, sounds strange because we usually connect the outputs of normal convolutions (here a point-wise covolution is a normal 1x1 convolution), but nothing stops trying. </p>
+<p>For question 2, we can find our answer from the analysis of ReLU. </p>
+<img src="Going-with-small-and-fast-networks-1/4.3.png" width="500">
+
+<p>ReLu cause information collapse. However, the higher the dimension of the input, the less the degree information collapses. So the high dimension in the middle of block is to avoid information loss. And intuitively, more channels usually means more powerful representative features thus to enhance the discriminability of a model. According to this, it is reasonable not to apply ReLU at the “slim output” of the block.</p>
+<p>We can use the same explanation to attack ResNet, which indeed use ReLU on the low-dimensional features. So why is it still so effective? This would attribute to its high dimensions of input and output ends of a ResNet block, which ensure its representative ability even with the ReLU layer in the bottleneck. </p>
+<p>The design art of MobileNet v2 is to keep few number of channels for the input and output of each block, while doing more complicated feature extraction inside the block with enough channels. This ensures the extraction of effective and high-level features of the image while reduce the computation cost at the same time, because <strong>the main computation cost is from the 1x1 convolution filters</strong> (see the following figure).</p>
+<img src="Going-with-small-and-fast-networks-1/4.4.png" width="400">
+
+<p>MobileNet v2 has even less parameters and MACCs than v1. This because MobileNet v1 takes more channels for 1x1 convolutions than v2, leading to much more MACCs. While MobileNet v2 smartly avoid giving many channels to 1x1 convolutions, and do feature extraction mainly via depth-wise convolutions. </p>
+<h2 id="MobileNet-v2-vs-ShuffleNet-v1-vs-NasNet"><a href="#MobileNet-v2-vs-ShuffleNet-v1-vs-NasNet" class="headerlink" title="MobileNet v2 vs. ShuffleNet v1 vs. NasNet"></a>MobileNet v2 vs. ShuffleNet v1 vs. NasNet</h2><img src="Going-with-small-and-fast-networks-1/5.1.png" width="400">
+
+<p>Above figure shows that a ShuffleNet v1(1.5) and a MobileNet V2 have the similar model size (3.4M params) and computation cost ($\approx 300$M MACCs), and furthermore, the similar classification accuracy. This means that ShuffleNet v1 is at the same level of MobileNet v2, the two are closely comparable. So, what does a ShuffleNet v1 look like? <a href="Going-with-small-and-fast-networks-1/5.2.png" target="_blank">Click here</a></p>
+<p>Again, we capture part of it to analyse. </p>
+<span id="compress">
+<img src="Going-with-small-and-fast-networks-1/5.3.png">
+</span>
+
+<p>Since we realize that the main computation takes place at the 1x1 convolutions, which also accounts for main part of parameters. Unlike MobileNet v2 who solves the problem by reducing number of channels inputted to 1x1 convolutions, ShuffleNet v1 is more straightforward. Specifically, rather than only applying group convolution (for group convolution, see ResNeXt, depth-wise convolution can be regarded as an extreme case of group convolution) on 3x3 filters, it also applies group operation on 1x1 filters. Although it reduces computation cost and number of parameters effectively, it leads to a problem: different groups cannot communicate with each other, thus restrict the power of model.</p>
+<p><code>Shuffle</code> in ShuffleNet v1 provides the solution of above problem by shuffling all the output channels of 1x1 group convolutions as a whole, so that enforce information communication among groups. And the most inspiring thing is the shuffle operation doesn’t take any additional parameters and computationally efficient. </p>
+<img src="Going-with-small-and-fast-networks-1/5.4.png" width="200">
+
+<p>To further reduce model size and computation cost, ShuffleNet v1 also uses <code>BottleNeck</code>s as illustrated:</p>
+<img src="Going-with-small-and-fast-networks-1/5.5.png" width="600">
+
+<p>As discussed above, MobileNet v2 and ShuffleNet v1 both focus on reducing computation cost on 1x1 convolutions, while there are still three more differences according to their structures. </p>
+<ol>
+<li>Difference on how to apply residual. For MobileNet v2, no residual is used when the shape of input volume and output volume of a block doesn’t match. For ShuffleNet v1, when the two doesn’t match, a <code>AveragePool + Concatenation</code> strategy is used to do shortcut connection. </li>
+<li>According to the above <a href="Going-with-small-and-fast-networks-1/5.2.png" target="_blank">diagram</a>, ShuffleNet v1 quickly downsamples the input image from 224x224 to 56x56, while <a href="Going-with-small-and-fast-networks-1/4.1.png" target="_blank">MobileNet v2</a> only downsamples its input image to 112x112 in the first stages. </li>
+<li>According to the logic of MobileNet v2, ReLU layers should apply on “fat layers” rather than bottleneck layers. While ShuffleNet (both v1 and v2) more or less does the opposite (e.g., ReLU after the <a href="#compress">Compress</a> operator, marked red in the figure). Why?</li>
+</ol>
+<p>Well, I think it’s worth trying and see what will happen if we take the ReLU away after the 3x3 convolutions in MobileNet v1 or MobileNet v2 (e.g., only connect the ReLu to the first 1x1 convolution layer of each block mobileNet v2). On the other hand, the reason why ShuffleNet v1 doesn’t connect a ReLU after the 3x3 convolution layers comes from the explanation in Xception, which thought that for shallow features (i.e., the 1-channel deep feature spaces of depth-wise convolutions), non-linearity becomes harmful, possibly due to a loss of information. </p>
+<p><strong>NasNet</strong>, in which the word “Nas” is an abbreviation of <strong>Network architecture search</strong>, definitely is a more advanced technology to search for compact and efficient networks. The auto-search algorithms and other very recent research works (works in ICLR 2019, ICML 2019 and CVPR 2019) will be gone through in another post. Let’s proceed to ShuffleNet v2. </p>
+<h2 id="ShuffleNet-v2-vs-All"><a href="#ShuffleNet-v2-vs-All" class="headerlink" title="ShuffleNet v2 vs. All"></a>ShuffleNet v2 vs. All</h2><p>The above methods are based on two principles, small model size and less computation cost. However, in practical applications, efforts taken on the above criterion doesn’t exactly bring a corresponding faster model in hardware equipments. There are some other factors we should take into account when designing an embeddable model for hardware devices – memory access cost (MAC) and battery consuming. </p>
+<p>Based on the above findings, ShuffleNet v2 rethinks the previous compression models and proposes four useful designing guidelines. </p>
+<blockquote>
+<p>G1, Equal channel width minimizes MAC (this means letting number of input channels equal to that of output channels);<br>G2, Excessive group convolution increase MAC (do not use or use less group convolutions);<br>G3, Network fragmentation reduces degree of parallelism (small stacked convolutions with in blocks and branches in NasNet);<br>G4, Element-wise operations are non-negligible (like ReLU and addition operations in residual block).</p>
+</blockquote>
+<p>As described in the original paper, ShuffleNet v1 violates G2 (group convolutions) and G1 (bottleneck blocks), MobileNet v2 violates G1 (inverted bottleneck structure) and G4 (ReLU on “thick” feature maps), and NasNet violates G3 (too many branches).</p>
+<p>So the problem is: </p>
+<blockquote>
+<p>How to maintain a large number and equally wide channels with neither dense convolution nor too many groups? </p>
+</blockquote>
+<p>We mention that all the above guidelines have been proved by a series of validation experiments. Let’s draw the building blocks of ShuffleNet v2 here (actually I’ve also drawn a table for ShuffleNet v2 structure <a href="Going-with-small-and-fast-networks-1/6.2.png" target="_blank">here</a>, but takes time to understand..)</p>
+<img src="Going-with-small-and-fast-networks-1/6.1.png" width="700">
+
+<p>How does it solve the problem? </p>
+<ul>
+<li>First, the <code>channel split</code> divide the input channels into two parts, one of them keeps untouched, the other experiences a <strong>1x1 + DW3x3 + 1x1</strong> flowchart, here, the <strong>1x1</strong> doesn’t use group convolution. On one hand to follow <strong>G2</strong>, on the other hand, two branches indicates two groups. </li>
+<li>Second, the two branches are merged by concatenation. By doing so, there is no add operations (follows <strong>G4</strong>), and all the ReLU and depth-wise convolutions only exist in half of all the input channels, which again follows <strong>G4</strong>. </li>
+<li>Then, after concatenation, channel shuffling is applied to enforce branch communication. In addition, the <strong>Concat + Shuffle + Split</strong> pipeline can be merge into a single element-wise operation, which follows <strong>G4</strong>. </li>
+<li>Similar to DenseNet, it takes the advantage of <code>feature reuse</code>.</li>
+</ul>
+<p>Under the same FLOPs, ShuffleNet v2 is superior than other models. </p>
+<img src="Going-with-small-and-fast-networks-1/6.3.png" width="700">
+
+<h2 id="Conclusion"><a href="#Conclusion" class="headerlink" title="Conclusion"></a>Conclusion</h2><p>We have analysed several classical network compression models, from which we can see that the main strategy to reduce model size and computation cost is using <strong>Depth-wise convolution</strong>, <strong>Group convolution</strong> and <strong>Point-wise convolution</strong>. </p>
+<p>There are other interesting algorithms like network pruning, network quantization (e.g., binarize weiths and activations) and Network architecture search. They also lead to fast and small network models and will be discussed in the next post. </p>
+<p><em>Note: Most of the figures are directly copied from the original paper.</em></p>
+<p>[^1]: <a target="_blank" rel="noopener" href="https://arxiv.org/abs/1704.04861">Howard, Andrew G., et al. “Mobilenets: Efficient convolutional neural networks for mobile vision applications.” arXiv preprint arXiv:1704.04861 (2017).</a><br>[^2]: <a target="_blank" rel="noopener" href="https://arxiv.org/abs/1801.04381">Sandler, Mark, et al. “Mobilenetv2: Inverted residuals and linear bottlenecks.” Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition. 2018.</a><br>[^3]: <a target="_blank" rel="noopener" href="https://arxiv.org/abs/1602.07360">Iandola, Forrest N., et al. “SqueezeNet: AlexNet-level accuracy with 50x fewer parameters and&lt; 0.5 MB model size.” arXiv preprint arXiv:1602.07360 (2016).</a><br>[^4]: <a target="_blank" rel="noopener" href="http://openaccess.thecvf.com/content_cvpr_2018/papers/Zhang_ShuffleNet_An_Extremely_CVPR_2018_paper.pdf">Zhang, Xiangyu, et al. “Shufflenet: An extremely efficient convolutional neural network for mobile devices.” Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition. 2018.</a><br>[^5]: <a target="_blank" rel="noopener" href="http://openaccess.thecvf.com/content_ECCV_2018/papers/Ningning_Light-weight_CNN_Architecture_ECCV_2018_paper.pdf">Ma, Ningning, et al. “Shufflenet v2: Practical guidelines for efficient cnn architecture design.” Proceedings of the European Conference on Computer Vision (ECCV). 2018.</a><br>[^6]: <a target="_blank" rel="noopener" href="http://openaccess.thecvf.com/content_cvpr_2018/papers/Zoph_Learning_Transferable_Architectures_CVPR_2018_paper.pdf">Zoph, Barret, et al. “Learning transferable architectures for scalable image recognition.” Proceedings of the IEEE conference on computer vision and pattern recognition. 2018.</a></p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/blogs/tags/Network-compression/" rel="tag"># Network compression</a>
+              <a href="/blogs/tags/CNN/" rel="tag"># CNN</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+            </div>
+            <div class="post-nav-item">
+                <a href="/blogs/2019/06/22/Quick-read-methods-of-network-compression-in-2019/" rel="next" title="Quick read: methods of network compression in 2019">
+                  Quick read: methods of network compression in 2019 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2024</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Zhuo ge ge</span>
+  </div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="Back to top">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/blogs/js/comments.js"></script><script src="/blogs/js/utils.js"></script><script src="/blogs/js/motion.js"></script><script src="/blogs/js/sidebar.js"></script><script src="/blogs/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

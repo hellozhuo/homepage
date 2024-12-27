@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/blogs/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/blogs/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/blogs/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/blogs/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/blogs/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha256-5eIC48iZUHmSlSUz9XtjRyK2mzQkHScZY1WdMaoz74E=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"zhuogege1943.com","root":"/blogs/","images":"/blogs/images","scheme":"Muse","darkmode":false,"version":"8.21.1","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}}</script><script src="/blogs/js/config.js"></script>
+
+    <meta name="description" content="Resources about distributed training with Megatron-LM  Github: https:&#x2F;&#x2F;github.com&#x2F;NVIDIA&#x2F;Megatron-LMDocument on NeMo: https:&#x2F;&#x2F;docs.nvidia.com&#x2F;nemo-framework&#x2F;user-guide&#x2F;latest&#x2F;overview.html   NeMo is">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Megatron-LM (1)">
+<meta property="og:url" content="https://zhuogege1943.com/blogs/2024/12/26/Megatron-LM-1/index.html">
+<meta property="og:site_name" content="Zhuo&#39;s Blog">
+<meta property="og:description" content="Resources about distributed training with Megatron-LM  Github: https:&#x2F;&#x2F;github.com&#x2F;NVIDIA&#x2F;Megatron-LMDocument on NeMo: https:&#x2F;&#x2F;docs.nvidia.com&#x2F;nemo-framework&#x2F;user-guide&#x2F;latest&#x2F;overview.html   NeMo is">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://zhuogege1943.com/blogs/joplin_resources/fa846f2d8740035590fed9a5b6e21774.png">
+<meta property="og:image" content="https://zhuogege1943.com/blogs/joplin_resources/ea97528d7e5fcdf8c5320fd26d4ef537.png">
+<meta property="og:image" content="https://zhuogege1943.com/blogs/joplin_resources/c49cabcf330bbd76d7f63d0cf30a0da4.png">
+<meta property="og:image" content="https://zhuogege1943.com/blogs/joplin_resources/798943eea9a9e4d297607659287469f7.png">
+<meta property="article:published_time" content="2024-12-26T06:54:32.000Z">
+<meta property="article:modified_time" content="2024-12-27T13:50:11.646Z">
+<meta property="article:author" content="Zhuo ge ge">
+<meta property="article:tag" content="Optimization">
+<meta property="article:tag" content="Distributed training">
+<meta property="article:tag" content="LLM">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://zhuogege1943.com/blogs/joplin_resources/fa846f2d8740035590fed9a5b6e21774.png">
+
+
+<link rel="canonical" href="https://zhuogege1943.com/blogs/2024/12/26/Megatron-LM-1/">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"en","comments":true,"permalink":"https://zhuogege1943.com/blogs/2024/12/26/Megatron-LM-1/","path":"2024/12/26/Megatron-LM-1/","title":"Megatron-LM (1)"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>Megatron-LM (1) | Zhuo's Blog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/blogs/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar" role="button">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/blogs/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Zhuo's Blog</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="Search" role="button">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Megatron-LM-Training-Multi-Billion-Parameter-Language-Models-Using-Model-Parallelism"><span class="nav-number">1.</span> <span class="nav-text">Megatron-LM: Training Multi-Billion Parameter Language Models Using Model Parallelism</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Contributions"><span class="nav-number">1.1.</span> <span class="nav-text">Contributions</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Methods"><span class="nav-number">1.2.</span> <span class="nav-text">Methods</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Other-notes"><span class="nav-number">1.2.1.</span> <span class="nav-text">Other notes</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Scaling-evaluation-on-GPT-2"><span class="nav-number">1.3.</span> <span class="nav-text">Scaling evaluation on GPT-2</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Zhuo ge ge</p>
+  <div class="site-description" itemprop="description">Hi, nice to meet you</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/blogs/archives/">
+          <span class="site-state-item-count">5</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+        <span class="site-state-item-count">1</span>
+        <span class="site-state-item-name">categories</span>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">tags</span>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://zhuogege1943.com/blogs/2024/12/26/Megatron-LM-1/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/blogs/images/avatar.gif">
+      <meta itemprop="name" content="Zhuo ge ge">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zhuo's Blog">
+      <meta itemprop="description" content="Hi, nice to meet you">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="Megatron-LM (1) | Zhuo's Blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Megatron-LM (1)
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2024-12-26 08:54:32" itemprop="dateCreated datePublished" datetime="2024-12-26T08:54:32+02:00">2024-12-26</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">Edited on</span>
+      <time title="Modified: 2024-12-27 15:50:11" itemprop="dateModified" datetime="2024-12-27T15:50:11+02:00">2024-12-27</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">In</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/blogs/categories/Paper-reading/" itemprop="url" rel="index"><span itemprop="name">Paper reading</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><blockquote>
+<p>Resources about distributed training with Megatron-LM</p>
+</blockquote>
+<p>Github: <a target="_blank" rel="noopener" href="https://github.com/NVIDIA/Megatron-LM">https://github.com/NVIDIA/Megatron-LM</a><br>Document on NeMo: <a target="_blank" rel="noopener" href="https://docs.nvidia.com/nemo-framework/user-guide/latest/overview.html">https://docs.nvidia.com/nemo-framework/user-guide/latest/overview.html</a></p>
+<blockquote>
+<blockquote>
+<p>NeMo is a cloud-native generative AI framework built on top of Megatron-LM.</p>
+</blockquote>
+</blockquote>
+<p>Overall view of Megatron-Core: <a target="_blank" rel="noopener" href="https://docs.nvidia.com/megatron-core/developer-guide/latest/index.html">https://docs.nvidia.com/megatron-core/developer-guide/latest/index.html</a></p>
+<blockquote>
+<blockquote>
+<p>Official APIs with formal product support.. </p>
+</blockquote>
+</blockquote>
+<p>Megatron-LM are basically based on the following three papers. Let’s do some notes on them. </p>
+<h2 id="Megatron-LM-Training-Multi-Billion-Parameter-Language-Models-Using-Model-Parallelism"><a href="#Megatron-LM-Training-Multi-Billion-Parameter-Language-Models-Using-Model-Parallelism" class="headerlink" title="Megatron-LM: Training Multi-Billion Parameter Language Models Using Model Parallelism"></a>Megatron-LM: Training Multi-Billion Parameter Language Models Using Model Parallelism</h2><p>paper (2020, arxiv): <a target="_blank" rel="noopener" href="https://arxiv.org/abs/1909.08053">https://arxiv.org/abs/1909.08053</a></p>
+<h3 id="Contributions"><a href="#Contributions" class="headerlink" title="Contributions"></a>Contributions</h3><ol>
+<li>Put large transformer models into different GPUs (with <code>tensor model parallelism</code>) to solve the problem that a single GPU cannot fit the whole model.</li>
+<li>No need to design custom C++ code, compatible with existing Pytorch transformer implementations.</li>
+<li>Able to train a GPT-2 with 8.3 billion parameters and a BERT with 3.9 billion parameters.<br><img src="/blogs/joplin_resources/fa846f2d8740035590fed9a5b6e21774.png"><br>On the above figure, model parallel means using tensor model parallelism methods proposed in this paper. Evaluation is based on weak scaling.</li>
+</ol>
+<h3 id="Methods"><a href="#Methods" class="headerlink" title="Methods"></a>Methods</h3><p><img src="/blogs/joplin_resources/ea97528d7e5fcdf8c5320fd26d4ef537.png"></p>
+<p>The tensor model parallelism can be described by the above illustrations. Generally it is designed for equally partitioning transformer blocks (MLP and self-attention layers) into different parts which are stored in corresponding GPUs. Above figure uses 2 GPUs, it means both MLP and Self-Attention layer are segmented equally with two parts, with each part put in a GPU during training.</p>
+<p>For MLP, we have the following equations:<br>$$ Y&#x3D; \text{GeLU}(XA) $$<br>$$ Z &#x3D; \text{Dropout}(YB) $$<br>where X and Y are activations, A and B are parameter matrices. A is split along columns such that the GeLU nonlinear function can be put in individual GPUs separately, leading to $Y_1$ and $Y_2$. Then B is split along rows giving $Z_1&#x3D;Y_1B_1$ and $Z_2&#x3D;Y_2B_2$. Before dropout, we should have $Z&#x3D;Z_1 + Z_2$, therefore, we use “all-reduce” operator to calculate the sum from different GPUs and distribute the result back to all GPUs, then dropout operator is executed in each GPU that outputs $Z$ (here I guess each GPU should share the same dropout mask).</p>
+<p>In this way, the “f” function is actually a non-operation (or Identity function) and “g” is an all-reduce function in the forward pass. In the backward pass, “g” becomes Identity function and “f” becomes an all-reduce function. These two functions are the so-called conjugate functions.</p>
+<p>For Self-Attention layer, we make use of the multi-head attention mechanism to do tensor model parallelism. X, again, is shared in all GPUs, while each GPU have its separate sets of attention heads where the K, Q, V are generated with its own linear projection matrices. Similarly, B is split in rows and all-reduce is applied before dropout. </p>
+<p>Overall, after applying such tensor model parallelism, for each transformer layer (consisting of a attention layer and a MLP layer), there are 4 total communication operations in the forward and backward pass of a single model parallel transformer layer, i.e., four all-reduce operations involved in forward and backward passes.<br><img src="/blogs/joplin_resources/c49cabcf330bbd76d7f63d0cf30a0da4.png"></p>
+<h4 id="Other-notes"><a href="#Other-notes" class="headerlink" title="Other notes"></a>Other notes</h4><ol>
+<li><p>For output embedding $E_{H\times v}$ which transforms the hidden size H to vocabulary size v, we split $E$ along columns to $E_1, E_2$ and multiply with the output of the last transformer layer to get $[Y_1, Y_2] &#x3D; [XE_1, XE_2]$, then instead of using all-gather to gather $Y_1, Y_2$ to $Y&#x3D;[Y_1, Y_2]$ and distribute it to each GPU followed by cross-entropy loss (this may cause the all-gather operation to communicate $b\times s\times v$ elements in $Y$ where b is batch size and s is sequence length), they  fuse the output of $[Y_1, Y_2]$ with the cross entropy loss to reduce the dimension to $b\times s$. (Though here I don’t know how they fuse that :&lt;). </p>
+</li>
+<li><p>For communications between GPUs, they use NVSwitch with 300GB&#x2F;sec bandwidth for intra-server and 8 InfiniBand adapters per server with 100GB&#x2F;sec bandwidth for inter-server communications.</p>
+</li>
+</ol>
+<h3 id="Scaling-evaluation-on-GPT-2"><a href="#Scaling-evaluation-on-GPT-2" class="headerlink" title="Scaling evaluation on GPT-2"></a>Scaling evaluation on GPT-2</h3><p><img src="/blogs/joplin_resources/798943eea9a9e4d297607659287469f7.png"><br>Here, 100% is for the baseline regarding the training throughput. Other percentages are relative to the baseline. </p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/blogs/tags/Optimization/" rel="tag"># Optimization</a>
+              <a href="/blogs/tags/Distributed-training/" rel="tag"># Distributed training</a>
+              <a href="/blogs/tags/LLM/" rel="tag"># LLM</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/blogs/2019/06/22/Quick-read-methods-of-network-compression-in-2019/" rel="prev" title="Quick read: methods of network compression in 2019">
+                  <i class="fa fa-angle-left"></i> Quick read: methods of network compression in 2019
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/blogs/2024/12/26/Megatron-LM-2/" rel="next" title="Megatron-LM (2)">
+                  Megatron-LM (2) <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2024</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Zhuo ge ge</span>
+  </div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="Back to top">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/blogs/js/comments.js"></script><script src="/blogs/js/utils.js"></script><script src="/blogs/js/motion.js"></script><script src="/blogs/js/sidebar.js"></script><script src="/blogs/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>
