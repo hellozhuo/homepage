@@ -1,0 +1,1181 @@
+<?xml version="1.0" encoding="utf-8"?>
+<search>
+  <entry>
+    <title>BLIP-2 - Querying Transformer (Q-Former)</title>
+    <url>/blogs/2024/07/22/BLIP-2-Querying-Transformer-Q-Former/</url>
+    <content><![CDATA[<h2 id="BLIP-2-Bootstrapping-Language-Image-Pre-training-with-Frozen-Image-Encoders-and-Large-Language-Models">BLIP-2: Bootstrapping Language-Image Pre-training with Frozen Image Encoders and Large Language Models</h2>
+<span id="more"></span>
+<p><img src="/blogs/joplin_resources/d40702382fcc928ef5e03a04addaf925.png" alt=""></p>
+<h3 id="Motivation">Motivation</h3>
+<p>Large image models and large language models were trained separately, and it might be difficult for them to directly communicate to do multimodal tasks, like Visual Question Answsering (VQA) and mutimodal retrieval.</p>
+<p>Multimodal training is computational costly, and fine-tuning from existing seprated unimodal large models would cause catastrophic forgetting.</p>
+<p>So the paper proposes Q-Former to connect them, such that during training, the separate unimodal models are frozen, but only to train the Q-Former to get text-aligned visual features that facilitate multimodal tasks.</p>
+<h3 id="Training">Training</h3>
+<p>Q-Former is trained in two stages. On the first stage, the purpose of training is that given a pretrained image encoder and a text, to make Q-Former output tokens that align with the given text. On the second stage, the output of Q-Former is connected to LLMs as “soft prompt” such that LLMs can generate related text.</p>
+<h4 id="1-First-stage">1. First stage</h4>
+<p><img src="/blogs/joplin_resources/e56d5c6059062e0f2bd78e84a4e9e2ac.png" alt=""></p>
+<p>So the big image encoder is frozen, and Q-former consists of two transformer branches as shown above with <strong>shared self-attention paramters</strong>.  The queries of the vision branch are learnable (32 * 768, 32 queries with dimension of 768). In the Cro-attention layer of the vision transformer, keys and values are from the frozen image encoder. The training of Q-Former involves three objectives.</p>
+<ul>
+<li>ITC (Image-Text Contrastive learning)<br>
+In the self-attention layer, uni-modal mask is adopted, which means the visual queries can only att end to other visual queries (because it’s self-attention, so queries here are regarded as tokens), not text tokens, and text tokens can also only attend to other text tokens. Like CLIP, a contrastive learning objective is used to align the output of the two transformers. Since the Q-Former costs much less memory than typical multimodal learning methods, so they didn’t use momentum queue in BLIP, but in-batch negatives.</li>
+<li>ITG (Image-grounded Text Generation)<br>
+So here, in the self-attention layer, the multi-modal causal mask is used, such that visual tokens only attend to other visual tokens, but text tokens attend to all the visual tokens and its previous text tokens. The training objective is a next token prediction decoding task.</li>
+<li>ITM (Image Text Matching)<br>
+In the self-attention layer, the bi-directional mask is used like in BERT, and compute the similarities between the cls token in the text transformer output and each of the queries in the vision transformer output, getting 32 similarities, and use the biggest similarity score as the matching score. They also use hard negative mining strategy as used in BLIP to create informative negative pairs.</li>
+</ul>
+<h4 id="2-Second-stage">2. Second stage</h4>
+<p><img src="/blogs/joplin_resources/8e53c36be42f4448cea55d5621511477.png" alt=""></p>
+<p>The second stage is quite simple, as we also get the visual prompt from Q-Former (this is done by using FC to transform the dimension of the Q-Former otuput tokens of the vision branch to be compatible with the text tokens for the LLMs). In this stage, decoder-based training or encoder-decoder-based trainin can be used as shown above.</p>
+<h3 id="The-advantes-of-BLIP2">The advantes of BLIP2</h3>
+<ol>
+<li>It uses less memory and computation and leverages pre-trained LLMs and large vision models for multimodal learning, without fine-tuning LLMs and large vision models. It acts like an adapter to bridge to make multi modals aligned.</li>
+<li>It can do VQA, it can create dialogue between images and humans through text.</li>
+</ol>
+]]></content>
+      <categories>
+        <category>Paper reading</category>
+      </categories>
+      <tags>
+        <tag>Multimodal learning</tag>
+        <tag>Large vision models</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>CLIP 相关工作1</title>
+    <url>/blogs/2024/06/26/CLIP-%E7%9B%B8%E5%85%B3%E5%B7%A5%E4%BD%9C1/</url>
+    <content><![CDATA[<h2 id="1-Language-driven-Semantic-Segmentation">1. Language-driven Semantic Segmentation</h2>
+<span id="more"></span>
+<p><img src="/blogs/joplin_resources/535b77b874425a0a97a9b31c663b52bf.png" alt=""></p>
+<p>First, using clip text encoder to get N tokens, each has C dimensional features. Use a pretrained image encoder (like ViT) to get H’ X W’ image tokens with each also having C dimensional features. Then by matrix multiplication, we get a HW X N matrix representing the correlations between each pixel and the text. The image encoder is then fine-tuned to maximize the correlation between the text embedding and the image pixel embedding of the ground-truth class of the pixel.</p>
+<p>During testing, zero-shot can be done by also calculating the similarities between pixel embedding and each of the text embedding, just like CLIP.</p>
+<h2 id="2-GroupViT-Semantic-Segmentations-Emerges-from-Text-Supervision">2. GroupViT: Semantic Segmentations Emerges from Text Supervision</h2>
+<p><img src="/blogs/joplin_resources/9248ef8acd4a29ee844d358ea1ecd948.png" alt=""></p>
+<p>Image is fed to patch tokenizer to get N tokens, along with them, there are G1 learnable tokens representing G1 semantic groups. After several layers of Transformer blocks, using grouping block to reduce the number of tokens from N + G1 to G1. Then there are another G2 learnable semantic groups that might have higher-level semantic meanings, repeating the process, to get G2 tokens in the final output. After a avg pooling and MLP, we get a single token that can be used to calculate the contrastive loss with the text embedding from clip. Negative pairs can be generated by using unmatched text. This is training.</p>
+<p><img src="/blogs/joplin_resources/0c72d92fed60d21e0e199d23e7859081.png" alt=""></p>
+<p>During testing, we use the final G2 tokens and compute their similarities to each class label text embedding. Use a threshold to extract those tokens, therefore the corresponding pixels in the original image as the segmented area.</p>
+<h2 id="3-Open-vocabulary-Object-Detection-via-Vision-and-Language-Knowledge-Distillation">3. Open-vocabulary Object Detection via Vision and Language Knowledge Distillation</h2>
+<p><img src="/blogs/joplin_resources/b65089670121cca95fdb705ebe2645d8.png" alt=""></p>
+<p>以上是要解决的问题。</p>
+<p><img src="/blogs/joplin_resources/f48f4ea48059c7e9e9b0b0a2aa036b1a.png" alt=""></p>
+<p>All these framworks are based on region proposals (e.g., from RPN, ROI align, etc.), then in ViLD-text, we get N region embeddings from the N proposals, then each proposal has a GT label (basic label), which can have a text embedding from clip. Additionally there is a background text embedding which is learnt. Then use the contrastive loss to train the region encoder.</p>
+<p>In ViLD-image, because the dataset is huge, and generating N proposals from each image during training is not that feasible, so we pre-computed M proposals according to the whole dataest. Use clip image encoder to get M image embeddings, which can be a teacher to guide the training of the image encoder in the model, simply with L1 loss.</p>
+<p>In ViLD, both knowledge distillation from clip image encoder and contrastive loss from clip text encoder are used, by simply feeding N + M proposals to the transformer and split them into N and M embeddings which are separately used to calculate the two losses.</p>
+<p>During testing, novel labels can have corresponding regions in the image, using the same mechnism as in CLIP.</p>
+<h2 id="4-Grounded-Language-Image-Pre-Training-GLIP">4. Grounded Language-Image Pre-Training (GLIP)</h2>
+<p>Use image grouding dataset, which also has bounding box annotations, to train a image region encoder that miminize the contrastive loss between region embeddings and text embeddings, just like ViLD-text. Then it uses the trained model to generate bounding boxes (noisy lables) for more (24M) image-text pairs and use these generatel lables to train a larger model.</p>
+<p>The large model GLIP-T uses Swin-L.</p>
+]]></content>
+      <categories>
+        <category>Paper reading</category>
+      </categories>
+      <tags>
+        <tag>CLIP</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>CLIP 相关工作2</title>
+    <url>/blogs/2024/06/26/CLIP-%E7%9B%B8%E5%85%B3%E5%B7%A5%E4%BD%9C2/</url>
+    <content><![CDATA[<p>Something like</p>
+<ul>
+<li>CLIPasso<br>
+The goal is that given an image, generate a stroke image with several simple curves to represent this image.<br>
+Based on some initial points, curves can be drawn to generate a simple stroke image. The function from points to the stroke image is differentiable. Then to make sure the stroke image represent the given image, two kinds of losses are designed. One loss is based on CLIP, that the CLIP image embedding from the two images should be similar. The other is geometric loss, that the features in the shallow layers of a VGG/ResNet of these two images should be similar.</li>
+</ul>
+<span id="more"></span>
+<ul>
+<li>
+<p>CLIP4Clip<br>
+The goal is to use CLIP to do video retrieval. Given a text, retrieve the associate videos. Very simple, there are three kinds of ways to use CLIP image encoder to get the embedding of a video. The first way, calculating the image embedding of each frame, then use avg pooling. Second way, use LSTM/1D Conv to fuse the image embedding from frames. Third way, use a cls token along with the frame embeddings and use a transformer to get the cls embedding in the output.</p>
+</li>
+<li>
+<p>ActionCLIP<br>
+Datasets are annotated with video-label pairs. The method fine-tunes CLIP, by introducing some text prompt (in order to get a complete sentence that contains the label) and image prompt (i.e., image adapters which can be trained). Similarly to CLIP4Clip, they use CLIP image encoder to get video embeddings and calculate the similarity between on video embeddings and text embeddings. The difference to CLIP is that the GT is not a diagonal matrix but also has some non-zero elements on other places. This happens when multiple videos share one action.<br>
+Therefore, they can do zero-shot action recognition.</p>
+</li>
+<li>
+<p>AudioCLIP<br>
+They just use the idea of CLIP, they have video-text-audio dataset, such that three pairs are used to do contrastive learning.</p>
+</li>
+<li>
+<p>PointCLIP<br>
+They might fine-tune CLIP or just use CLIP encoders to extract text and image embeddings. Each point cloud has a label which can be converted to a sentence by some prompting. Then the point cloud are used to extract different images through different angles. Based on that, they have image-text pairs.<br>
+Therefore, they can do zero-shot point cloud recognition.</p>
+</li>
+<li>
+<p>DepthCLIP<br>
+This can be quite simple, as original images can be processed by CLIP image encoder, then the GT depth image can be used to first extract sentences, by something like: this object is far/unseen/close, by setting some thresholds of the depths to define the object.</p>
+</li>
+</ul>
+]]></content>
+      <categories>
+        <category>Paper reading</category>
+      </categories>
+      <tags>
+        <tag>CLIP</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>DPO - Direct Preference Optimization</title>
+    <url>/blogs/2024/07/05/DPO-Direct-Preference-Optimization/</url>
+    <content><![CDATA[<h2 id="Direct-Preference-Optimization-Your-Language-Model-is-Secretly-a-Reward-Model">Direct Preference Optimization: Your Language Model is Secretly a Reward Model</h2>
+<p>Tutorial https://www.youtube.com/watch?v=hvGa5Mba4c8<br>
+Paper: https://arxiv.org/abs/2305.18290</p>
+<span id="more"></span>
+<h3 id="Highlight">Highlight</h3>
+<p>It solve the RLHF problem which aims to align the output of LLMs to the uer desires, for example, to give human-prefered outputs that are more polite, friendly, no descrimination, etc. but without using reinforcement learning, but the common SGD.</p>
+<h3 id="How">How?</h3>
+<p>Recall in RLHF, we train a reward model (e.g., Bradley Terry model) $r^*$ such that for a human-prefered answer $y_1$ and a unprefered answer $y_2$ for a given prompt $x$, the probability that $y_1$ ranks before $y_2<br>
+<img src="/blogs/joplin_resources/85da2fba0e5bb3957642706bcf413e2b.png" alt=""><br>
+has a high value.<br>
+We can collect a dataset<br>
+<img src="/blogs/joplin_resources/ec3ce0bd2e1200d228fd0620a4bff066.png" alt=""><br>
+where $y_w$ and $y_l$ are winning and losing answers respectively, to tain this reward model $r_\phi(x, y)$, with the loss:<br>
+<img src="/blogs/joplin_resources/138abc7bc2d706d699955ce6cad2e729.png" alt=""></p>
+<p>Once we get the reward model, we use it to fine-tune our LLM $\pi_\theta(y|x)$:<br>
+<img src="/blogs/joplin_resources/96472bcfc84c2a55bf6403175db2b026.png" alt=""><br>
+The first term in the square bracket is to ensure that the generate answer $y$ by $\pi_\phi$ has high reward value, and the second term is a regularization to make sure that the fine-tuned model doesn’t deviate the original LLM, or the reference model, too much. Otherwise, the model will simply generate answers that are polite, friendly, etc, but without actually answering x.<br>
+The above optimizaiton is not differentiable as the term under the expectation symbol is not fixed, it is actually a distribution depending on $\pi_\phi$. So we cannot use SGD to train it, since the sampling process under the expectation is not differentiable, like we saw in VAE.</p>
+<blockquote>
+<p>My note:<br>
+In VAE, the authors use a reparameterization trick, which is feasible because they suppose the distribution under expectation is a Gaussian noise. However, the distribution of $y\sim\pi_\phi(y|x)$ is not Gaussian, so we cannot use the same strategy.</p>
+</blockquote>
+<p>To solve that, RLHF uses reinforcement learning. However, the authors of DPO find the analytical solution of the above optimization problem, given the reward model $r$:<br>
+<img src="/blogs/joplin_resources/e2fbac7b72bec5268719b7340c8030ff.png" alt=""><br>
+It is not easy to compute because of the Z.</p>
+<h3 id="How-the-magic-happens">How the magic happens?</h3>
+<p>So, from the above equation, we get also get an expression of the reward model r:<br>
+<img src="/blogs/joplin_resources/7292267019c2ca63e669ae32ff194316.png" alt=""><br>
+which is expressed by the reference model and the fine-tuned model. We can then substitute this formulation to the loss function of training the reward model, and we get<br>
+<img src="/blogs/joplin_resources/c2976d913e7b311363442e611b5f68d9.png" alt=""><br>
+This step actually cancels Z out, and we are <strong>directly fine-tuning our LLM model</strong>, and jump the step of training a reward model!</p>
+<p>This can achieve exactly the same goal as we want to achieve in the first place, the regularization, or the KL divergence between the fine-tuned model and the reference model is implicitely included in the DPO training objectives.</p>
+]]></content>
+      <categories>
+        <category>Paper reading</category>
+      </categories>
+      <tags>
+        <tag>LLM</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Going with small and fast networks (1)</title>
+    <url>/blogs/2019/06/16/Going-with-small-and-fast-networks-1/</url>
+    <content><![CDATA[<h2 id="Overview">Overview</h2>
+<p>In this post, we are going to look at the following neural network models: MobileNet v1<sup class="footnote-ref"><a href="#fn1" id="fnref1">[1]</a></sup> &amp; v2<sup class="footnote-ref"><a href="#fn2" id="fnref2">[2]</a></sup>, SqueezeNet<sup class="footnote-ref"><a href="#fn3" id="fnref3">[3]</a></sup>, ShuffleNet v1<sup class="footnote-ref"><a href="#fn4" id="fnref4">[4]</a></sup> &amp; v2<sup class="footnote-ref"><a href="#fn5" id="fnref5">[5]</a></sup>, NasNet<sup class="footnote-ref"><a href="#fn6" id="fnref6">[6]</a></sup>. We consider the following questions:</p>
+<span id="more"></span>
+<ol>
+<li>
+<p>What in the world do they look like?</p>
+</li>
+<li>
+<p>Why are they fast? Why are they small? Which one is better and Why?</p>
+</li>
+<li>
+<p>Why the authors design them like that?</p>
+</li>
+</ol>
+<p>So, let’s try to solve these doubts step by step.</p>
+<h2 id="MobileNet-v1-vs-Standard-CNN-models">MobileNet v1 vs. Standard CNN models</h2>
+<p>MobileNet v1 is smart enough to decompose the standard convolution operation into two separate operations: depth-wise (or channel-wise) convolution and point-wise convolution.</p>
+<p>We can take the following figure as an illustration:</p>
+<img src="mobilenetv1.png" width="400">
+<p>Suppose we have the convolutional layer with kernel size $K$, input size $C_{in}\times H\times W$ and output size $C_{out} \times H \times W$ (stride=1). For a standard convolution operation, the computation complexity, here we use MACC (Multiply-accumulate, also known as MADD), is calculated as (for how to calculate FLOPs or MACC, we kindly recommend this great post: <a href="https://machinethink.net/blog/how-fast-is-my-model/">How Fast is my model?</a>):</p>
+<p>$$\begin{equation}\label{eq1}<br>
+K\times K\times C_{in}\times C_{out}\times H\times W.<br>
+\end{equation}$$</p>
+<p>With decomposition, the two separate operation parts lead to output feature maps with exactly the same size as the standard counterpart does while with much less computation cost. How does that works?</p>
+<p>OK, depth-wise convolution takes as input a single channel and output a single channel for each channel of the input volume, and then concatenates the output channels for the second stage, in which the point-wise convolution takes place. According to this, its corresponding computation cost is:</p>
+<p>$$ K\times K\times H\times W\times C_{in}. $$</p>
+<p>The point-wise convolution is a simple 1x1 convolution (also known as network-in-network), which transfers the $C_{in}\times H\times W$ volume produced by the depth-wise operation to  a $C_{out}\times H\times W$ output volume. Since we have dealt with the input volume with a channel-by-channel strategy at first, so the purpose of point-wise operation is to combine the information of different channels and fuse them to new features. The point-wise operation costs</p>
+<p>$$ 1\times 1\times C_{in}\times C_{out}\times H\times W = C_{in}\times C_{out}\times H\times W.$$</p>
+<p>As a result, with the above decomposition, the total MACC is<br>
+$$\begin{equation}\label{eq2} K\times K\times H\times W\times C_{in} + C_{in}\times C_{out}.<br>
+\end{equation}$$</p>
+<p>Compared with equation $\eqref{eq1}$, the reduction of computation is $\eqref{eq2}$/$\eqref{eq1}$ $=\frac{1}{C_{out}} + \frac{1}{K^2}$.</p>
+<p>In addition, the number of parameters of the standard convolution filters is $K\times K\times C_{in}\times C_{out}$. With depth-wise and point-wise convolution, the number of parameters becomes $K\times K\times C_{in} + C_{in}\times C_{out} = C_{in}\times (K\times K + C_{out})$. In this way, both computation cost and model size can be considerably reduced. What’s more, this can be further done by applying the <em>Resolution Multipier</em> and <em>Width Pultipier</em>, which reduce the resolution of the input images and channels of all layers by a multipier coefficient.</p>
+<p>If you are not clear, the following is the whole MobielNet v1 structure with all the bells and whistles.<br>
+<img src="mobilenetv1_2.png"></p>
+<p>The structure was drawn according to the code in <a href="https://github.com/marvis/pytorch-mobilenet">https://github.com/marvis/pytorch-mobilenet</a>, where filter in each row of the table takes the input with size written immediately in the same row, and therefore, outputs a volume with size written in the following row, and then, processed by the next filter. Finally, <code>BR</code> means Batch normalization and Relu layers after a certain filter.</p>
+<p>What surprised me was that there is no residual module at all, what if we add some residuals or shortcuts like ResNet? Afterall, the author got his purpose and the accuracy on ImageNet classification task is comparable to the one using the standard convolution filters instead as well as other famous CNN models.<br>
+<img src="mobilenetv1_3.png" width="500"></p>
+<h2 id="MobileNet-v1-vs-SqueezeNet">MobileNet v1 vs. SqueezeNet</h2>
+<p>First, let’s compare these two networks directly,</p>
+<img src="3.1.png" width="500">
+<p>where, <code>0.50 MobileNet-160</code> means halving the channels for all layers and setting the resolution of input images as $160\times 160$. We can see from the table that the only highlight of SqueezeNet is its model size. It is not ignorable that we also need the speed of computation when we embed our model into resource-restricted devices like Mobile phones. It’s hard to say that SqueezeNet is good enough when we see that its MACC is even more than AlexNet, with a large margin.</p>
+<p>However, it’s worth thinking why SqueezeNet has so few parameters. Take a look at it basic unit (a fire module):</p>
+<img src="3.2.png" width="450">
+<p>The basic idea behind SqueezeNet comes from three principles. First, using 1x1 filters as possible as we can; Second, decreasing the number of input channels to 3x3 filters. The last pinciple is to downsample feature maps after the merging operation of residual blocks so that to keep more activations.</p>
+<p>By stacking fire modules, we get a small model, while also having numerous computations.</p>
+<h2 id="MobileNet-v1-vs-MobileNet-v2">MobileNet v1 vs. MobileNet v2</h2>
+<p>Keep it in mind that MobileNet v1’s success attributes to using the <strong>depth-wise</strong> and <strong>point-wise</strong> convolutions. These two kinds of filters become the very basic tools for most of the following works focusing on network compression and speeding up, including MobileNet v2, ShuffleNet v1 and v2.</p>
+<p>For the MobileNet v2, similar to the above illustration, let’s first take a look at its <a href="4.1.png" target="_blank">whole structure</a>. For analysis, we take part of it as the whole structure is stacked with similar components.</p>
+<img src="4.2.png">
+<p>In this illustration, the green unit means a residual block while the orange one means a normal block (without residual) with stride 2 to do downsampling. The main characteristic of MobileNet v2 architecture is for every unit or block, it first expands the number of channels by point-wise convolutions, then applies depth-wise convolutions with kernel size 3x3 on the expanded space, and finally projects back to low-channel feature spaces using point-wise convolutions again. For a block doesn’t having to downsample its input volume, an additional residual component is applied to enhance the performance. Another feature is, as illustrated in the above figure with a single <code>B</code> after each block which means Batch normalization only, it doesn’t use non-linearity at the output of blocks. Now, I have the following questions:</p>
+<ol>
+<li>When building a residual block, why connect the shortcut between two low-channel ends? Why not connect the “fat part” just like the original ResNet does?</li>
+<li>Why it needs to be “fat” in the middle of block? Why not just keep it slim so that to further reduce its size and parameters? Why not apply ReLu at the end of block?</li>
+<li>Comparing with ResNet, which applies ReLU on its “slim part” of each block, it seems like the two designing strategies (ResNet block and MobileNet v2 block) conflict with each other, why?</li>
+</ol>
+<p>OK, let’s try to answer these questions (if you have any different idea, please do not hesitate to contact me, the email can be found in my profile).</p>
+<p>For question 1, there is a intuition when designing MobileNet v2: bottlenecks actually contains all the necessary informations. So it would not cause information loss if we do like that. On the other hand, connecting the “fat parts” is possible, but that also means we should connect two volumes produced by two depth-wise convolutions, sounds strange because we usually connect the outputs of normal convolutions (here a point-wise covolution is a normal 1x1 convolution), but nothing stops trying.</p>
+<p>For question 2, we can find our answer from the analysis of ReLU.</p>
+<img src="4.3.png" width="500">
+<p>ReLu cause information collapse. However, the higher the dimension of the input, the less the degree information collapses. So the high dimension in the middle of block is to avoid information loss. And intuitively, more channels usually means more powerful representative features thus to enhance the discriminability of a model. According to this, it is reasonable not to apply ReLU at the “slim output” of the block.</p>
+<p>We can use the same explanation to attack ResNet, which indeed use ReLU on the low-dimensional features. So why is it still so effective? This would attribute to its high dimensions of input and output ends of a ResNet block, which ensure its representative ability even with the ReLU layer in the bottleneck.</p>
+<p>The design art of MobileNet v2 is to keep few number of channels for the input and output of each block, while doing more complicated feature extraction inside the block with enough channels. This ensures the extraction of effective and high-level features of the image while reduce the computation cost at the same time, because <strong>the main computation cost is from the 1x1 convolution filters</strong> (see the following figure).</p>
+<img src="4.4.png" width="400">
+<p>MobileNet v2 has even less parameters and MACCs than v1. This because MobileNet v1 takes more channels for 1x1 convolutions than v2, leading to much more MACCs. While MobileNet v2 smartly avoid giving many channels to 1x1 convolutions, and do feature extraction mainly via depth-wise convolutions.</p>
+<h2 id="MobileNet-v2-vs-ShuffleNet-v1-vs-NasNet">MobileNet v2 vs. ShuffleNet v1 vs. NasNet</h2>
+<img src="5.1.png" width="400">
+<p>Above figure shows that a ShuffleNet v1(1.5) and a MobileNet V2 have the similar model size (3.4M params) and computation cost ($\approx 300$M MACCs), and furthermore, the similar classification accuracy. This means that ShuffleNet v1 is at the same level of MobileNet v2, the two are closely comparable. So, what does a ShuffleNet v1 look like? <a href="5.2.png" target="_blank">Click here</a></p>
+<p>Again, we capture part of it to analyse.</p>
+<span id="compress">
+<img src="5.3.png">
+</span>
+<p>Since we realize that the main computation takes place at the 1x1 convolutions, which also accounts for main part of parameters. Unlike MobileNet v2 who solves the problem by reducing number of channels inputted to 1x1 convolutions, ShuffleNet v1 is more straightforward. Specifically, rather than only applying group convolution (for group convolution, see ResNeXt, depth-wise convolution can be regarded as an extreme case of group convolution) on 3x3 filters, it also applies group operation on 1x1 filters. Although it reduces computation cost and number of parameters effectively, it leads to a problem: different groups cannot communicate with each other, thus restrict the power of model.</p>
+<p><code>Shuffle</code> in ShuffleNet v1 provides the solution of above problem by shuffling all the output channels of 1x1 group convolutions as a whole, so that enforce information communication among groups. And the most inspiring thing is the shuffle operation doesn’t take any additional parameters and computationally efficient.</p>
+<img src="5.4.png" width="200">
+<p>To further reduce model size and computation cost, ShuffleNet v1 also uses <code>BottleNeck</code>s as illustrated:</p>
+<img src="5.5.png" width="600">
+<p>As discussed above, MobileNet v2 and ShuffleNet v1 both focus on reducing computation cost on 1x1 convolutions, while there are still three more differences according to their structures.</p>
+<ol>
+<li>Difference on how to apply residual. For MobileNet v2, no residual is used when the shape of input volume and output volume of a block doesn’t match. For ShuffleNet v1, when the two doesn’t match, a <code>AveragePool + Concatenation</code> strategy is used to do shortcut connection.</li>
+<li>According to the above <a href="5.2.png" target="_blank">diagram</a>, ShuffleNet v1 quickly downsamples the input image from 224x224 to 56x56, while <a href="4.1.png" target="_blank">MobileNet v2</a> only downsamples its input image to 112x112 in the first stages.</li>
+<li>According to the logic of MobileNet v2, ReLU layers should apply on “fat layers” rather than bottleneck layers. While ShuffleNet (both v1 and v2) more or less does the opposite (e.g., ReLU after the <a href="#compress">Compress</a> operator, marked red in the figure). Why?</li>
+</ol>
+<p>Well, I think it’s worth trying and see what will happen if we take the ReLU away after the 3x3 convolutions in MobileNet v1 or MobileNet v2 (e.g., only connect the ReLu to the first 1x1 convolution layer of each block mobileNet v2). On the other hand, the reason why ShuffleNet v1 doesn’t connect a ReLU after the 3x3 convolution layers comes from the explanation in Xception, which thought that for shallow features (i.e., the 1-channel deep feature spaces of depth-wise convolutions), non-linearity becomes harmful, possibly due to a loss of information.</p>
+<p><strong>NasNet</strong>, in which the word “Nas” is an abbreviation of <strong>Network architecture search</strong>, definitely is a more advanced technology to search for compact and efficient networks. The auto-search algorithms and other very recent research works (works in ICLR 2019, ICML 2019 and CVPR 2019) will be gone through in another post. Let’s proceed to ShuffleNet v2.</p>
+<h2 id="ShuffleNet-v2-vs-All">ShuffleNet v2 vs. All</h2>
+<p>The above methods are based on two principles, small model size and less computation cost. However, in practical applications, efforts taken on the above criterion doesn’t exactly bring a corresponding faster model in hardware equipments. There are some other factors we should take into account when designing an embeddable model for hardware devices – memory access cost (MAC) and battery consuming.</p>
+<p>Based on the above findings, ShuffleNet v2 rethinks the previous compression models and proposes four useful designing guidelines.</p>
+<blockquote>
+<p>G1, Equal channel width minimizes MAC (this means letting number of input channels equal to that of output channels);<br>
+G2, Excessive group convolution increase MAC (do not use or use less group convolutions);<br>
+G3, Network fragmentation reduces degree of parallelism (small stacked convolutions with in blocks and branches in NasNet);<br>
+G4, Element-wise operations are non-negligible (like ReLU and addition operations in residual block).</p>
+</blockquote>
+<p>As described in the original paper, ShuffleNet v1 violates G2 (group convolutions) and G1 (bottleneck blocks), MobileNet v2 violates G1 (inverted bottleneck structure) and G4 (ReLU on “thick” feature maps), and NasNet violates G3 (too many branches).</p>
+<p>So the problem is:</p>
+<blockquote>
+<p>How to maintain a large number and equally wide channels with neither dense convolution nor too many groups?</p>
+</blockquote>
+<p>We mention that all the above guidelines have been proved by a series of validation experiments. Let’s draw the building blocks of ShuffleNet v2 here (actually I’ve also drawn a table for ShuffleNet v2 structure <a href="6.2.png" target="_blank">here</a>, but takes time to understand…)</p>
+<img src="6.1.png" width="700">
+<p>How does it solve the problem?</p>
+<ul>
+<li>First, the <code>channel split</code> divide the input channels into two parts, one of them keeps untouched, the other experiences a <strong>1x1 + DW3x3 + 1x1</strong> flowchart, here, the <strong>1x1</strong> doesn’t use group convolution. On one hand to follow <strong>G2</strong>, on the other hand, two branches indicates two groups.</li>
+<li>Second, the two branches are merged by concatenation. By doing so, there is no add operations (follows <strong>G4</strong>), and all the ReLU and depth-wise convolutions only exist in half of all the input channels, which again follows <strong>G4</strong>.</li>
+<li>Then, after concatenation, channel shuffling is applied to enforce branch communication. In addition, the <strong>Concat + Shuffle + Split</strong> pipeline can be merge into a single element-wise operation, which follows <strong>G4</strong>.</li>
+<li>Similar to DenseNet, it takes the advantage of <code>feature reuse</code>.</li>
+</ul>
+<p>Under the same FLOPs, ShuffleNet v2 is superior than other models.</p>
+<img src="6.3.png" width="700">
+<h2 id="Conclusion">Conclusion</h2>
+<p>We have analysed several classical network compression models, from which we can see that the main strategy to reduce model size and computation cost is using <strong>Depth-wise convolution</strong>, <strong>Group convolution</strong> and <strong>Point-wise convolution</strong>.</p>
+<p>There are other interesting algorithms like network pruning, network quantization (e.g., binarize weiths and activations) and Network architecture search. They also lead to fast and small network models and will be discussed in the next post.</p>
+<p><em>Note: Most of the figures are directly copied from the original paper.</em></p>
+<hr class="footnotes-sep">
+<section class="footnotes">
+<ol class="footnotes-list">
+<li id="fn1" class="footnote-item"><p><a href="https://arxiv.org/abs/1704.04861">Howard, Andrew G., et al. “Mobilenets: Efficient convolutional neural networks for mobile vision applications.” arXiv preprint arXiv:1704.04861 (2017).</a> <a href="#fnref1" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn2" class="footnote-item"><p><a href="https://arxiv.org/abs/1801.04381">Sandler, Mark, et al. “Mobilenetv2: Inverted residuals and linear bottlenecks.” Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition. 2018.</a> <a href="#fnref2" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn3" class="footnote-item"><p><a href="https://arxiv.org/abs/1602.07360">Iandola, Forrest N., et al. “SqueezeNet: AlexNet-level accuracy with 50x fewer parameters and&lt; 0.5 MB model size.” arXiv preprint arXiv:1602.07360 (2016).</a> <a href="#fnref3" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn4" class="footnote-item"><p><a href="http://openaccess.thecvf.com/content_cvpr_2018/papers/Zhang_ShuffleNet_An_Extremely_CVPR_2018_paper.pdf">Zhang, Xiangyu, et al. “Shufflenet: An extremely efficient convolutional neural network for mobile devices.” Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition. 2018.</a> <a href="#fnref4" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn5" class="footnote-item"><p><a href="http://openaccess.thecvf.com/content_ECCV_2018/papers/Ningning_Light-weight_CNN_Architecture_ECCV_2018_paper.pdf">Ma, Ningning, et al. “Shufflenet v2: Practical guidelines for efficient cnn architecture design.” Proceedings of the European Conference on Computer Vision (ECCV). 2018.</a> <a href="#fnref5" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn6" class="footnote-item"><p><a href="http://openaccess.thecvf.com/content_cvpr_2018/papers/Zoph_Learning_Transferable_Architectures_CVPR_2018_paper.pdf">Zoph, Barret, et al. “Learning transferable architectures for scalable image recognition.” Proceedings of the IEEE conference on computer vision and pattern recognition. 2018.</a> <a href="#fnref6" class="footnote-backref">↩︎</a></p>
+</li>
+</ol>
+</section>
+]]></content>
+      <categories>
+        <category>Paper reading</category>
+      </categories>
+      <tags>
+        <tag>Network compression</tag>
+        <tag>CNN</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>InstructGP-RLHF</title>
+    <url>/blogs/2024/06/27/InstructGP-RLHF/</url>
+    <content><![CDATA[<h2 id="Training-language-models-to-follow-instructions-with-human-feedback">Training language models to follow instructions with human feedback</h2>
+<span id="more"></span>
+<p><img src="/blogs/joplin_resources/ed41c95657c09fd229c5ed16ef514980.png" alt=""></p>
+<p>The motivation is that the output of GPT series are not aligned with the user needs, since the pre-text task in GPT is to predict next word, but the expectation of ChatGPT is to be useful and helpful for users. Thus, the authors give a 3-stage framework to fine-tune GPT-3.</p>
+<p>First, they collect some prompts (questions) and answers from users/labelers, and use these to fine-tune GPT-3.</p>
+<p>Second, they ask labelers to rank the multiple outputs of the model from step 1 for a single prompt. Then they train a reward model to match the ranking.</p>
+<p>Third, they further train the model from step 1 such that its output has a high score from the reward model from step 2.</p>
+<p>It is called reinforcement learning from human feedback, or RLHF.</p>
+]]></content>
+      <categories>
+        <category>Paper reading</category>
+      </categories>
+      <tags>
+        <tag>LLM</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>LLaMA - Google released on Feb 2023</title>
+    <url>/blogs/2024/06/28/LLaMA-Google-released-on-Feb-2023/</url>
+    <content><![CDATA[<p>tutorial: https://www.youtube.com/watch?v=Mn_9W1nCFLo&amp;t=27s</p>
+<h2 id="LLaMA-Open-and-Efficient-Foundation-Language-Models">LLaMA: Open and Efficient Foundation Language Models</h2>
+<span id="more"></span>
+<p align="center">
+  <img src="/blogs/joplin_resources/08eb4cd4872e73c9be305bcf153afdc0.png" width="60%">
+</p>
+<p>This is the framework drawn by Umar from his video tutorial. There are several concepts from LLaMa.</p>
+<ul>
+<li>
+<p>Rotary positional embedding [1]<br>
+It was proposed by Jianlin Su et al. In the origninal method that uses absolute positional embeddings, the positional embeddings are added to the feature embeddings. In the methods using relative positional embeddings, the positional embeddings are also added to the dot product of Q and K. However, they think that they can integrate the relative distance of two tokens into the dot product, or generally the inner product of Q and K. Baased on that, they define a new inner product on the complex space where the relative distance or positions can be represented by a rotation operation.</p>
+</li>
+<li>
+<p>RMS Norm (Root Mean Square Normalization) [2]<br>
+It was suggested that the stability of the training is mostly attributed to the re-scaling of variance rather than the re-centering using means. Therefore, they only focus on variance and save the computation. The network will still achieve the same effect as Layer Norm.<br>
+<img src="/blogs/joplin_resources/244ed736a78e6b3b6d909e1f2a718b9f.png" alt=""></p>
+</li>
+<li>
+<p>KV Cache<br>
+<img src="/blogs/joplin_resources/97b7324cb7b6321d2f61645e459fd42e.png" alt=""></p>
+<p>In the task of next token prediction, for each iteration, we only care about the last output token since the previous tokens have already been predicted. But we calculate these tokens in every iteration repeatedly. To avoid that, for each iteration and suppose we have to predict token 3, then we append the token 3 from K to the K buffer, since token 1 and 2 are already there, and append the Token 3 from V to the V buffer, and after the attention layer calculation, we obtain the prediction of token 3.</p>
+</li>
+<li>
+<p>Multi-Query Attention  [3] and Grouped Multi-Query Attention [4]<br>
+As we have reduced the computation by KV cache, the bottleneck which affects the speed is now becoming the Memory access, according to the ratio of memory and arithmetic operations. So they only divide the Q into multi heads and use a single shared head for the case of K and V. But it will degrads the model slightly, so they use grouped meahcnism like grouped convolution. They are illustrated below.<br>
+<img src="/blogs/joplin_resources/00ba5684d55220456d1b2630d45b9a34.png" alt=""></p>
+</li>
+</ul>
+</br>
+</br>
+</br>
+</br>
+<p>[1] <a href="https://arxiv.org/abs/2104.09864">RoFormer: Enhanced Transformer with Rotary Position Embedding</a></p>
+<p>[2] <a href="https://arxiv.org/abs/1910.07467">Root Mean Square Normalization</a></p>
+<p>[3] <a href="https://arxiv.org/abs/1911.02150">Fast Transformer Decoding: One Write-Head is All You Need</a></p>
+<p>[4] <a href="https://arxiv.org/abs/2305.13245">GQA: Training Generalized Multi-Query Transformer Models from Multi-Head Checkpoints</a></p>
+]]></content>
+      <categories>
+        <category>Paper reading</category>
+      </categories>
+      <tags>
+        <tag>LLM</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Mamba</title>
+    <url>/blogs/2024/07/05/Mamba/</url>
+    <content><![CDATA[<h2 id="Mamba-Linear-Time-Sequence-Modeling-with-Selective-State-Spaces">Mamba: Linear-Time Sequence Modeling with Selective State Spaces</h2>
+<span id="more"></span>
+<p>Tutorial https://www.youtube.com/watch?v=8Q_tqwpTpVU<br>
+Paper: https://arxiv.org/abs/2312.00752</p>
+<p>The shortage of Transformer is the quatratic computational complexity about the sequence length. Also, during inference, even with KV cache, the computation cost of the later token will be significnatly larger than the early token, as the KV cache is growing. Mamba developes a linear-time sequnce modeling and the computational cost for each token during inference is just the same.</p>
+<p>Training: using convolution + Inference: using recurrent network</p>
+<p>The whole method is based on state space models, where the formulations are:<br>
+<img src="/blogs/joplin_resources/23fde06c67274b3697e16aed1d97cf5f.png" alt=""><br>
+where h(t) is the state representation at time step t (or of the t-th token), x(t) is the input at t, and y(t) is the output at t.</p>
+<p>This is a differential equation, but by some discretization process like Euler method, we can convert it into a recurrent process:<br>
+<img src="/blogs/joplin_resources/0ad8d2e2ca85fe420f2453af685ee947.png" alt=""><br>
+so that it operates like a recurrent network, where $\mathbf{\overline{A}}$ and $\mathbf{\overline{B}}$ are calculated by<br>
+<img src="/blogs/joplin_resources/d89e95508e78407f2afd3322ab1a82c6.png" alt=""><br>
+where $\mathbf{\Delta}$ is the time step which are learnable paramters in Mamba.</p>
+<p>If we extend h0, h1, h2, …, ht, then<br>
+<img src="/blogs/joplin_resources/683335d9643b85b2bf0e4c6c27ec2203.png" alt=""><br>
+It means we can actually convert it into convolutions with kernel<br>
+<img src="/blogs/joplin_resources/dcc55b9116aff5f3a87c7705390d58eb.png" alt=""><br>
+For example,<br>
+<img src="/blogs/joplin_resources/084fbe642e5f1f7a70dcafd572246987.png" alt=""></p>
+<p>The good thing is that we could train it with efficient convolution (highly parallelized) and inference it with recurrent operation (with constant computation).</p>
+<p>The problem is that if we initialize A and B and regard them as parameters, and using this convolution, then A and B are shared. It also means the kernels are shared for different tokens (or different time steps), so the model cannot deal with the slective coping problem, since the model <strong>is not time-varying</strong> to selectively remember or ignore inputs depending on their content.<br>
+<img src="/blogs/joplin_resources/5043a37ca9f6cf1e2c43f8345db203fc.png" alt=""></p>
+<p>The solution is to use dynamic kernels that depend on the current token on-the-fly. However, it would be difficult to parallelize since the kernels are not shared. Therefore the authors propose the <strong>Selective Scan</strong> algorithm to increase parallelism and computational efficiency with GPUs.</p>
+<h3 id="Performance">Performance</h3>
+<p><img src="/blogs/joplin_resources/bd6832abe895c28024147c38b7e522a4.png" alt=""><br>
+“Transformer++” is the strong transformer based recipe in state-of-the-art methods. Mamba performs nearly the same or superiously.</p>
+]]></content>
+      <categories>
+        <category>Paper reading</category>
+      </categories>
+      <tags>
+        <tag>Mamba</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Megatron-LM (1)</title>
+    <url>/blogs/2024/12/26/Megatron-LM-1/</url>
+    <content><![CDATA[<h2 id="Resources-about-distributed-training-with-Megatron-LM">Resources about distributed training with Megatron-LM</h2>
+<p>Github: https://github.com/NVIDIA/Megatron-LM<br>
+Document on NeMo: https://docs.nvidia.com/nemo-framework/user-guide/latest/overview.html</p>
+<blockquote>
+<blockquote>
+<p>NeMo is a cloud-native generative AI framework built on top of Megatron-LM.</p>
+</blockquote>
+</blockquote>
+<p>Overall view of Megatron-Core: https://docs.nvidia.com/megatron-core/developer-guide/latest/index.html</p>
+<blockquote>
+<blockquote>
+<p>Official APIs with formal product support…</p>
+</blockquote>
+</blockquote>
+<p>Megatron-LM are basically based on the following three papers. Let’s do some notes on them.</p>
+<h2 id="Megatron-LM-Training-Multi-Billion-Parameter-Language-Models-Using-Model-Parallelism">Megatron-LM: Training Multi-Billion Parameter Language Models Using Model Parallelism</h2>
+<span id="more"></span>
+<p>paper (2020, arxiv): <a href="https://arxiv.org/abs/1909.08053">https://arxiv.org/abs/1909.08053</a></p>
+<h3 id="Contributions">Contributions</h3>
+<ol>
+<li>Put large transformer models into different GPUs (with <code>tensor model parallelism</code>) to solve the problem that a single GPU cannot fit the whole model.</li>
+<li>No need to design custom C++ code, compatible with existing Pytorch transformer implementations.</li>
+<li>Able to train a GPT-2 with 8.3 billion parameters and a BERT with 3.9 billion parameters.<br>
+<img src="/blogs/joplin_resources/fa846f2d8740035590fed9a5b6e21774.png" alt=""><br>
+On the above figure, model parallel means using tensor model parallelism methods proposed in this paper. Evaluation is based on weak scaling.</li>
+</ol>
+<h3 id="Methods">Methods</h3>
+<p><img src="/blogs/joplin_resources/ea97528d7e5fcdf8c5320fd26d4ef537.png" alt=""></p>
+<p>The tensor model parallelism can be described by the above illustrations. Generally it is designed for equally partitioning transformer blocks (MLP and self-attention layers) into different parts which are stored in corresponding GPUs. Above figure uses 2 GPUs, it means both MLP and Self-Attention layer are segmented equally with two parts, with each part put in a GPU during training.</p>
+<p>For MLP, we have the following equations:<br>
+$$ Y= \text{GeLU}(XA) $$<br>
+$$ Z = \text{Dropout}(YB) $$<br>
+where X and Y are activations, A and B are parameter matrices. A is split along columns such that the GeLU nonlinear function can be put in individual GPUs separately, leading to $Y_1$ and $Y_2$. Then B is split along rows giving $Z_1=Y_1B_1$ and $Z_2=Y_2B_2$. Before dropout, we should have $Z=Z_1 + Z_2$, therefore, we use “all-reduce” operator to calculate the sum from different GPUs and distribute the result back to all GPUs, then dropout operator is executed in each GPU that outputs $Z$ (here I guess each GPU should share the same dropout mask).</p>
+<p>In this way, the “f” function is actually a non-operation (or Identity function) and “g” is an all-reduce function in the forward pass. In the backward pass, “g” becomes Identity function and “f” becomes an all-reduce function. These two functions are the so-called conjugate functions.</p>
+<p>For Self-Attention layer, we make use of the multi-head attention mechanism to do tensor model parallelism. X, again, is shared in all GPUs, while each GPU have its separate sets of attention heads where the K, Q, V are generated with its own linear projection matrices. Similarly, B is split in rows and all-reduce is applied before dropout.</p>
+<p>Overall, after applying such tensor model parallelism, for each transformer layer (consisting of a attention layer and a MLP layer), there are 4 total communication operations in the forward and backward pass of a single model parallel transformer layer, i.e., four all-reduce operations involved in forward and backward passes.<br>
+<img src="/blogs/joplin_resources/c49cabcf330bbd76d7f63d0cf30a0da4.png" alt=""></p>
+<h4 id="Other-notes">Other notes</h4>
+<ol>
+<li>
+<p>For output embedding $E_{H\times v}$ which transforms the hidden size H to vocabulary size v, we split $E$ along columns to $E_1, E_2$ and multiply with the output of the last transformer layer to get $[Y_1, Y_2] = [XE_1, XE_2]$, then instead of using all-gather to gather $Y_1, Y_2$ to $Y=[Y_1, Y_2]$ and distribute it to each GPU followed by cross-entropy loss (this may cause the all-gather operation to communicate $b\times s\times v$ elements in $Y$ where b is batch size and s is sequence length), they  fuse the output of $[Y_1, Y_2]$ with the cross entropy loss to reduce the dimension to $b\times s$. (Though here I don’t know how they fuse that :&lt;).</p>
+</li>
+<li>
+<p>For communications between GPUs, they use NVSwitch with 300GB/sec bandwidth for intra-server and 8 InfiniBand adapters per server with 100GB/sec bandwidth for inter-server communications.</p>
+</li>
+</ol>
+<h3 id="Scaling-evaluation-on-GPT-2">Scaling evaluation on GPT-2</h3>
+<p><img src="/blogs/joplin_resources/798943eea9a9e4d297607659287469f7.png" alt=""><br>
+Here, 100% is for the baseline regarding the training throughput. Other percentages are relative to the baseline.</p>
+]]></content>
+      <categories>
+        <category>Paper reading</category>
+      </categories>
+      <tags>
+        <tag>LLM</tag>
+        <tag>Optimization</tag>
+        <tag>Distributed training</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Megatron-LM (2)</title>
+    <url>/blogs/2024/12/26/Megatron-LM-2/</url>
+    <content><![CDATA[<h2 id="Efficient-Large-Scale-Language-Model-Training-on-GPU-Clusters-Using-Megatron-LM">Efficient Large-Scale Language Model Training on GPU Clusters Using Megatron-LM</h2>
+<span id="more"></span>
+<p>paper (2021 arxiv): <a href="https://arxiv.org/abs/2104.04473">https://arxiv.org/abs/2104.04473</a></p>
+<h3 id="Contributions">Contributions</h3>
+<p>Based on Megatron-LM, the authors further adopt pipeline model parallelism via the proposed interleaved 1F1B pipeline schedules to scale the LLM training to thousands of GPUs, because of the dramatic increase in model sizes.</p>
+<p><img src="/blogs/joplin_resources/5bc748b36099a88976c17f640972d76b.png" alt=""></p>
+<h3 id="Methods">Methods</h3>
+<p><img src="/blogs/joplin_resources/98465e80b56627ea161b155d620a0b07.png" alt=""></p>
+<p>Basically, it combines tensor parallelism (proposed in Megatron-LM) and pipeline parallelism for model parallelism. Assume tensor-parallel size is $t$, pipeline-parallel size is $p$ (also said as the number of pipeline stages), and data-parallel size is $d$, then the total number of GPUs is $ptd$.</p>
+<p>First, let's get familiar with some concepts:</p>
+<h4 id="GPipe-pipeline-schedule">GPipe pipeline schedule</h4>
+<p><img src="/blogs/joplin_resources/6575e9290eb6cf6aa228877c5239e812.png" alt=""></p>
+<blockquote>
+<p>The grey area represents <span style="color: red;">pipeline bubble</span> where devices are idle. <span style="color: red;">Pipeline flush</span>, I guess, is the end point of the backward pass at each iteration.</p>
+</blockquote>
+<p>Here, the number of microbatches in batch is $m$, and assume the time to execute a single microbatch’s forward and backward pass as $t_f$ and $t_b$. Then the total amount of time spent in the pipeline bubble is $t_{pb} = (p-1)\cdot (t_f + t_b)$, and the ideal processing time for the batch is $t_{id} = m\cdot (t_f + t_b)$. Therefore, the fraction of ideal computation time spent in the pipeline bubble (or called the <span style="color: red;">bubble time fraction</span>) is:</p>
+<p>$$<br>
+\frac{t_{pb}}{t_{id}} = \frac{p - 1}{m}.<br>
+$$</p>
+<p>The bubble time fraction should be as small as possible. The naive solution is to make $m \gg p$, however, this needs each device to store all the m microbatches’ activations for the gradient calculation in the backward pass, having a high memory footprint. In other words, the number of in-flight microbatches equal to the total number of microbatches $m$, so we have:</p>
+<h4 id="PipeDream-Flush-schedule-upper-part-of-the-following-figure">PipeDream-Flush schedule (upper part of the following figure)</h4>
+<p><img src="/blogs/joplin_resources/6e4ffba59ca4f57b0bbc132fd516ee3b.png" alt=""></p>
+<p>In this schedule, there is a warmup phase for each device for the forward pass. After the warmup, the device goes with a one forward pass followed by one backward pass, which is the so-called <span style="color: red;">1F1B</span> schedule. In this way, the number of in-flight microbatches reduces to $p$ in maximum, while the bubble fraction time is the same. Therefore, PipeDream-Flush can be much more memory-efficient when $p \ll m$.</p>
+<p>To reduce the bubble fraction time and keep the schedule memory efficient, the authors propose:</p>
+<h4 id="Interleaved-1F1B-pipeline-schedule-lower-part-of-the-above-figure">Interleaved 1F1B pipeline schedule (lower part of the above figure)</h4>
+<p>Briefly, each device can perform computation for multiple subsets of layers (or a <span style="color: red;">model chunk</span>), for example, device 1 has layers 1, 2, 9, 10, device 2 has layers 3, 4, 11, 12, and so on. Then just like the 1F1B schedule, they do an interleaved 1F1B schedule.</p>
+<ul>
+<li>Property 1: this needs the number of microbatches $m$ to be an integer multiple of $p$;</li>
+<li>Property 2: this reduce the pipeline bubble time to $(p-1)\cdot(t_f+t_b)/v$ where $v$ is the number of model chunks in each stage. Then the bubble time fraction reduces to $(p-1)/(m\cdot v)$.</li>
+<li>Property 3 (drawback): this introduces extra communication with the increase of $v$.</li>
+</ul>
+<h3 id="Higher-level-experimental-and-analytical-conclusion">Higher-level experimental and analytical conclusion</h3>
+<p>The actual throughput for each device is affected by all the hyperparameters $p, t, d, B, b$ etc., where $B$ is the global batch size and $b$ is the microbatch size due to the communication overhead between devices. There are three takeaways</p>
+<ol>
+<li>
+<p>When using $g$-GPU servers, the tensor model parallelism should generally be set up to $g$. Based on that, pipeline model parallelism can be used across servers.</p>
+</li>
+<li>
+<p>When combine data and model parallelism, for model parallelism, a total number of $t\cdot p$ GPUs should be used to fit the model memory, then data parallelism is used to scale up training.</p>
+</li>
+<li>
+<p>The optimal $b$ depends on the characteristics and throughput of the model, $p$, $d$ and $B$.</p>
+</li>
+</ol>
+<h3 id="Communication-optimization">Communication optimization</h3>
+<p><img src="/blogs/joplin_resources/8650bd09481bc21b74e8e18f303e065f.png" alt=""></p>
+<p>Simply, shown in the above figure, assume we have $t=2$, when send and receive between two consecutive pipeline stage (i.e., two servers according to conclusion 1), the naive way is to send the tensor on each GPU on the previous pipeline stage (server) to the second stage, where each pair of GPUs on the sender and receiver communicate with the exact same set of tensor.  Instead, we can first divide (scatter) the tensor to be sent into $t$ parts equally and each GPU on the sender server send its part to the GPU on the receiver server, then use all-gather operator to gather the tensor. We call this scatter/gather optimization that reduce the communication to $1/t$.</p>
+<h3 id="General-accelerator-agnostic-ideas">General accelerator-agnostic ideas</h3>
+<ol>
+<li>Smartly partitioning the model training graph to minimize the amount of communication while still keeping device active (they are saying the interleaved 1F1B pipeline schedule).</li>
+<li>Minimizing the number of memory bound kernels with operator fusion and careful data layout (they might be saying the fusion of output embedding with the cross entropy loss function to reduce the communication overhead).</li>
+<li>Other domain-specific optimizations (like the scatter-gather optimization).</li>
+</ol>
+<h3 id="Experiment-results">Experiment results</h3>
+<p><img src="/blogs/joplin_resources/e6acb1a769d391f7aaa6b4d449df3a7f.png" alt=""></p>
+<p><img src="/blogs/joplin_resources/c63f7301c8ccbcbdd2535c492b8ecd36.png" alt=""></p>
+]]></content>
+      <categories>
+        <category>Paper reading</category>
+      </categories>
+      <tags>
+        <tag>LLM</tag>
+        <tag>Optimization</tag>
+        <tag>Distributed training</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Megatron-LM (3)</title>
+    <url>/blogs/2024/12/26/Megatron-LM-3/</url>
+    <content><![CDATA[<h2 id="Reducing-Activation-Recomputation-in-Large-Transformer-Models">Reducing Activation Recomputation in Large Transformer Models</h2>
+<span id="more"></span>
+<p>paper (2022 arxiv): https://arxiv.org/abs/2205.05198</p>
+<h3 id="Contributions">Contributions</h3>
+<p>Briefly, the authors based on tensor and pipeline model parallelism, find that the previous parallelism cannot reduce the memory needed for activations while maintaining high device utilization. They propose <span style="color: red;">sequence parallelism</span> and <span style="color: red;">selective activation recomputation</span>.</p>
+<h3 id="Methods">Methods</h3>
+<h4 id="Sequence-parallelism">Sequence parallelism</h4>
+<p>Let’s first analyze the activation memory during training for a single transformer layer without gradient checkpointing (or activation recomputation).</p>
+<p><img src="/blogs/joplin_resources/3d18b37149176ab5f6bbaa98853201e7.png" alt=""><br>
+<img src="/blogs/joplin_resources/bc097eaac647dcdf091c8480115856aa.png" alt=""><br>
+Above is the transformer structure with layer normalizations rearranged in Megatron-LM. Supposing the network and activations are stored in a 16-bit floating point format (2 bytes for each element) and the dropout masks only need 1 byte to store. The activation memory (in bytes) needed for each component is</p>
+<ul>
+<li>LayerNorm: $4sbh$</li>
+<li>Self Attention as follows:<br>
+<img src="/blogs/joplin_resources/0ef95fd501438d6f6458d1d8cfab0f92.png" alt=""><br>
+Q, K, V: $6sbh$<br>
+QK^T + Softmax output: $2s^2b$<br>
+Dropout mask: $s^2b$<br>
+Dropout output: $2s^2b$<br>
+Attention with V: $2sbh$<br>
+In total: $8sbh + 5s^2b$</li>
+<li>Linear ($h\rightarrow h, h\rightarrow 4h, 4h\rightarrow h$): $2sbh + 8sbh + 2sbh = 12sbh$</li>
+<li>Dropout  (masks + output): $1sbh + 2sbh + 1sbh + 2sbh = 6sbh$</li>
+<li>GeLU: $8sbh$</li>
+</ul>
+<p>In total: $34sbh + 5s^2b = sbh(34 + 5\frac{as}{h})$.</p>
+<p><img src="/blogs/joplin_resources/198919038772856844e278de52ef0cf8.png" alt=""></p>
+<p>However, when applying tensor parallelism (above figure), the output of LayerNorm ($4sbh$), output of dropout layers and dropout masks ($4sbh + 2sbh=6sbh$) are stored in all GPUs. Therefore, $10sbh$ are not parallelized. Therefore, the activations memory per layer is:<br>
+$$sbh(10+\frac{24}{t}+5\frac{as}{ht})$$</p>
+<p>The authors then propose sequence parallelism to also parallelize these $10sbh$ tensors along their sequency dimension:<br>
+<img src="/blogs/joplin_resources/ab9adeb4b25f20c6d5ab41737ddd204b.png" alt=""></p>
+<p>To do that, for example, apply sequence parallelism on the two side of MLP tensor parallelism, the method is illustrated as follows:<br>
+<img src="/blogs/joplin_resources/a480dd0135ebd2f433d33d1c2fd5bfa7.png" alt=""></p>
+<p>Particularly, before the “$g$” function, $Y_1^s, Y_2^s$ are the outputs from the previous sequence parallel stage which are divided along the sequence dimension, therefore, $g$ function uses “all-gather” operator to concatenate them and distribute the result to each tensor parallel device. The outputs of the tensor parallel stage should be processed with “all-reduce” that adds together the outputs and then distributed to each device for the dropout, instead, $\bar g$ uses “reduce-scatter” to scatter (or divide) the reduced results into different segments along the sequence dimension again, each sequence parallel GPU takes one segment for the dropout, followed by another tensor parallel stage.</p>
+<p>In this way, all the activations are paralleled. There is no extra communications. Before sequence parallelism, for one forward and backward pass, it needs 4 all-reduce operations. Now, it needs 4 all-gather and 4 reduce-scatter operations, which have the same communication overhead.</p>
+<h5 id="Other-notes">Other notes</h5>
+<p>The authors also discussed the activations on input and output embeddings, which are negligible compared with the transformer layers.</p>
+<h4 id="Selective-Activation-Recomputation">Selective Activation Recomputation</h4>
+<p>Generally, we don’t store the softmax output, dropout mask and dropout output which take large amount of memory (the $5\frac{as}{ht}$ term). When doing backward pass, we recompute them based on the stored Q, K, V. However, the calculation of these activations is compute-efficient, so it makes more sense to recompute them.</p>
+<p><img src="/blogs/joplin_resources/c544c6ee879141464cc291dbdaf48d0a.png" alt=""></p>
+<p>In Table 4, the observation is that the introduction of selective activation recomputation only slightly affects the training speed, while the introduction of sequence parallelism reduce the overhead and speedup training. When two techniques combined, the speed and overhead just slightly affected, but the activation memory per device is significantly reduced (all tensors to $1/t$), which is important for scaling to large models.</p>
+]]></content>
+      <categories>
+        <category>Paper reading</category>
+      </categories>
+      <tags>
+        <tag>LLM</tag>
+        <tag>Optimization</tag>
+        <tag>Distributed training</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Mistral - Mistral.AI company</title>
+    <url>/blogs/2024/07/03/Mistral-Mistral-AI-company/</url>
+    <content><![CDATA[<p>Tutorial:https://www.youtube.com/watch?v=UiX8K-xBUpE</p>
+<h2 id="Mistral-7B">Mistral 7B</h2>
+<span id="more"></span>
+<p><img src="/blogs/joplin_resources/649acb777c0f3c697b34fbf0a5210be1.png" alt=""></p>
+<p>Paper: https://arxiv.org/abs/2310.06825</p>
+<p><img src="/blogs/joplin_resources/276dfa772215f086120c7167554ee6b1.png" alt=""></p>
+<p>For RMS, Rotary Positional Encoding, and Grouped Query Attention, we have introduced in LLaMa.</p>
+<hr>
+<p>Mistral is also a decoder based large language models, the goal is to predict next tokens given a prompt.</p>
+<p><img src="/blogs/joplin_resources/38106b4ff7efa67b35155e6df4827a3e.png" alt=""></p>
+<p>OK, the difference between Mistral and LLaMa is the sliding window attention, rolling buffer KV Cache, sparse MoE feed forward module and the SiLU function used in Mistral.</p>
+<ul>
+<li>Sliding Window Attention<br>
+<img src="/blogs/joplin_resources/6dd38abc2796de92f6ad3929bd2c6b27.png" alt=""></li>
+</ul>
+<p>Instead of taking all the previous tokens when predicting the current token, sliding window restrict the the number of previous tokens the current token can see. But indirectly, the receptive field of the current token still include all the previous tokens, similar to the receptive field of features in deep layers of a CNN.</p>
+<ul>
+<li>
+<p>Rolling Buffer KV Cache<br>
+Due to the existence of sliding windows, the KV cache buffer has fixed size, and the content in the cache is updated in a rolling way.<br>
+Pre-fill and chunking are techniques to implement the CV cache, in an memory efficient way. Particularly, the prompt is split into several chunks with each chunking has the size of the sliding window D. For the token to be predicted, the KV cache have values from previous chunk and current chunk, such that the memory only has two chunks of KV but ensure each token can see the previous  D tokens.</p>
+</li>
+<li>
+<p>MoE Feed Forward<br>
+<img src="/blogs/joplin_resources/22bdc3d3dd4699ad9478ef36a03b0499.png" alt=""><br>
+It is like dynamic channel pruning, with a gate to decide which feed forward experts (e.g., the top 2)  are used to generate the output. To make sure the scale of the output remain stable, it uses weighted sum to add the selected experts.</p>
+</li>
+<li>
+<p>Pipeline Parallelism<br>
+Paper “GPipe: Efficient Training of Giant Neural Networks using Pipeline Parallelism”: https://arxiv.org/abs/1811.06965<br>
+If using model sharding, the big Mistral was split to several parts which are assigned to different GPUs in sequence. GPU1 is reponsible for Layer1-Layer4, for example. To finish the whole forward and backward pipleline, we need to wait the previous GPU to excute the next GPU. So it wastes much time.<br>
+Using pipeline parallelism, we divide the mini-batch into several micro-batches, and feed micro-batches to GPUs and it can save time. For example, when we feed micro-batch 1 to GPU1, then GPU2 is free now, we can at the same time feed micro-batch 2 to GPU2, smilarly, micro-batch 3 to GPU3, etc. Then when GPU1 finished micro-batch 1, it means other micro-batches are finished by other GPUs, we can then feed micro-batch 1 to GPU2 because GPU2 is now free, and at the same time micro-batch 2 to GPU3, and so on, and we may finally feed micro-batch 4 just finished by GPU4 to GPU1 if GPU1 is free (when it doesn’t take more new batches) to make it work in a cricle.</p>
+</li>
+</ul>
+]]></content>
+      <categories>
+        <category>Paper reading</category>
+      </categories>
+      <tags>
+        <tag>LLM</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Quantization</title>
+    <url>/blogs/2024/07/03/Quantization/</url>
+    <content><![CDATA[<p>Tutorial: https://www.youtube.com/watch?v=0VdNflU08yA</p>
+<span id="more"></span>
+<p>There wo main types of network quantizatin:</p>
+<ul>
+<li>Post Training Quantization<br>
+The goal is to quantize the pretrained networks without fine-tuning. To quantize both activations and weights, with the goal that it maintains the accuracy.</li>
+<li>Quantization aware Training<br>
+To quantize the weights and activations during training, using STE to propagate gradients of quantization functions.</li>
+</ul>
+<p>The two common quantization function are follows:<br>
+<img src="/blogs/joplin_resources/1631bc6e35b0257400bdad21799d373d.png" alt=""></p>
+<p><img src="/blogs/joplin_resources/f31d6c25279038cdcab570794f59a8f1.png" alt=""></p>
+<p>Let’s say Y = WX + B, then W, B and X are all quantized using certain quantization functions to quantize 32-bit floating point numbers to 8-bit integers. We can use different granularities, for examples, per-channel, per-layer, etc. But the result Y is actually integers with more bits than 8, usually it’s 32-bit. To dequantize Y back to floating-point, we need to obtain the corresponding quantization parameters alpha and beta (as shown in the figures). This can be done by sampling some values from Y and calculating them as an approximation.</p>
+]]></content>
+      <categories>
+        <category>Paper reading</category>
+      </categories>
+      <tags>
+        <tag>Network compression</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Quick read: methods of network compression in 2019</title>
+    <url>/blogs/2019/06/22/Quick-read-methods-of-network-compression-in-2019/</url>
+    <content><![CDATA[<h2 id="Overview">Overview</h2>
+<p>Let’s quickly go through the new models related to network compression published at <em>CVPR 2019</em>, <em>ICLR 2019</em> and <em>ICML 2019</em>. Some works needs to be read and understood more carefully.</p>
+<span id="more"></span>
+<h2 id="CVPR-2019">CVPR 2019</h2>
+<p>CVPR is more kind of tending to solve problems in practical applications, while ICLR and ICML are more close to theoretical explanations.</p>
+<h3 id="1-Exploiting-Kernel-Sparsity-and-Entropy-for-Interpretable-CNN-Compression">1. Exploiting Kernel Sparsity and Entropy for Interpretable CNN Compression<sup class="footnote-ref"><a href="#fn1" id="fnref1">[1]</a></sup></h3>
+<ul>
+<li>
+<p>Institutes: Xiamen University, Peng Cheng Laboratory (Shenzhen, China), Beihang University, Huawei Noahs Ark Lab, University of Buffalo and BestImage of Tencent Technology (Shanghai)</p>
+</li>
+<li>
+<p>Notes</p>
+</li>
+</ul>
+<ol>
+<li>Investigate CNN compression from a novel interpretable perspective. Discover that importance of feature maps depend on sparsity and richness (using the proposed Kernel sparsity and Entropy metric);</li>
+</ol>
+<img src="2.1.png" width="400">
+<ol start="2">
+<li>Pruning in a feature-agnostic way, so that all layers can simultaneously be handled in parallel.</li>
+<li>Using Kernel Clustering to replace the common kernel pruning methods.</li>
+</ol>
+<ul>
+<li>Results<br>
+ResNet-50 4.7x FLOPs, 2.9x Size and a reduction of 0.35% Top-5 accuracy on ImageNet.</li>
+</ul>
+<h3 id="2-Towards-Optimal-Structured-CNN-Pruning-via-Generative-Adversarial-Learning">2. Towards Optimal Structured CNN Pruning via Generative Adversarial Learning<sup class="footnote-ref"><a href="#fn2" id="fnref2">[2]</a></sup></h3>
+<ul>
+<li>Institutes: Xiamen University, Beihang University, UCAS (China), BestImage of Tecent Technology (Shanghai), University of Buffalo (the same group as above)</li>
+<li>Notes</li>
+</ul>
+<ol>
+<li>Using GAN to guide filter pruning. Specifically, the <code>Generator</code> is used to generate pruned network, the <code>Discriminator</code> is used to judge whether the output is from the original network or the pruned network with the Objective function based on L<sub>1</sub>-regularization.</li>
+<li>Label free due to no need of label information.</li>
+<li>Using a soft mask to build a generator.<br>
+<img src="2.2.png" width="400"></li>
+</ol>
+<ul>
+<li>Results<br>
+ResNet-50 3.7x speedup and a reduction of 3.75% Top-5 accuracy on ImageNet. Not as good as the above one.</li>
+</ul>
+<h3 id="3-RePr-Improved-Training-of-Convolutional-Filters">3. RePr: Improved Training of Convolutional Filters<sup class="footnote-ref"><a href="#fn3" id="fnref3">[3]</a></sup></h3>
+<ul>
+<li>Institutes: Brandeis University, Microsoft Research</li>
+<li>Notes</li>
+</ul>
+<ol>
+<li>They discover that no matter the size of network, even those small under-parameterized networks, the network would always tend to learn redundant filters, which suggests that filter redundancy is not solely a result of over-parameterization, but is also due to ineffective training;</li>
+<li>So the method of the work is to first train a network with standard training, then select a subset of the model’s filters to be temporarily dropped, continue training. After that, reintroduce the previously dropped filters which are initialized with new weights and train with standard training again. Do this several times, the performance would be improved than common standard training.</li>
+</ol>
+<img src="2.3.png" width="400">
+<ol start="3">
+<li>
+<p>Therefore, the work also proposes a criterion to do filter selection (to select less useful filters).</p>
+</li>
+<li>
+<p>I think it’s like dropout, to some extent the strategy proposed introduce a form of regularization to gain more generality. But my doubt is why giving up less useful filters and then reintroducing helps improving training? Perhaps when we reintroduce the filters and initialize them with new weights, it can increase the capacity of the subset which has already been trained. The new weights give a new opportunity to train a better model, because we gave up them when they were not useful. From this perspective, the proposed algorithm also seeks for better solution by initializing the reintroduced weights to make sure they are orthogonal to their value before being dropped and the current value of non-pruned filters, thus ensuring small redundancy.</p>
+</li>
+</ol>
+<h3 id="4-Fully-Learnable-Group-Convolution-for-Acceleration-of-Deep-Neural-Networks-FLGC">4. Fully Learnable Group Convolution for Acceleration of Deep Neural Networks<sup class="footnote-ref"><a href="#fn4" id="fnref4">[4]</a></sup> (FLGC)</h3>
+<ul>
+<li>Institutes: CAS, UCAS</li>
+<li>Notes</li>
+</ul>
+<ol>
+<li>The <em>Introduction</em> section does a really good recall and conclusion in the network compression literature. It’s worth reading while the recall seems has nothing to do with the main algorithms proposed.</li>
+<li>The main point of the paper is to propose a new strategy of <code>Group Convolution</code>, which can be seen as an improvement of <strong>ShuffleNet</strong>. The difference is, for ShuffleNet, only the <em>filters</em> are not fixed (input channels connected to each filter are changed through channel shuffle, so it also means the filter is changed while the input channels are fixed) during group convolution, while for this paper, both <em>input channels</em> and <em>filters</em> are not fixed and each filter can connect to different number of input channels.<br>
+<img src="2.4.png" width="400"></li>
+</ol>
+<ul>
+<li>Results<br>
+<img src="2.5.png" width="400"></li>
+</ul>
+<h3 id="5-A-Main-Subsidiary-Network-Framework-for-Simplifing-Binary-Networks">5. A Main/Subsidiary Network Framework for Simplifing Binary Networks<sup class="footnote-ref"><a href="#fn5" id="fnref5">[5]</a></sup></h3>
+<ul>
+<li>Institutes: Zhejiang University, Harvard University, UC (University of California, San Diego), UESTC (China)</li>
+<li>Notes</li>
+</ul>
+<ol>
+<li>The authors prove that even for <code>Binary Network</code>, there exits redundancy.</li>
+<li>So they <strong>prune Binary Network directly</strong>.</li>
+</ol>
+<ul>
+<li>Results<br>
+For binary ResNet-18 on ImageNet, the authors use 78.6% filters but can achieve slightly better test error 49.87% (50.02%-0.15%) than the original model.</li>
+</ul>
+<h3 id="6-Binary-Ensemble-Neural-Network-More-Bits-per-Network-or-More-Networks-per-Bit">6. Binary Ensemble Neural Network: More Bits per Network or More Networks per Bit?<sup class="footnote-ref"><a href="#fn6" id="fnref6">[6]</a></sup></h3>
+<ul>
+<li>Institutes: UC San Diego, Harvard University (the same group as above)</li>
+<li>Notes</li>
+</ul>
+<ol>
+<li>They prove why the Binary network suffer from sever accuracy degradation, especially when the activations are also binarized, through extensive experiments on representation power, bias, variance, stability and robustness, and think that the degradation are not likely to be resolved by solely improving the optimization techniques.</li>
+<li>Error of BNNs are predominantly caused by <strong>Intrinsic Instability</strong> and <strong>Non-robustness</strong>. Therefore, they propose a <code>Binary Ensemble Neural Network</code> (BENN) to boost performance.</li>
+<li>BENN is faster and more robust than the state-of-art binary networks and sometimes even more accurate than the full-precision floating number of network.</li>
+</ol>
+<ul>
+<li>Results<br>
+<img src="2.6.png" width="400"></li>
+</ul>
+<h3 id="7-ESPNet-v2-A-light-weight-Power-Efficient-and-General-Purpose-Convolutional-Neural-Network">7. ESPNet v2: A light-weight, Power Efficient, and General Purpose Convolutional Neural Network<sup class="footnote-ref"><a href="#fn7" id="fnref7">[7]</a></sup></h3>
+<ul>
+<li>
+<p>Institutes: University of Washington, Allen Institute for AI, XNOR.AI</p>
+</li>
+<li>
+<p>Notes</p>
+</li>
+</ul>
+<ol>
+<li>Group point-wise and depth-wise dilated separable convolutions</li>
+<li>Based on ESPNet<sup class="footnote-ref"><a href="#fn8" id="fnref8">[8]</a></sup> and better than that.</li>
+</ol>
+<h3 id="8-Filter-Pruning-via-Geometric-Median-for-Deep-Convolutional-Neural-Networks-Acceleration-FPGM">8. Filter Pruning via Geometric Median for Deep Convolutional Neural Networks Acceleration<sup class="footnote-ref"><a href="#fn9" id="fnref9">[9]</a></sup> (FPGM)</h3>
+<ul>
+<li>Institutes: University of Technology Sydney, JD.com, CETC, Huawei, Baidu Research</li>
+<li>Notes</li>
+</ul>
+<ol>
+<li>The norm-based criterion utilized in previous works lead to limitations due to failure of two requirements: Low deviation and small minimum norm.</li>
+<li>Propose FPGM to prune filters regardless of the two requirements, by pruning replaceable filters containing redundant information.</li>
+<li>The theoretic basement may come from <em>Rethinking the smaller-norm-less-informative assumption in channel pruning of convolution layers. In ICLR, 2018.</em><sup class="footnote-ref"><a href="#fn10" id="fnref10">[10]</a></sup></li>
+</ol>
+<h3 id="9-MnasNet-Platform-Aware-Neural-Architecture-Search-for-Mobile">9. MnasNet: Platform-Aware Neural Architecture Search for Mobile<sup class="footnote-ref"><a href="#fn11" id="fnref11">[11]</a></sup></h3>
+<ul>
+<li>Institutes: Google Brain, Google Inc</li>
+<li>Notes</li>
+</ul>
+<ol>
+<li>Using Architecture search to find fast and high-performance CNN model.</li>
+<li>Unlike previous models using FLOPs which are often inaccurate to evaluate model’s latency, they directly measure the read-world latency by executing the model on real mobile devices.<br>
+<img src="2.7.png" width="400"></li>
+<li>Accomplish two trade-offs:
+<ul>
+<li>Accuracy &amp; Inference latency: Formulate the design problem as a multi-objective optimization problem considering the two things.</li>
+<li>Search space &amp; Layer diversity: Propose a novel factorized hierarchical search space (where each block in the stacked structure can be different, while layers in each block should be with the same structure)</li>
+</ul>
+</li>
+</ol>
+<ul>
+<li>Results (On ImageNet)<br>
+<img src="2.8.png" width="400"></li>
+</ul>
+<h3 id="10-HAQ-Hardware-Aware-Automated-Quantization-with-Mixed-Precision">10. HAQ: Hardware-Aware Automated Quantization with Mixed Precision<sup class="footnote-ref"><a href="#fn12" id="fnref12">[12]</a></sup></h3>
+<ul>
+<li>Institutes: MIT (Song Han)</li>
+<li>Notes</li>
+</ul>
+<ol>
+<li>Conventional quantization methods use the same number of bits for all layers, but as different layer have different redundancy and arithmetic behaviours (computation bounded or memory bounded), this strategy is sub-optimal and it’s necessary to use mixed precision for different layers.</li>
+<li>Because there are numerous possibilities of design polices (which determine the bitwidth of both weights and activations for each layer), the authors introduce the RL (Reinforcement Learning) agent to automatically determine the quantization policy, and take the hardware accelerator’s feedback in the design loop. So it is <em>Hardware-Aware</em> by considering latency, energy and storage on the target hardware directly instead of relying on proxy signals like FLOPs and model size.</li>
+</ol>
+<ul>
+<li>Results<br>
+Reduce latency by 1.4~1.95x and the energy consumption by 1.9x with negligible loss of accuracy compared with fixed bitwidth (8-bit) quantization.</li>
+</ul>
+<h2 id="ICLR-2019">ICLR 2019</h2>
+<h3 id="1-The-lottery-ticket-hypothesis-finding-sparse-trainable-neural-networks">1. The lottery ticket hypothesis: finding sparse, trainable neural networks<sup class="footnote-ref"><a href="#fn13" id="fnref13">[13]</a></sup></h3>
+<ul>
+<li>Institutes: MIT CSAIL</li>
+<li>Notes</li>
+</ul>
+<ol>
+<li>Find winning tickets (subnetworks) that then trained in isolation, they can reach test accuracy comparable to the original network.</li>
+<li>Worth reading and understanding more deeply.</li>
+</ol>
+<h3 id="2-An-empirical-study-of-binary-Neural-Networks’-optimization">2. An empirical study of binary Neural Networks’ optimization<sup class="footnote-ref"><a href="#fn14" id="fnref14">[14]</a></sup></h3>
+<ul>
+<li>Institutes: University of Oxford</li>
+<li>Notes</li>
+</ul>
+<ol>
+<li>The training process with Straight-Through-Estimator (STE) is not well-founded due to the discrepancy between the evaluated function in the forward path and the weight updates in the back-propagation, updates which do not correspond to gradients of the forward path.</li>
+<li>Normally training a BNN needs many ad-hoc techniques (STE, optimizer, etc). These are well analyzed through the corresponding experiments in this paper and understood whether they are necessary, so that better training process is guided for BNN.</li>
+</ol>
+<h3 id="3-Rethinking-the-value-of-Network-pruning">3. Rethinking the value of Network pruning<sup class="footnote-ref"><a href="#fn15" id="fnref15">[15]</a></sup></h3>
+<ul>
+<li>Institutes: UC Berkeley, Tsinghua University</li>
+<li>Notes</li>
+</ul>
+<ol>
+<li>An excellent work reconsidering the traditional way of network pruning (3-stage: Training-&gt;Pruning-&gt;Fine-tuning). Under this rethinking, many previous work seems not to be persuasive again due to the lack of theoretical support.</li>
+<li>What’s that? Previous work thinks that <em>A model with fewer filters can not be trained from scratch to achieve the performance of a large model that has been pruned to be roughly the same size</em>. Now, this paper points out that <strong>it actually can</strong>. The contradiction behind this might be explained by less carefully chosen hyper-parameters, data augmentation schemes and unfair computation budget for evaluating baseline approaches.</li>
+<li>It suggests that the value of automatic structured pruning algorithms sometimes lie in identifying efficient structures and performing implicit architecture search, rather than selecting “important” weights.</li>
+</ol>
+<h3 id="4-ProxylessNAS-Direct-Neural-Architecture-Search-on-Target-Task-and-Hardware">4. ProxylessNAS: Direct Neural Architecture Search on Target Task and Hardware<sup class="footnote-ref"><a href="#fn16" id="fnref16">[16]</a></sup></h3>
+<ul>
+<li>Institutes: MIT (Song Han)</li>
+<li>Notes</li>
+</ul>
+<ol>
+<li>What is Proxy-based NAS (Network Architecture Search)? NAS utilizing proxy tasks, such as training on a smaller dataset, or learning with only a few blocks, or training just for a few epochs.</li>
+<li>Why previous works are proxy-based? Because the prohibitive computational demand of conventional NAS algorithms makes it difficult to directly search the architecture on large-scale tasks. On the other hand, differentiable NAS can reduce GPU hours but also increase CPU memory consumption.</li>
+<li>The drawback of proxy-based NAS: They are not guaranteed to be optimal on the target task.</li>
+<li>How to solve the difficulties when using proxyless (directly optimizes neural network architectures on target task and hardware) NAS?<br>
+<img src="3.1.png" width="400">
+<ul>
+<li>To reduce GPU hours, the authors first directly train on an over-parameterized network that contains all candidates and gradually prune redundant paths.</li>
+<li>To reduce GPU memory consumption, the authors binarize network parameters, and train them via a gradient-based approach based on BinaryConnect<sup class="footnote-ref"><a href="#fn17" id="fnref17">[17]</a></sup></li>
+<li>To handle on non-differentiable hardware objective (e.g., latency), the authors model network latency as a continuous function and optimize it as regularization loss.</li>
+</ul>
+</li>
+</ol>
+<ul>
+<li>Results<br>
+With only 200 GPU hours, got same top-1 accuracy as <code>MobileNet v2 1.4</code>, while 1.8x faster.</li>
+</ul>
+<h3 id="5-Defensive-Quantization-When-Efficiency-meets-Robustness">5. Defensive Quantization: When Efficiency meets Robustness<sup class="footnote-ref"><a href="#fn18" id="fnref18">[18]</a></sup></h3>
+<ul>
+<li>Institutes: MIT (Song Han)</li>
+<li>Notes</li>
+</ul>
+<ol>
+<li>It is observed that the quantized model is more vulnerable to adversarial attacks (which consist of subtle perturbations on the input image to fool the network to make wrong decisions).</li>
+<li>The above fact is counter-intuitive because small perturbations should be denoised with low-bit representations. They analyzed that this issue is caused by the fact that error of one layer can be amplified significantly when passing through deep neural network.</li>
+<li>They find that when the magnitude of the noise is small, activation quantization is capable of reducing it while fails when the noise is greater than a certain threshold. Based on this, they propose Defensive Quantization (DQ) to control the Lipschitz constant of the network so that noise is kept within a small magnitude for all layers.</li>
+<li>DQ can also make quantization itself easier thanks to the constrained dynamic range.</li>
+</ol>
+<h2 id="ICML-2019">ICML 2019</h2>
+<h3 id="1-Collaborative-Channel-Pruning-for-Deep-Networks">1. Collaborative Channel Pruning for Deep Networks<sup class="footnote-ref"><a href="#fn19" id="fnref19">[19]</a></sup></h3>
+<ul>
+<li>Institutes: Tencent AI Lab, CAS, University of Texas at Arlington</li>
+<li>Notes</li>
+</ul>
+<ol>
+<li>OK, it unluckily can be categorized to the 3-stage network pruning methods discussed above.</li>
+<li>Investigate how the inter-channel relationship can be utilized to guide pruning.</li>
+</ol>
+<h3 id="2-EfficientNet-Rethinking-Model-Scaling-for-Convolutional-Neural-Network">2. EfficientNet: Rethinking Model Scaling for Convolutional Neural Network<sup class="footnote-ref"><a href="#fn20" id="fnref20">[20]</a></sup></h3>
+<ul>
+<li>Institutes: [Google Research, Brain Team, Mountain View, CA]</li>
+<li>Notes:</li>
+</ul>
+<ol>
+<li>It is critical to balance all dimensions of network width/depth/resolution. Therefore, they scale the three dimensions simultaneously.<br>
+The Intuition behind this is that if the input image is bigger, then the network needs more layers to increase the receptive field and more channels to capture more find-grained patterns on the bigger image.</li>
+<li>Architecture search + Scaling --&gt; EfficientNet, much better than the state-of-art.<br>
+<img src="4.1.png" width="400"></li>
+<li>There is also a similar network search paper: MNasNet, CVPR 2019</li>
+</ol>
+<h2 id="Others-in-2019">Others in 2019</h2>
+<h3 id="1-Searching-for-MobileNetV3">1. Searching for MobileNetV3<sup class="footnote-ref"><a href="#fn21" id="fnref21">[21]</a></sup></h3>
+<ul>
+<li>Institutes: Google AI, Google Brain</li>
+<li>Notes:<br>
+Network architecture search + Network design.</li>
+<li>Results (ImageNet):<br>
+<img src="5.1.png" width="400"></li>
+</ul>
+<hr class="footnotes-sep">
+<section class="footnotes">
+<ol class="footnotes-list">
+<li id="fn1" class="footnote-item"><p><a href="http://openaccess.thecvf.com/content_CVPR_2019/papers/Li_Exploiting_Kernel_Sparsity_and_Entropy_for_Interpretable_CNN_Compression_CVPR_2019_paper.pdf">Li, Yuchao, et al. “Exploiting Kernel Sparsity and Entropy for Interpretable CNN Compression.” Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition. 2019.</a> <a href="#fnref1" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn2" class="footnote-item"><p><a href="https://arxiv.org/abs/1903.09291">Lin, Shaohui, et al. “Towards Optimal Structured CNN Pruning via Generative Adversarial Learning.” arXiv preprint arXiv:1903.09291 (2019).</a> <a href="#fnref2" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn3" class="footnote-item"><p><a href="http://openaccess.thecvf.com/content_CVPR_2019/papers/Prakash_RePr_Improved_Training_of_Convolutional_Filters_CVPR_2019_paper.pdf">Prakash, Aaditya, et al. “RePr: Improved Training of Convolutional Filters.” Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition. 2019.</a> <a href="#fnref3" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn4" class="footnote-item"><p><a href="https://arxiv.org/abs/1904.00346">Wang, Xijun, et al. “Fully Learnable Group Convolution for Acceleration of Deep Neural Networks.” Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition. 2019.</a> <a href="#fnref4" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn5" class="footnote-item"><p><a href="https://arxiv.org/abs/1812.04210">Xu, Yinghao, et al. “A Main/Subsidiary Network Framework for Simplifying Binary Neural Networks.” Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition. 2019.</a> <a href="#fnref5" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn6" class="footnote-item"><p><a href="https://arxiv.org/abs/1806.07550">Zhu, Shilin, Xin Dong, and Hao Su. “Binary Ensemble Neural Network: More Bits per Network or More Networks per Bit?.” Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition. 2019.</a> <a href="#fnref6" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn7" class="footnote-item"><p><a href="https://arxiv.org/abs/1811.11431">Mehta, Sachin, et al. “ESPNetv2: A Light-weight, Power Efficient, and General Purpose Convolutional Neural Network.” arXiv preprint arXiv:1811.11431 (2018).</a> <a href="#fnref7" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn8" class="footnote-item"><p><a href="https://arxiv.org/abs/1804.00015">Watanabe, Shinji, et al. “Espnet: End-to-end speech processing toolkit.” arXiv preprint arXiv:1804.00015 (2018).</a> <a href="#fnref8" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn9" class="footnote-item"><p><a href="https://arxiv.org/abs/1811.00250">He, Yang, et al. “Filter pruning via geometric median for deep convolutional neural networks acceleration.” Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition. 2019.</a> <a href="#fnref9" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn10" class="footnote-item"><p><a href="https://arxiv.org/abs/1802.00124">Ye, Jianbo, et al. “Rethinking the smaller-norm-less-informative assumption in channel pruning of convolution layers.” arXiv preprint arXiv:1802.00124 (2018).</a> <a href="#fnref10" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn11" class="footnote-item"><p><a href="https://arxiv.org/abs/1807.11626">Tan, Mingxing, et al. “Mnasnet: Platform-aware neural architecture search for mobile.” Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition. 2019.</a> <a href="#fnref11" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn12" class="footnote-item"><p><a href="https://arxiv.org/abs/1811.08886">Wang, Kuan, et al. “HAQ: Hardware-Aware Automated Quantization with Mixed Precision.” Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition. 2019.</a> <a href="#fnref12" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn13" class="footnote-item"><p><a href="https://arxiv.org/abs/1803.03635">Frankle, Jonathan, and Michael Carbin. “The lottery ticket hypothesis: Finding sparse, trainable neural networks.” arXiv preprint arXiv:1803.03635 (2018).</a> <a href="#fnref13" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn14" class="footnote-item"><p><a href="https://openreview.net/pdf?id=rJfUCoR5KX">Milad Alizadeh and Javier Fernández-Marqués and Nicholas D. Lane and Yarin Gal. “An empirical study of binary Neural Networks’ optimization.” ICLR. 2019.</a> <a href="#fnref14" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn15" class="footnote-item"><p><a href="https://arxiv.org/abs/1810.05270">Liu, Zhuang, et al. “Rethinking the value of network pruning.” ICLR. (2019).</a> <a href="#fnref15" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn16" class="footnote-item"><p><a href="https://arxiv.org/abs/1812.00332">Cai, Han, Ligeng Zhu, and Song Han. “ProxylessNAS: Direct neural architecture search on target task and hardware.” arXiv preprint arXiv:1812.00332 (2018).</a> <a href="#fnref16" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn17" class="footnote-item"><p><a href="http://papers.nips.cc/paper/5647-binaryconnect-training-deep-neural-networks-with-binary-weights-during-propagations.pdf">Courbariaux, Matthieu, Yoshua Bengio, and Jean-Pierre David. “Binaryconnect: Training deep neural networks with binary weights during propagations.” Advances in neural information processing systems. 2015.</a> <a href="#fnref17" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn18" class="footnote-item"><p><a href="https://arxiv.org/abs/1904.08444">Lin, Ji, Chuang Gan, and Song Han. “Defensive quantization: When efficiency meets robustness.” arXiv preprint arXiv:1904.08444 (2019).</a> <a href="#fnref18" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn19" class="footnote-item"><p><a href="http://proceedings.mlr.press/v97/peng19c/peng19c.pdf">Hanyu Peng, Jiaxiang Wu, Shifeng Chen, Junzhou Huang ; Proceedings of the 36th International Conference on Machine Learning, PMLR 97:5113-5122, 2019.</a> <a href="#fnref19" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn20" class="footnote-item"><p><a href="http://proceedings.mlr.press/v97/tan19a/tan19a.pdf">Mingxing Tan, Quoc Le ; Proceedings of the 36th International Conference on Machine Learning, PMLR 97:6105-6114, 2019.</a> <a href="#fnref20" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn21" class="footnote-item"><p><a href="https://arxiv.org/abs/1905.02244">Howard, Andrew, et al. “Searching for mobilenetv3.” arXiv preprint arXiv:1905.02244 (2019).</a> <a href="#fnref21" class="footnote-backref">↩︎</a></p>
+</li>
+</ol>
+</section>
+]]></content>
+      <categories>
+        <category>Paper reading</category>
+      </categories>
+      <tags>
+        <tag>Network compression</tag>
+        <tag>CNN</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>RAG - Retrieval Augmented Generation</title>
+    <url>/blogs/2024/06/28/RAG-Retrieval-Augmented-Generation/</url>
+    <content><![CDATA[<p>Tutorial: https://www.youtube.com/watch?v=rhZgXNdhWDY<br>
+Paper: https://arxiv.org/abs/2005.11401</p>
+<span id="more"></span>
+<h2 id="Retrieval-Augmented-Generation-for-Knowledge-Intensive-NLP-Tasks">Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks</h2>
+<p><img src="/blogs/joplin_resources/11998ecbc4bb45d66b95964082d2d292.png" alt=""></p>
+<p>Motivation: for sequence to sequence generation models like LLaMa and ChatGPT, they cannot have the latest knowledge since they were trained with old data. To answer question regarding the new knowledge, the use can input some latext documents like wikipeadia as prompt and then ask a question. These documents are usually large, making the model slow.</p>
+<p>RAG is kind of method that combines the parametric memory and non-parametric memory to speed up the QA process.</p>
+<ul>
+<li>parametric memory<br>
+knowledge stored in the s2s model, which was the original model trained with old data.</li>
+<li>non-parametric memory<br>
+the retriver to be discussed, that are a separate model trained to have the new knowledge.</li>
+</ul>
+<h3 id="Inference">Inference</h3>
+<p>Given the retriever (including a query encoder and a document index/embedder), the process of QA is:</p>
+<p>The query x is encoded into q(x) by the query encoder, then find the top-K document embeddings d(z) which have the highest similarities to q(x). The document embedding is the output of the document encoder that encodes the document chunks z (like sentences or document segments). Then we find the associated document chunks z according to d(z) (they have one-by-one map of course), feed both x and z to the original s2s model and obtain the output.<br>
+Mathematically, we have:</p>
+<p><img src="/blogs/joplin_resources/4a320578bf21c80fe6258470d4e0f068.png" alt=""></p>
+<p>It reduces the generation time of the original s2s model since we only use K document segments, instead of the whole document, and x as the prompt.</p>
+<h3 id="Train">Train</h3>
+<p>We can train (fine-tune) both the retriever and the original s2s generator end-to-end, given data (x, y) where y is the annotations.</p>
+<p>From the tutorial, we can also train the retriever separately, for example using Sentence BERT with a shared BERT architecture for query encoder and document index, to make sure that semantically similar sentence tokens have outputs that have high similarity or short Euclidean distance.</p>
+<p><img src="/blogs/joplin_resources/e205d3ff6631186a6167ca1729cf471d.png" alt=""></p>
+]]></content>
+      <categories>
+        <category>Paper reading</category>
+      </categories>
+      <tags>
+        <tag>LLM</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Segment Anything Model (SAM)</title>
+    <url>/blogs/2024/06/27/Segment-Anything-Model-SAM/</url>
+    <content><![CDATA[<p>Tutorial: https://www.youtube.com/watch?v=eYhvJR4zFUM</p>
+<h2 id="Segment-Anything">Segment Anything</h2>
+<span id="more"></span>
+<p><img src="/blogs/joplin_resources/efb033aa848968287780a9ccf26bc3c8.png" alt=""></p>
+<p>The above figure show three most important characters of the model.</p>
+<ol>
+<li>The segmentation can be prompted by four types, point, bounding box, a coarse mask, and text.</li>
+<li>Use a heavy image encoder to ensure the high-quality feature representation, while use a lightweight decoder to do real-time interactive segmentations depending on users’ prompts.</li>
+<li>Like BLIP (but not exactly the same), after a first stage training (by using annotated data), finally the model is able to generate annotations (masks) for new images without human interference, hence creating a large scale dataset with 11 million images and 1+ billion masks and go back to train the model again. It should be noted that the initial annotations generated by the model will post-processed by techniques like NMS, threshold selection, etc. Based on that, I think it makes sense to use the generated annotations to back train the model.</li>
+</ol>
+<p><img src="/blogs/joplin_resources/9830305252a59939232efe53da249c1b.png" alt=""></p>
+<p>The model looks like this. It supports four types of prompts, therefore it has corresponding different prompt encoders to convert the prompts to tokens that can do cross-attention with the tokens from the image. The lightweight decoder will generate three mask tokens which then give three masks. The three masks deal with the problem of ambiguity from the prompts. For example, a point can associate with different objects that have the same point included.</p>
+<p><img src="/blogs/joplin_resources/1eef9054db0cc739034293a6167171f2.png" alt=""></p>
+<p>This is the details of the decoder. The output tokens (in code, they have 4 output tokens)  are actually the output of the first attention blcok (there are two attention blocks), which is firtly an initialized learnable tokens, then the second attention block use the output tokens to generate 3 masks and 1 IoU score.</p>
+]]></content>
+      <categories>
+        <category>Paper reading</category>
+      </categories>
+      <tags>
+        <tag>LVM</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>多模态学习相关工作1</title>
+    <url>/blogs/2024/06/27/%E5%A4%9A%E6%A8%A1%E6%80%81%E5%AD%A6%E4%B9%A0%E7%9B%B8%E5%85%B3%E5%B7%A5%E4%BD%9C1/</url>
+    <content><![CDATA[<h2 id="ViLT-Vision-and-Language-Transformer-Without-Convolution-or-Region-Supervision">ViLT: Vision-and-Language Transformer Without Convolution or Region Supervision</h2>
+<span id="more"></span>
+<p><img src="/blogs/joplin_resources/c2ad031cca6843543f322846438f7abb.png" alt=""></p>
+<p>The paper summarizes four types of vision-language learning frameworks. In computer vision, it is widely accepted that visual embedder or encoder is more important than text embedder, therefore having more computational complexity.<br>
+In a), earlier works use separate embedders with light textual embedder but heavier visual embedder, and the intreaction module is just to calculate similarities between two modalities.<br>
+In b), typical work is <strong>CLIP</strong>, where two embedders are both heavy but in the intreaction, they also compute the similarity to calculate contrastive loss.<br>
+In c), paper like <strong>ViLBERT and UNITER</strong> use this frame.<br>
+In d), this is waht <strong>ViLT</strong> proposes. Just like what ViT did, they think the image embedder can be just a simple patch tokenizer. The previous three frameworks is very time-consuming when dealing with images, but ViLT demonstrates that d) can speed up maganitudes of times and still get good results.</p>
+<h2 id="Align-before-Fuse-Vision-and-Language-Representation-Learning-with-Momentum-Distillation">Align before Fuse: Vision and Language Representation Learning with Momentum Distillation</h2>
+<p><img src="/blogs/joplin_resources/387d11d891035453e0efe065cfb38394.png" alt=""></p>
+<ul>
+<li>ITC loss (image-text contrastive loss): they propose to do contrastive learning before multimodal interaction, such that the features fed to intreaction are aligned to make interaction more effective. The loss is the same as that in CLIP.</li>
+<li>ITM loss (image-text matching loss): use the output of the multimodal encoder to generate the classifying logits for a binary classification problem, to check whether the image-text pair is positive or negative. Here, they use the similarity scores from ITC to mine the hard negative pairs.</li>
+<li>MLM loss (masked language modeling loss): just like BERT, the multimodal encoder will generate textual outputs/tokens and give probability in the masked place for predicting the masked word. But this time both textual and visual information are considered for MLM via the multimodal encoder.</li>
+</ul>
+<p>They also propose a momentum model for knowledge distillation for ITC and MLM losses. Like MoCov1, the moemtum model is updated based on the textual and visual embedders using the large momentum, then the moemntum model is used as a teacher model to generate similarities between images and texts as a second GT to guide ITC (it mean ITC considre both the one-hot GT and the outputs from teacher).</p>
+<p>Similarly, the probabilities generated using teacher model for MLM is also a second GT for MLM loss.</p>
+<h2 id="VLMo-Unified-Vision-Language-Pre-Training-with-Mixture-of-Modality-Experts">VLMo: Unified Vision-Language Pre-Training with Mixture-of-Modality-Experts</h2>
+<p><img src="/blogs/joplin_resources/e3c8299f643ae637868ce3d9baca8644.png" alt=""></p>
+<p>The motivation is in previous works the model cann’t do both single-modal and multi-modal tasks. For example, separately encode images and texts for retrieval tasks are singel-modal based.</p>
+<p><img src="/blogs/joplin_resources/427d1b2d3a482d0b5c48d9dfe9a8071a.png" alt=""></p>
+<p>They use a multi-stage traing method, to make full use of the single-modal data (unlabeled) and the image-text pairs data. As shown in the figure, in each stage, some parameters are frozen.</p>
+<p>So one advanntage of VLMo is that they use only one transformer architecture but separate light experts.</p>
+]]></content>
+      <categories>
+        <category>Paper reading</category>
+      </categories>
+      <tags>
+        <tag>Multimodal learning</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>多模态学习相关工作2</title>
+    <url>/blogs/2024/06/27/%E5%A4%9A%E6%A8%A1%E6%80%81%E5%AD%A6%E4%B9%A0%E7%9B%B8%E5%85%B3%E5%B7%A5%E4%BD%9C2/</url>
+    <content><![CDATA[<h2 id="BLIP-Bootstrapping-Language-Image-Pre-training-for-Unified-Vision-Language-Understanding-and-Generation">BLIP: Bootstrapping Language-Image Pre-training for Unified Vision-Language Understanding and Generation</h2>
+<span id="more"></span>
+<p>The paper has two main controbituions, one is to use a decoder to caption the image, this is what previous works didn’t do since they only use transformer encoders. The other is use the trained BLIP to augment datasets. Particularly, they generate synthesized captions, then use caption filters to filter out those wrong image-text pairs. Finally, they obtain a larger scale dataset and get back to train the model again.</p>
+<p><img src="/blogs/joplin_resources/c9be2378731b79df21daa89c3bab7aae.png" alt=""></p>
+<p>During training, they use three losses like ALBEF, but replace the MLM loss to LM (language modeling) loss to predict next word like in original Transformer. In addition, the parameters (the same color in the figure indicates the shared structure parameters) are shared when training with different losses. The causal self-att is actually using decoders.</p>
+<p><img src="/blogs/joplin_resources/0985c805775281b7dc2986410146d8e8.png" alt=""></p>
+<p>To augment data, here, {Ih, Th} are the created image-text pairs, and those green colors mean the corrected or filtered captions.</p>
+<p>BLIP can be used in my tasks including single modal-based ones and multi-modal-based ones like question answering, because they have single-modal encoders and modal interaction embedders, and also decoders.</p>
+<h2 id="CoCa-Contrastive-Captioners-are-Image-Text-Foundation-Models">CoCa: Contrastive Captioners are Image-Text Foundation Models</h2>
+<p>The drawbacks of BLIP and many other methods like VLMo, ALBEF are that they need to inference the language encoders as many times as the number of losses, because each losses may use different language inputs. For example, MLM need the words to be masked.</p>
+<p>Hence, CoCa proposes to only inference the encoder once during training.</p>
+<p align="center">
+  <img src="/blogs/joplin_resources/5543e2e85ba71d18b5d99b6207a472b2.png" width="40%">
+&nbsp; &nbsp; &nbsp; &nbsp;
+  <img src="/blogs/joplin_resources/f6499769e1bfab743b52ac687e2afb3b.png" width="55%">
+</p>
+<p>It has the ICT loss and ML loss, but the textual embedder is a transformer decoder where casual mask attention is used. The representation of text is from the last cls-token of the decoder which can see all the words in the text. The performance of CoCa is amazing!</p>
+<h2 id="BEiTv3-Image-as-a-Foreign-Language-BEiT-Pretraining-for-All-Vision-and-Vision-Language-Tasks">BEiTv3: Image as a Foreign Language: BEiT Pretraining for All Vision and Vision-Language Tasks</h2>
+<p><img src="/blogs/joplin_resources/f5b3c561af8b17a99990d6c7926cb0a2.png" alt=""></p>
+<p>The framework is even simpler. They treat image as language (Imaglish) and the shared self-attention blocks are trained only using masked data modeling loss. For language, the loss is MLM like in BERT/ALBEF/VLMo, for image, the loss is like in MAE, for multi-modal data, I guess is also to predict the language word/image patch based on multimodal input.</p>
+<p><img src="/blogs/joplin_resources/4b0686d5c19b686c6430c7c4b5e1ad05.png" alt=""></p>
+<p>They can tasks like listed above.  The performance beats that of CoCa.</p>
+]]></content>
+      <categories>
+        <category>Paper reading</category>
+      </categories>
+      <tags>
+        <tag>Multimodal learning</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>视频理解串讲-1</title>
+    <url>/blogs/2024/08/01/%E8%A7%86%E9%A2%91%E7%90%86%E8%A7%A3%E4%B8%B2%E8%AE%B2-1/</url>
+    <content><![CDATA[<p>Video: https://www.youtube.com/watch?v=gK7AGO6okhc</p>
+<p>视频理解在深度学习时代有过已下几大探索：<br>
+<img src="/blogs/joplin_resources/af77d0b37bef5a3bea77972618e9df7d.png" alt=""></p>
+<span id="more"></span>
+<h3 id="1-早期CNN-DeepVideo">1. 早期CNN - DeepVideo</h3>
+<p>对于早期CNN方法，代表是DeepVideo, 探索了很多我们早期可能会第一时间想到的各种可能，比如用2D CNN对每帧图像进行处理，结合early fusion, late fusion，slow fusion等等。<br>
+<img src="/blogs/joplin_resources/32a7cb5500314e537c955f080ce8f8f0.png" alt=""><br>
+答案就是效果不好。</p>
+<h3 id="2-双流网络">2. 双流网络</h3>
+<p>加上时序信息，能显著提升视频理解性能（主要是在动作识别这一任务上进行的探索）<br>
+<img src="/blogs/joplin_resources/73da16bf45d6e404b9326d0a69582bc3.png" alt=""></p>
+<p>The method is quite simple, first use some basic method to extract the optical flow for video which is then used as temporal information.<br>
+The first stream use 2D CNN to process single image frames, the input of which is a single image, and the network is a pretrained CNN on ImageNet.<br>
+The second stream use a sequence of optical flow frames (with a fixed number, e.g., 20), and train the network from scratch (because the number of input channels are now becoming 20 instead of 3).<br>
+Finally, the output of softmax from the two streams are averaged to give the final score.</p>
+<p>The performance is increased from like 60% to 80%, comparable with the performance of the best traditional handcrafted feature based methods. Typical datasets are UCF-101, and Sports-1M.</p>
+<h4 id="How-to-test">How to test?</h4>
+<p>Well, they sample a fixed number of frames from each test video, no matter how long the video is. Then they use corner crops and center crop for each video frame, plus flipping, getting 10 times bigger than the original sampled test data. For each 1 of the 10 versions of video, they use this two-stream network to get a score, and do averaging to get the final score.</p>
+<h4 id="Tips">Tips</h4>
+<ol>
+<li>They use mean subtraction to alleviate the camera motion.</li>
+<li>They use bidirectional optical flows (forward and backward, respectively).</li>
+</ol>
+<h4 id="Other-possible-tricks-also-appear-in-different-papers">Other possible tricks (also appear in different papers)</h4>
+<ol>
+<li>Combine space fusion and temporal fusion. Space fusion is implemented by simpling summation, concatenation, or stack-and-conv operations to fuse features from the two streams. For temporal fusion, we could use 3D conv, or pooling to fuse features from consecutive frames.</li>
+<li>Initialization of temporal network from pretrained 2D network on ImageNet. Since the number of input channels of the network is changed from 3 to 20, an effective way to initialize the network for the first layer is to firstly averaging the 3 channels’ corresponding parameters and repeat it 20 times.</li>
+<li>Partial BN, which only learn the BN parameters for the first BN, and keep the rest of the BNs frozen.</li>
+</ol>
+<h4 id="How-to-effectively-deal-with-long-videos">How to effectively deal with long videos?</h4>
+<h5 id="Future-work-1-Beyond-short-snippets">Future work 1: Beyond short snippets</h5>
+<p>It is a paper to solve the problem:<br>
+The initial idea would be using pooling to aggregate the information from multiple frames. So they have investigated like max pooling, average pooling, and Convolutional pooling.<br>
+Finally, they use <strong>LSTM</strong> to do the pooling. But the effect was not that good, it might because that the test videos like in UCF-101 are too short, repeatedly feedinding features of video frames that might be very similar with each other, can not fully utilize the advantage of LSTM.</p>
+<h5 id="Future-work-2-Temporal-Segment-Networks-TSN-Towards-Good-Practices-for-Deep-Action-Recognition">Future work 2: Temporal Segment Networks (TSN):Towards Good Practices for Deep Action Recognition.</h5>
+<p>This paper is quite straightforward but absolutely effective. 简单有效！ECCV 16.</p>
+<p><img src="/blogs/joplin_resources/a48581d5d261c8f6efa32aec7d6cec71.png" alt=""></p>
+<p>So they segment the long video into pieces. For each segment, they sample a frame, and a sequence of optical flow frames based on that frame, generating the space logits and temporal logits through a two-stream network. Then they aggregate all the space logits together, so called segmental consensus, by pooling, summation, or even LSTM to get the space-related score. Similarly, they aggregate the temporal logits to get a temporal-related score. Then they fuse the scores to get the final prediction.</p>
+<p>My comments (may not from the paper): For long video, it is possible to sparsely segment the video, or increase the length of each segment.</p>
+<p>The above is <strong>supervised learning</strong>. It can also do <strong>unsupervised contrastive learning</strong>, the work done by team of 朱毅 (the tutorial speaker)<br>
+Generally, they have three segments, and they extract a image frame and a sequence of optical flows from each segment, obtaining 3 image frames and the corresponding 3 optical flow sequences, being one sample of a pair. Then they repeat the process to obtain another 3 images and 3 optical flow sequences, being the other sample of the pair. So this pair can be regarded as a positive pair, because they are extracted from the same segment group. Similarly, they can extract a negative pair by using two different segment groups.</p>
+]]></content>
+      <categories>
+        <category>Paper reading</category>
+      </categories>
+      <tags>
+        <tag>Video understanding</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>视频理解串讲-2</title>
+    <url>/blogs/2024/08/01/%E8%A7%86%E9%A2%91%E7%90%86%E8%A7%A3%E4%B8%B2%E8%AE%B2-2/</url>
+    <content><![CDATA[<p>Video: https://www.youtube.com/watch?v=J2YC0-k57NM</p>
+<h3 id="C3D">C3D</h3>
+<p>3D convolution, easy to understand. Circumvent the use of optical flow, which is time-consuming. But 3D conv itself is also time-consuming with heavy computations.</p>
+<span id="more"></span>
+<h3 id="I3D">I3D</h3>
+<p>Inflated 3D Conv, the advantage is that it can be initialized from pretrained 2D CNNs, where the 2D kernels are inflated into 3D kernels, by copying the parameters T times and dividing it by T (T is the termporal dimension of the kernel).</p>
+<h3 id="Non-local">Non-local</h3>
+<p>It is similar to self-attention, can be formed in spatial space or temporalsptial space.</p>
+<h3 id="R-2-1-D">R(2+1)D</h3>
+<p>Factorize 3D conv into 2D in space and 1D in time.</p>
+<h3 id="SlowFast">SlowFast</h3>
+<p><img src="/blogs/joplin_resources/9f450a9be0cbf2ae169c342003e79a82.png" alt=""></p>
+<h3 id="TimesFormer">TimesFormer</h3>
+<p>Decompose the 3D attentions into 2D attentions in space dimensions and 1D attentions in time dimension.</p>
+<h3 id="Thoughts-about-how-to-do-long-video-understanding">Thoughts about how to do long video understanding</h3>
+<ol>
+<li>Transformer, Non-local to capture long-term dependencies.</li>
+<li>RNN like structures, like LSTM, Mamba, and TTT.</li>
+<li>Local-global attentions (MobileViT, Swin Transformer, etc.) to save computation.</li>
+<li>Use factorized/decomposed operators (like R(2+1)D, TimesFormer, etc.) to save computation.</li>
+<li>For the case the number of tokens is huge, then using techniques like sampling, or sliding window to do self-attention.</li>
+</ol>
+<p>Local-global attention is that we do self-attention in local tokens, and then select local representative tokens for global self-attention.</p>
+]]></content>
+      <categories>
+        <category>Paper reading</category>
+      </categories>
+      <tags>
+        <tag>Video understanding</tag>
+      </tags>
+  </entry>
+</search>
