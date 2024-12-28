@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/blogs/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/blogs/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/blogs/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/blogs/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/blogs/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha256-5eIC48iZUHmSlSUz9XtjRyK2mzQkHScZY1WdMaoz74E=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"zhuogege1943.com","root":"/blogs/","images":"/blogs/images","scheme":"Gemini","darkmode":true,"version":"8.21.1","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}}</script><script src="/blogs/js/config.js"></script>
+
+    <meta name="description" content="BLIP: Bootstrapping Language-Image Pre-training for Unified Vision-Language Understanding and Generation">
+<meta property="og:type" content="article">
+<meta property="og:title" content="多模态学习相关工作2">
+<meta property="og:url" content="https://zhuogege1943.com/blogs/2024/06/27/%E5%A4%9A%E6%A8%A1%E6%80%81%E5%AD%A6%E4%B9%A0%E7%9B%B8%E5%85%B3%E5%B7%A5%E4%BD%9C2/index.html">
+<meta property="og:site_name" content="Zhuo&#39;s Blog">
+<meta property="og:description" content="BLIP: Bootstrapping Language-Image Pre-training for Unified Vision-Language Understanding and Generation">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://zhuogege1943.com/blogs/joplin_resources/c9be2378731b79df21daa89c3bab7aae.png">
+<meta property="og:image" content="https://zhuogege1943.com/blogs/joplin_resources/0985c805775281b7dc2986410146d8e8.png">
+<meta property="og:image" content="https://zhuogege1943.com/blogs/joplin_resources/5543e2e85ba71d18b5d99b6207a472b2.png">
+<meta property="og:image" content="https://zhuogege1943.com/blogs/joplin_resources/f6499769e1bfab743b52ac687e2afb3b.png">
+<meta property="og:image" content="https://zhuogege1943.com/blogs/joplin_resources/f5b3c561af8b17a99990d6c7926cb0a2.png">
+<meta property="og:image" content="https://zhuogege1943.com/blogs/joplin_resources/4b0686d5c19b686c6430c7c4b5e1ad05.png">
+<meta property="article:published_time" content="2024-06-27T07:25:34.000Z">
+<meta property="article:modified_time" content="2024-12-28T18:45:22.239Z">
+<meta property="article:author" content="Zhuo ge ge">
+<meta property="article:tag" content="Multimodal learning">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://zhuogege1943.com/blogs/joplin_resources/c9be2378731b79df21daa89c3bab7aae.png">
+
+
+<link rel="canonical" href="https://zhuogege1943.com/blogs/2024/06/27/%E5%A4%9A%E6%A8%A1%E6%80%81%E5%AD%A6%E4%B9%A0%E7%9B%B8%E5%85%B3%E5%B7%A5%E4%BD%9C2/">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"en","comments":true,"permalink":"https://zhuogege1943.com/blogs/2024/06/27/%E5%A4%9A%E6%A8%A1%E6%80%81%E5%AD%A6%E4%B9%A0%E7%9B%B8%E5%85%B3%E5%B7%A5%E4%BD%9C2/","path":"2024/06/27/多模态学习相关工作2/","title":"多模态学习相关工作2"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>多模态学习相关工作2 | Zhuo's Blog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/blogs/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/blogs/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Zhuo's Blog</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="Search" role="button">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/blogs/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a></li><li class="menu-item menu-item-about"><a href="/blogs/about/" rel="section"><i class="fa fa-user fa-fw"></i>About</a></li><li class="menu-item menu-item-tags"><a href="/blogs/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a></li><li class="menu-item menu-item-categories"><a href="/blogs/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a></li><li class="menu-item menu-item-all-blogs"><a href="/blogs/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>All blogs</a></li>
+  </ul>
+</nav>
+
+
+
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#BLIP-Bootstrapping-Language-Image-Pre-training-for-Unified-Vision-Language-Understanding-and-Generation"><span class="nav-number">1.</span> <span class="nav-text">BLIP: Bootstrapping Language-Image Pre-training for Unified Vision-Language Understanding and Generation</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CoCa-Contrastive-Captioners-are-Image-Text-Foundation-Models"><span class="nav-number">2.</span> <span class="nav-text">CoCa: Contrastive Captioners are Image-Text Foundation Models</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#BEiTv3-Image-as-a-Foreign-Language-BEiT-Pretraining-for-All-Vision-and-Vision-Language-Tasks"><span class="nav-number">3.</span> <span class="nav-text">BEiTv3: Image as a Foreign Language: BEiT Pretraining for All Vision and Vision-Language Tasks</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Zhuo ge ge"
+      src="/blogs/images/dushen.png">
+  <p class="site-author-name" itemprop="name">Zhuo ge ge</p>
+  <div class="site-description" itemprop="description">Hi, nice to meet you</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/blogs/archives/">
+          <span class="site-state-item-count">20</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/blogs/categories/">
+        <span class="site-state-item-count">1</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/blogs/tags/">
+        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/hellozhuo" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;hellozhuo" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:zuike2013@outlook.com" title="E-Mail → mailto:zuike2013@outlook.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://zhuogege1943.com/blogs/2024/06/27/%E5%A4%9A%E6%A8%A1%E6%80%81%E5%AD%A6%E4%B9%A0%E7%9B%B8%E5%85%B3%E5%B7%A5%E4%BD%9C2/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/blogs/images/dushen.png">
+      <meta itemprop="name" content="Zhuo ge ge">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zhuo's Blog">
+      <meta itemprop="description" content="Hi, nice to meet you">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="多模态学习相关工作2 | Zhuo's Blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          多模态学习相关工作2
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2024-06-27 10:25:34" itemprop="dateCreated datePublished" datetime="2024-06-27T10:25:34+03:00">2024-06-27</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">Edited on</span>
+      <time title="Modified: 2024-12-28 20:45:22" itemprop="dateModified" datetime="2024-12-28T20:45:22+02:00">2024-12-28</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">In</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/blogs/categories/Paper-reading/" itemprop="url" rel="index"><span itemprop="name">Paper reading</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h2 id="BLIP-Bootstrapping-Language-Image-Pre-training-for-Unified-Vision-Language-Understanding-and-Generation">BLIP: Bootstrapping Language-Image Pre-training for Unified Vision-Language Understanding and Generation</h2>
+<span id="more"></span>
+<p>The paper has two main controbituions, one is to use a decoder to caption the image, this is what previous works didn’t do since they only use transformer encoders. The other is use the trained BLIP to augment datasets. Particularly, they generate synthesized captions, then use caption filters to filter out those wrong image-text pairs. Finally, they obtain a larger scale dataset and get back to train the model again.</p>
+<p><img src="/blogs/joplin_resources/c9be2378731b79df21daa89c3bab7aae.png" alt=""></p>
+<p>During training, they use three losses like ALBEF, but replace the MLM loss to LM (language modeling) loss to predict next word like in original Transformer. In addition, the parameters (the same color in the figure indicates the shared structure parameters) are shared when training with different losses. The causal self-att is actually using decoders.</p>
+<p><img src="/blogs/joplin_resources/0985c805775281b7dc2986410146d8e8.png" alt=""></p>
+<p>To augment data, here, {Ih, Th} are the created image-text pairs, and those green colors mean the corrected or filtered captions.</p>
+<p>BLIP can be used in my tasks including single modal-based ones and multi-modal-based ones like question answering, because they have single-modal encoders and modal interaction embedders, and also decoders.</p>
+<h2 id="CoCa-Contrastive-Captioners-are-Image-Text-Foundation-Models">CoCa: Contrastive Captioners are Image-Text Foundation Models</h2>
+<p>The drawbacks of BLIP and many other methods like VLMo, ALBEF are that they need to inference the language encoders as many times as the number of losses, because each losses may use different language inputs. For example, MLM need the words to be masked.</p>
+<p>Hence, CoCa proposes to only inference the encoder once during training.</p>
+<p align="center">
+  <img src="/blogs/joplin_resources/5543e2e85ba71d18b5d99b6207a472b2.png" width="40%">
+&nbsp; &nbsp; &nbsp; &nbsp;
+  <img src="/blogs/joplin_resources/f6499769e1bfab743b52ac687e2afb3b.png" width="55%">
+</p>
+<p>It has the ICT loss and ML loss, but the textual embedder is a transformer decoder where casual mask attention is used. The representation of text is from the last cls-token of the decoder which can see all the words in the text. The performance of CoCa is amazing!</p>
+<h2 id="BEiTv3-Image-as-a-Foreign-Language-BEiT-Pretraining-for-All-Vision-and-Vision-Language-Tasks">BEiTv3: Image as a Foreign Language: BEiT Pretraining for All Vision and Vision-Language Tasks</h2>
+<p><img src="/blogs/joplin_resources/f5b3c561af8b17a99990d6c7926cb0a2.png" alt=""></p>
+<p>The framework is even simpler. They treat image as language (Imaglish) and the shared self-attention blocks are trained only using masked data modeling loss. For language, the loss is MLM like in BERT/ALBEF/VLMo, for image, the loss is like in MAE, for multi-modal data, I guess is also to predict the language word/image patch based on multimodal input.</p>
+<p><img src="/blogs/joplin_resources/4b0686d5c19b686c6430c7c4b5e1ad05.png" alt=""></p>
+<p>They can tasks like listed above.  The performance beats that of CoCa.</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/blogs/tags/Multimodal-learning/" rel="tag"># Multimodal learning</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/blogs/2024/06/27/%E5%A4%9A%E6%A8%A1%E6%80%81%E5%AD%A6%E4%B9%A0%E7%9B%B8%E5%85%B3%E5%B7%A5%E4%BD%9C1/" rel="prev" title="多模态学习相关工作1">
+                  <i class="fa fa-angle-left"></i> 多模态学习相关工作1
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/blogs/2024/06/27/InstructGP-RLHF/" rel="next" title="InstructGP-RLHF">
+                  InstructGP-RLHF <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+    <div class="comments utterances-container"></div>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2024</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Zhuo ge ge</span>
+  </div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="Back to top">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/blogs/js/comments.js"></script><script src="/blogs/js/utils.js"></script><script src="/blogs/js/motion.js"></script><script src="/blogs/js/sidebar.js"></script><script src="/blogs/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"ams","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/blogs/js/third-party/math/mathjax.js"></script>
+
+
+<script class="next-config" data-name="utterances" type="application/json">{"enable":true,"repo":"hellozhuo/blogs","issue_term":"pathname","theme":"preferred-color-scheme"}</script>
+<script src="/blogs/js/third-party/comments/utterances.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/blogs/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/blogs/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/blogs/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/blogs/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/blogs/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha256-5eIC48iZUHmSlSUz9XtjRyK2mzQkHScZY1WdMaoz74E=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"zhuogege1943.com","root":"/blogs/","images":"/blogs/images","scheme":"Gemini","darkmode":true,"version":"8.21.1","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}}</script><script src="/blogs/js/config.js"></script>
+
+    <meta name="description" content="tutorial: https:&#x2F;&#x2F;www.youtube.com&#x2F;watch?v&#x3D;Mn_9W1nCFLo&amp;t&#x3D;27s LLaMA: Open and Efficient Foundation Language Models">
+<meta property="og:type" content="article">
+<meta property="og:title" content="LLaMA - Google released on Feb 2023">
+<meta property="og:url" content="https://zhuogege1943.com/blogs/2024/06/28/LLaMA-Google-released-on-Feb-2023/index.html">
+<meta property="og:site_name" content="Zhuo&#39;s Blog">
+<meta property="og:description" content="tutorial: https:&#x2F;&#x2F;www.youtube.com&#x2F;watch?v&#x3D;Mn_9W1nCFLo&amp;t&#x3D;27s LLaMA: Open and Efficient Foundation Language Models">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://zhuogege1943.com/blogs/joplin_resources/08eb4cd4872e73c9be305bcf153afdc0.png">
+<meta property="og:image" content="https://zhuogege1943.com/blogs/joplin_resources/244ed736a78e6b3b6d909e1f2a718b9f.png">
+<meta property="og:image" content="https://zhuogege1943.com/blogs/joplin_resources/97b7324cb7b6321d2f61645e459fd42e.png">
+<meta property="og:image" content="https://zhuogege1943.com/blogs/joplin_resources/00ba5684d55220456d1b2630d45b9a34.png">
+<meta property="article:published_time" content="2024-06-28T06:46:34.000Z">
+<meta property="article:modified_time" content="2024-12-28T18:41:15.304Z">
+<meta property="article:author" content="Zhuo ge ge">
+<meta property="article:tag" content="LLM">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://zhuogege1943.com/blogs/joplin_resources/08eb4cd4872e73c9be305bcf153afdc0.png">
+
+
+<link rel="canonical" href="https://zhuogege1943.com/blogs/2024/06/28/LLaMA-Google-released-on-Feb-2023/">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"en","comments":true,"permalink":"https://zhuogege1943.com/blogs/2024/06/28/LLaMA-Google-released-on-Feb-2023/","path":"2024/06/28/LLaMA-Google-released-on-Feb-2023/","title":"LLaMA - Google released on Feb 2023"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>LLaMA - Google released on Feb 2023 | Zhuo's Blog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/blogs/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/blogs/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Zhuo's Blog</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="Search" role="button">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/blogs/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a></li><li class="menu-item menu-item-about"><a href="/blogs/about/" rel="section"><i class="fa fa-user fa-fw"></i>About</a></li><li class="menu-item menu-item-tags"><a href="/blogs/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a></li><li class="menu-item menu-item-categories"><a href="/blogs/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a></li><li class="menu-item menu-item-all-blogs"><a href="/blogs/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>All blogs</a></li>
+  </ul>
+</nav>
+
+
+
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#LLaMA-Open-and-Efficient-Foundation-Language-Models"><span class="nav-number">1.</span> <span class="nav-text">LLaMA: Open and Efficient Foundation Language Models</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Zhuo ge ge"
+      src="/blogs/images/dushen.png">
+  <p class="site-author-name" itemprop="name">Zhuo ge ge</p>
+  <div class="site-description" itemprop="description">Hi, nice to meet you</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/blogs/archives/">
+          <span class="site-state-item-count">20</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/blogs/categories/">
+        <span class="site-state-item-count">1</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/blogs/tags/">
+        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/hellozhuo" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;hellozhuo" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:zuike2013@outlook.com" title="E-Mail → mailto:zuike2013@outlook.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://zhuogege1943.com/blogs/2024/06/28/LLaMA-Google-released-on-Feb-2023/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/blogs/images/dushen.png">
+      <meta itemprop="name" content="Zhuo ge ge">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zhuo's Blog">
+      <meta itemprop="description" content="Hi, nice to meet you">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="LLaMA - Google released on Feb 2023 | Zhuo's Blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          LLaMA - Google released on Feb 2023
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2024-06-28 09:46:34" itemprop="dateCreated datePublished" datetime="2024-06-28T09:46:34+03:00">2024-06-28</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">Edited on</span>
+      <time title="Modified: 2024-12-28 20:41:15" itemprop="dateModified" datetime="2024-12-28T20:41:15+02:00">2024-12-28</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">In</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/blogs/categories/Paper-reading/" itemprop="url" rel="index"><span itemprop="name">Paper reading</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>tutorial: https://www.youtube.com/watch?v=Mn_9W1nCFLo&amp;t=27s</p>
+<h2 id="LLaMA-Open-and-Efficient-Foundation-Language-Models">LLaMA: Open and Efficient Foundation Language Models</h2>
+<span id="more"></span>
+<p align="center">
+  <img src="/blogs/joplin_resources/08eb4cd4872e73c9be305bcf153afdc0.png" width="60%">
+</p>
+<p>This is the framework drawn by Umar from his video tutorial. There are several concepts from LLaMa.</p>
+<ul>
+<li>
+<p>Rotary positional embedding [1]<br>
+It was proposed by Jianlin Su et al. In the origninal method that uses absolute positional embeddings, the positional embeddings are added to the feature embeddings. In the methods using relative positional embeddings, the positional embeddings are also added to the dot product of Q and K. However, they think that they can integrate the relative distance of two tokens into the dot product, or generally the inner product of Q and K. Baased on that, they define a new inner product on the complex space where the relative distance or positions can be represented by a rotation operation.</p>
+</li>
+<li>
+<p>RMS Norm (Root Mean Square Normalization) [2]<br>
+It was suggested that the stability of the training is mostly attributed to the re-scaling of variance rather than the re-centering using means. Therefore, they only focus on variance and save the computation. The network will still achieve the same effect as Layer Norm.<br>
+<img src="/blogs/joplin_resources/244ed736a78e6b3b6d909e1f2a718b9f.png" alt=""></p>
+</li>
+<li>
+<p>KV Cache<br>
+<img src="/blogs/joplin_resources/97b7324cb7b6321d2f61645e459fd42e.png" alt=""></p>
+<p>In the task of next token prediction, for each iteration, we only care about the last output token since the previous tokens have already been predicted. But we calculate these tokens in every iteration repeatedly. To avoid that, for each iteration and suppose we have to predict token 3, then we append the token 3 from K to the K buffer, since token 1 and 2 are already there, and append the Token 3 from V to the V buffer, and after the attention layer calculation, we obtain the prediction of token 3.</p>
+</li>
+<li>
+<p>Multi-Query Attention  [3] and Grouped Multi-Query Attention [4]<br>
+As we have reduced the computation by KV cache, the bottleneck which affects the speed is now becoming the Memory access, according to the ratio of memory and arithmetic operations. So they only divide the Q into multi heads and use a single shared head for the case of K and V. But it will degrads the model slightly, so they use grouped meahcnism like grouped convolution. They are illustrated below.<br>
+<img src="/blogs/joplin_resources/00ba5684d55220456d1b2630d45b9a34.png" alt=""></p>
+</li>
+</ul>
+</br>
+</br>
+</br>
+</br>
+<p>[1] <a target="_blank" rel="noopener" href="https://arxiv.org/abs/2104.09864">RoFormer: Enhanced Transformer with Rotary Position Embedding</a></p>
+<p>[2] <a target="_blank" rel="noopener" href="https://arxiv.org/abs/1910.07467">Root Mean Square Normalization</a></p>
+<p>[3] <a target="_blank" rel="noopener" href="https://arxiv.org/abs/1911.02150">Fast Transformer Decoding: One Write-Head is All You Need</a></p>
+<p>[4] <a target="_blank" rel="noopener" href="https://arxiv.org/abs/2305.13245">GQA: Training Generalized Multi-Query Transformer Models from Multi-Head Checkpoints</a></p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/blogs/tags/LLM/" rel="tag"># LLM</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/blogs/2024/06/27/Segment-Anything-Model-SAM/" rel="prev" title="Segment Anything Model (SAM)">
+                  <i class="fa fa-angle-left"></i> Segment Anything Model (SAM)
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/blogs/2024/06/28/RAG-Retrieval-Augmented-Generation/" rel="next" title="RAG - Retrieval Augmented Generation">
+                  RAG - Retrieval Augmented Generation <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+    <div class="comments utterances-container"></div>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2024</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Zhuo ge ge</span>
+  </div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="Back to top">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/blogs/js/comments.js"></script><script src="/blogs/js/utils.js"></script><script src="/blogs/js/motion.js"></script><script src="/blogs/js/sidebar.js"></script><script src="/blogs/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"ams","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/blogs/js/third-party/math/mathjax.js"></script>
+
+
+<script class="next-config" data-name="utterances" type="application/json">{"enable":true,"repo":"hellozhuo/blogs","issue_term":"pathname","theme":"preferred-color-scheme"}</script>
+<script src="/blogs/js/third-party/comments/utterances.js"></script>
+
+</body>
+</html>

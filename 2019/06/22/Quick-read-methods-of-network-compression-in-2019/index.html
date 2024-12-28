@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width">
-<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.3.0">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 6.3.0">
 
   <link rel="apple-touch-icon" sizes="180x180" href="/blogs/images/apple-touch-icon-next.png">
   <link rel="icon" type="image/png" sizes="32x32" href="/blogs/images/favicon-32x32-next.png">
@@ -17,33 +18,33 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha256-5eIC48iZUHmSlSUz9XtjRyK2mzQkHScZY1WdMaoz74E=" crossorigin="anonymous">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
 
-<script class="next-config" data-name="main" type="application/json">{"hostname":"zhuogege1943.com","root":"/blogs/","images":"/blogs/images","scheme":"Muse","darkmode":false,"version":"8.21.1","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}}</script><script src="/blogs/js/config.js"></script>
+<script class="next-config" data-name="main" type="application/json">{"hostname":"zhuogege1943.com","root":"/blogs/","images":"/blogs/images","scheme":"Gemini","darkmode":true,"version":"8.21.1","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}}</script><script src="/blogs/js/config.js"></script>
 
-    <meta name="description" content="OverviewLet’s quickly go through the new models related to network compression published at CVPR 2019, ICLR 2019 and ICML 2019. Some works needs to be read and understood more carefully.">
+    <meta name="description" content="Overview Let’s quickly go through the new models related to network compression published at CVPR 2019, ICLR 2019 and ICML 2019. Some works needs to be read and understood more carefully.">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Quick read: methods of network compression in 2019">
 <meta property="og:url" content="https://zhuogege1943.com/blogs/2019/06/22/Quick-read-methods-of-network-compression-in-2019/index.html">
 <meta property="og:site_name" content="Zhuo&#39;s Blog">
-<meta property="og:description" content="OverviewLet’s quickly go through the new models related to network compression published at CVPR 2019, ICLR 2019 and ICML 2019. Some works needs to be read and understood more carefully.">
+<meta property="og:description" content="Overview Let’s quickly go through the new models related to network compression published at CVPR 2019, ICLR 2019 and ICML 2019. Some works needs to be read and understood more carefully.">
 <meta property="og:locale" content="en_US">
-<meta property="og:image" content="https://zhuogege1943.com/blogs/2019/06/22/Quick-read-methods-of-network-compression-in-2019/Quick-read-methods-of-network-compression-in-2019/2.1.png">
-<meta property="og:image" content="https://zhuogege1943.com/blogs/2019/06/22/Quick-read-methods-of-network-compression-in-2019/Quick-read-methods-of-network-compression-in-2019/2.2.png">
-<meta property="og:image" content="https://zhuogege1943.com/blogs/2019/06/22/Quick-read-methods-of-network-compression-in-2019/Quick-read-methods-of-network-compression-in-2019/2.3.png">
-<meta property="og:image" content="https://zhuogege1943.com/blogs/2019/06/22/Quick-read-methods-of-network-compression-in-2019/Quick-read-methods-of-network-compression-in-2019/2.4.png">
-<meta property="og:image" content="https://zhuogege1943.com/blogs/2019/06/22/Quick-read-methods-of-network-compression-in-2019/Quick-read-methods-of-network-compression-in-2019/2.5.png">
-<meta property="og:image" content="https://zhuogege1943.com/blogs/2019/06/22/Quick-read-methods-of-network-compression-in-2019/Quick-read-methods-of-network-compression-in-2019/2.6.png">
-<meta property="og:image" content="https://zhuogege1943.com/blogs/2019/06/22/Quick-read-methods-of-network-compression-in-2019/Quick-read-methods-of-network-compression-in-2019/2.7.png">
-<meta property="og:image" content="https://zhuogege1943.com/blogs/2019/06/22/Quick-read-methods-of-network-compression-in-2019/Quick-read-methods-of-network-compression-in-2019/2.8.png">
-<meta property="og:image" content="https://zhuogege1943.com/blogs/2019/06/22/Quick-read-methods-of-network-compression-in-2019/Quick-read-methods-of-network-compression-in-2019/3.1.png">
-<meta property="og:image" content="https://zhuogege1943.com/blogs/2019/06/22/Quick-read-methods-of-network-compression-in-2019/Quick-read-methods-of-network-compression-in-2019/4.1.png">
-<meta property="og:image" content="https://zhuogege1943.com/blogs/2019/06/22/Quick-read-methods-of-network-compression-in-2019/Quick-read-methods-of-network-compression-in-2019/5.1.png">
+<meta property="og:image" content="https://zhuogege1943.com/blogs/2019/06/22/Quick-read-methods-of-network-compression-in-2019/2.1.png">
+<meta property="og:image" content="https://zhuogege1943.com/blogs/2019/06/22/Quick-read-methods-of-network-compression-in-2019/2.2.png">
+<meta property="og:image" content="https://zhuogege1943.com/blogs/2019/06/22/Quick-read-methods-of-network-compression-in-2019/2.3.png">
+<meta property="og:image" content="https://zhuogege1943.com/blogs/2019/06/22/Quick-read-methods-of-network-compression-in-2019/2.4.png">
+<meta property="og:image" content="https://zhuogege1943.com/blogs/2019/06/22/Quick-read-methods-of-network-compression-in-2019/2.5.png">
+<meta property="og:image" content="https://zhuogege1943.com/blogs/2019/06/22/Quick-read-methods-of-network-compression-in-2019/2.6.png">
+<meta property="og:image" content="https://zhuogege1943.com/blogs/2019/06/22/Quick-read-methods-of-network-compression-in-2019/2.7.png">
+<meta property="og:image" content="https://zhuogege1943.com/blogs/2019/06/22/Quick-read-methods-of-network-compression-in-2019/2.8.png">
+<meta property="og:image" content="https://zhuogege1943.com/blogs/2019/06/22/Quick-read-methods-of-network-compression-in-2019/3.1.png">
+<meta property="og:image" content="https://zhuogege1943.com/blogs/2019/06/22/Quick-read-methods-of-network-compression-in-2019/4.1.png">
+<meta property="og:image" content="https://zhuogege1943.com/blogs/2019/06/22/Quick-read-methods-of-network-compression-in-2019/5.1.png">
 <meta property="article:published_time" content="2019-06-22T07:01:33.000Z">
-<meta property="article:modified_time" content="2024-12-27T21:56:34.790Z">
+<meta property="article:modified_time" content="2024-12-28T18:07:00.758Z">
 <meta property="article:author" content="Zhuo ge ge">
 <meta property="article:tag" content="Network compression">
 <meta property="article:tag" content="CNN">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://zhuogege1943.com/blogs/2019/06/22/Quick-read-methods-of-network-compression-in-2019/Quick-read-methods-of-network-compression-in-2019/2.1.png">
+<meta name="twitter:image" content="https://zhuogege1943.com/blogs/2019/06/22/Quick-read-methods-of-network-compression-in-2019/2.1.png">
 
 
 <link rel="canonical" href="https://zhuogege1943.com/blogs/2019/06/22/Quick-read-methods-of-network-compression-in-2019/">
@@ -124,7 +125,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Overview"><span class="nav-number">1.</span> <span class="nav-text">Overview</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CVPR-2019"><span class="nav-number">2.</span> <span class="nav-text">CVPR 2019</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-Exploiting-Kernel-Sparsity-and-Entropy-for-Interpretable-CNN-Compression-KSE"><span class="nav-number">2.1.</span> <span class="nav-text">1. Exploiting Kernel Sparsity and Entropy for Interpretable CNN Compression[^KSE]</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-Towards-Optimal-Structured-CNN-Pruning-via-Generative-Adversarial-Learning-GAN-prune"><span class="nav-number">2.2.</span> <span class="nav-text">2. Towards Optimal Structured CNN Pruning via Generative Adversarial Learning[^GAN-prune]</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-RePr-Improved-Training-of-Convolutional-Filters-RePr"><span class="nav-number">2.3.</span> <span class="nav-text">3. RePr: Improved Training of Convolutional Filters[^RePr]</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-Fully-Learnable-Group-Convolution-for-Acceleration-of-Deep-Neural-Networks-FLGC-FLGC"><span class="nav-number">2.4.</span> <span class="nav-text">4. Fully Learnable Group Convolution for Acceleration of Deep Neural Networks[^FLGC] (FLGC)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-A-Main-Subsidiary-Network-Framework-for-Simplifing-Binary-Networks-Prune-Binary"><span class="nav-number">2.5.</span> <span class="nav-text">5. A Main&#x2F;Subsidiary Network Framework for Simplifing Binary Networks[^Prune-Binary]</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-Binary-Ensemble-Neural-Network-More-Bits-per-Network-or-More-Networks-per-Bit-Ensemble"><span class="nav-number">2.6.</span> <span class="nav-text">6. Binary Ensemble Neural Network: More Bits per Network or More Networks per Bit?[^Ensemble]</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-ESPNet-v2-A-light-weight-Power-Efficient-and-General-Purpose-Convolutional-Neural-Network-ESPNetV2"><span class="nav-number">2.7.</span> <span class="nav-text">7. ESPNet v2: A light-weight, Power Efficient, and General Purpose Convolutional Neural Network[^ESPNetV2]</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#8-Filter-Pruning-via-Geometric-Median-for-Deep-Convolutional-Neural-Networks-Acceleration-FPGM-FPGM"><span class="nav-number">2.8.</span> <span class="nav-text">8. Filter Pruning via Geometric Median for Deep Convolutional Neural Networks Acceleration[^FPGM] (FPGM)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#9-MnasNet-Platform-Aware-Neural-Architecture-Search-for-Mobile-MnasNet"><span class="nav-number">2.9.</span> <span class="nav-text">9. MnasNet: Platform-Aware Neural Architecture Search for Mobile[^MnasNet]</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#10-HAQ-Hardware-Aware-Automated-Quantization-with-Mixed-Precision-HAQ"><span class="nav-number">2.10.</span> <span class="nav-text">10. HAQ: Hardware-Aware Automated Quantization with Mixed Precision[^HAQ]</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ICLR-2019"><span class="nav-number">3.</span> <span class="nav-text">ICLR 2019</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-The-lottery-ticket-hypothesis-finding-sparse-trainable-neural-networks-Lottery"><span class="nav-number">3.1.</span> <span class="nav-text">1. The lottery ticket hypothesis: finding sparse, trainable neural networks[^Lottery]</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-An-empirical-study-of-binary-Neural-Networks%E2%80%99-optimization-Empirical-study"><span class="nav-number">3.2.</span> <span class="nav-text">2. An empirical study of binary Neural Networks’ optimization[^Empirical-study]</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-Rethinking-the-value-of-Network-pruning-Rethinking-prune"><span class="nav-number">3.3.</span> <span class="nav-text">3. Rethinking the value of Network pruning[^Rethinking-prune]</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-ProxylessNAS-Direct-Neural-Architecture-Search-on-Target-Task-and-Hardware-ProxylessNAS"><span class="nav-number">3.4.</span> <span class="nav-text">4. ProxylessNAS: Direct Neural Architecture Search on Target Task and Hardware[^ProxylessNAS]</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-Defensive-Quantization-When-Efficiency-meets-Robustness-DQ"><span class="nav-number">3.5.</span> <span class="nav-text">5. Defensive Quantization: When Efficiency meets Robustness[^DQ]</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ICML-2019"><span class="nav-number">4.</span> <span class="nav-text">ICML 2019</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-Collaborative-Channel-Pruning-for-Deep-Networks-Coll-channel"><span class="nav-number">4.1.</span> <span class="nav-text">1. Collaborative Channel Pruning for Deep Networks[^Coll-channel]</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-EfficientNet-Rethinking-Model-Scaling-for-Convolutional-Neural-Network-EfficientNet"><span class="nav-number">4.2.</span> <span class="nav-text">2. EfficientNet: Rethinking Model Scaling for Convolutional Neural Network[^EfficientNet]</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Others-in-2019"><span class="nav-number">5.</span> <span class="nav-text">Others in 2019</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-Searching-for-MobileNetV3-MobileNetV3"><span class="nav-number">5.1.</span> <span class="nav-text">1. Searching for MobileNetV3[^MobileNetV3]</span></a></li></ol></li></ol></div>
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Overview"><span class="nav-number">1.</span> <span class="nav-text">Overview</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CVPR-2019"><span class="nav-number">2.</span> <span class="nav-text">CVPR 2019</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-Exploiting-Kernel-Sparsity-and-Entropy-for-Interpretable-CNN-Compression"><span class="nav-number">2.1.</span> <span class="nav-text">1. Exploiting Kernel Sparsity and Entropy for Interpretable CNN Compression[1]</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-Towards-Optimal-Structured-CNN-Pruning-via-Generative-Adversarial-Learning"><span class="nav-number">2.2.</span> <span class="nav-text">2. Towards Optimal Structured CNN Pruning via Generative Adversarial Learning[2]</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-RePr-Improved-Training-of-Convolutional-Filters"><span class="nav-number">2.3.</span> <span class="nav-text">3. RePr: Improved Training of Convolutional Filters[3]</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-Fully-Learnable-Group-Convolution-for-Acceleration-of-Deep-Neural-Networks-FLGC"><span class="nav-number">2.4.</span> <span class="nav-text">4. Fully Learnable Group Convolution for Acceleration of Deep Neural Networks[4] (FLGC)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-A-Main-Subsidiary-Network-Framework-for-Simplifing-Binary-Networks"><span class="nav-number">2.5.</span> <span class="nav-text">5. A Main&#x2F;Subsidiary Network Framework for Simplifing Binary Networks[5]</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-Binary-Ensemble-Neural-Network-More-Bits-per-Network-or-More-Networks-per-Bit"><span class="nav-number">2.6.</span> <span class="nav-text">6. Binary Ensemble Neural Network: More Bits per Network or More Networks per Bit?[6]</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-ESPNet-v2-A-light-weight-Power-Efficient-and-General-Purpose-Convolutional-Neural-Network"><span class="nav-number">2.7.</span> <span class="nav-text">7. ESPNet v2: A light-weight, Power Efficient, and General Purpose Convolutional Neural Network[7]</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#8-Filter-Pruning-via-Geometric-Median-for-Deep-Convolutional-Neural-Networks-Acceleration-FPGM"><span class="nav-number">2.8.</span> <span class="nav-text">8. Filter Pruning via Geometric Median for Deep Convolutional Neural Networks Acceleration[9] (FPGM)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#9-MnasNet-Platform-Aware-Neural-Architecture-Search-for-Mobile"><span class="nav-number">2.9.</span> <span class="nav-text">9. MnasNet: Platform-Aware Neural Architecture Search for Mobile[11]</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#10-HAQ-Hardware-Aware-Automated-Quantization-with-Mixed-Precision"><span class="nav-number">2.10.</span> <span class="nav-text">10. HAQ: Hardware-Aware Automated Quantization with Mixed Precision[12]</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ICLR-2019"><span class="nav-number">3.</span> <span class="nav-text">ICLR 2019</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-The-lottery-ticket-hypothesis-finding-sparse-trainable-neural-networks"><span class="nav-number">3.1.</span> <span class="nav-text">1. The lottery ticket hypothesis: finding sparse, trainable neural networks[13]</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-An-empirical-study-of-binary-Neural-Networks%E2%80%99-optimization"><span class="nav-number">3.2.</span> <span class="nav-text">2. An empirical study of binary Neural Networks’ optimization[14]</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-Rethinking-the-value-of-Network-pruning"><span class="nav-number">3.3.</span> <span class="nav-text">3. Rethinking the value of Network pruning[15]</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-ProxylessNAS-Direct-Neural-Architecture-Search-on-Target-Task-and-Hardware"><span class="nav-number">3.4.</span> <span class="nav-text">4. ProxylessNAS: Direct Neural Architecture Search on Target Task and Hardware[16]</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-Defensive-Quantization-When-Efficiency-meets-Robustness"><span class="nav-number">3.5.</span> <span class="nav-text">5. Defensive Quantization: When Efficiency meets Robustness[18]</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ICML-2019"><span class="nav-number">4.</span> <span class="nav-text">ICML 2019</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-Collaborative-Channel-Pruning-for-Deep-Networks"><span class="nav-number">4.1.</span> <span class="nav-text">1. Collaborative Channel Pruning for Deep Networks[19]</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-EfficientNet-Rethinking-Model-Scaling-for-Convolutional-Neural-Network"><span class="nav-number">4.2.</span> <span class="nav-text">2. EfficientNet: Rethinking Model Scaling for Convolutional Neural Network[20]</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Others-in-2019"><span class="nav-number">5.</span> <span class="nav-text">Others in 2019</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-Searching-for-MobileNetV3"><span class="nav-number">5.1.</span> <span class="nav-text">1. Searching for MobileNetV3[21]</span></a></li></ol></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -139,7 +140,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/blogs/archives/">
-          <span class="site-state-item-count">4</span>
+          <span class="site-state-item-count">20</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>
@@ -150,7 +151,7 @@
       </div>
       <div class="site-state-item site-state-tags">
           <a href="/blogs/tags/">
-        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-count">11</span>
         <span class="site-state-item-name">tags</span></a>
       </div>
   </nav>
@@ -161,9 +162,6 @@
       </span>
       <span class="links-of-author-item">
         <a href="mailto:zuike2013@outlook.com" title="E-Mail → mailto:zuike2013@outlook.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
-      </span>
-      <span class="links-of-author-item">
-        <a href="https://zhuogege1943.com/" title="Zhuo&#39;s personal homepage → https:&#x2F;&#x2F;zhuogege1943.com" rel="noopener me" target="_blank"><i class="fas fa-home fa-fw"></i>Zhuo's personal homepage</a>
       </span>
   </div>
 
@@ -224,7 +222,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">Edited on</span>
-      <time title="Modified: 2024-12-27 23:56:34" itemprop="dateModified" datetime="2024-12-27T23:56:34+02:00">2024-12-27</time>
+      <time title="Modified: 2024-12-28 20:07:00" itemprop="dateModified" datetime="2024-12-28T20:07:00+02:00">2024-12-28</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -245,41 +243,49 @@
     
     
     
-    <div class="post-body" itemprop="articleBody"><h2 id="Overview"><a href="#Overview" class="headerlink" title="Overview"></a>Overview</h2><p>Let’s quickly go through the new models related to network compression published at <em>CVPR 2019</em>, <em>ICLR 2019</em> and <em>ICML 2019</em>. Some works needs to be read and understood more carefully.</p>
+    <div class="post-body" itemprop="articleBody"><h2 id="Overview">Overview</h2>
+<p>Let’s quickly go through the new models related to network compression published at <em>CVPR 2019</em>, <em>ICLR 2019</em> and <em>ICML 2019</em>. Some works needs to be read and understood more carefully.</p>
 <span id="more"></span>
-
-<h2 id="CVPR-2019"><a href="#CVPR-2019" class="headerlink" title="CVPR 2019"></a>CVPR 2019</h2><p>CVPR is more kind of tending to solve problems in practical applications, while ICLR and ICML are more close to theoretical explanations. </p>
-<h3 id="1-Exploiting-Kernel-Sparsity-and-Entropy-for-Interpretable-CNN-Compression-KSE"><a href="#1-Exploiting-Kernel-Sparsity-and-Entropy-for-Interpretable-CNN-Compression-KSE" class="headerlink" title="1. Exploiting Kernel Sparsity and Entropy for Interpretable CNN Compression[^KSE]"></a>1. Exploiting Kernel Sparsity and Entropy for Interpretable CNN Compression[^KSE]</h3><ul>
-<li><p>Institutes: Xiamen University, Peng Cheng Laboratory (Shenzhen, China), Beihang University, Huawei Noahs Ark Lab, University of Buffalo and BestImage of Tencent Technology (Shanghai)</p>
+<h2 id="CVPR-2019">CVPR 2019</h2>
+<p>CVPR is more kind of tending to solve problems in practical applications, while ICLR and ICML are more close to theoretical explanations.</p>
+<h3 id="1-Exploiting-Kernel-Sparsity-and-Entropy-for-Interpretable-CNN-Compression">1. Exploiting Kernel Sparsity and Entropy for Interpretable CNN Compression<sup class="footnote-ref"><a href="#fn1" id="fnref1">[1]</a></sup></h3>
+<ul>
+<li>
+<p>Institutes: Xiamen University, Peng Cheng Laboratory (Shenzhen, China), Beihang University, Huawei Noahs Ark Lab, University of Buffalo and BestImage of Tencent Technology (Shanghai)</p>
 </li>
-<li><p>Notes</p>
+<li>
+<p>Notes</p>
 </li>
 </ul>
 <ol>
 <li>Investigate CNN compression from a novel interpretable perspective. Discover that importance of feature maps depend on sparsity and richness (using the proposed Kernel sparsity and Entropy metric);</li>
 </ol>
-<img src="Quick-read-methods-of-network-compression-in-2019/2.1.png" width="400">
-
+<img src="2.1.png" width="400">
 <ol start="2">
-<li>Pruning in a feature-agnostic way, so that all layers can simultaneously be handled in parallel. </li>
+<li>Pruning in a feature-agnostic way, so that all layers can simultaneously be handled in parallel.</li>
 <li>Using Kernel Clustering to replace the common kernel pruning methods.</li>
 </ol>
 <ul>
-<li>Results<br>ResNet-50 4.7x FLOPs, 2.9x Size and a reduction of 0.35% Top-5 accuracy on ImageNet.</li>
+<li>Results<br>
+ResNet-50 4.7x FLOPs, 2.9x Size and a reduction of 0.35% Top-5 accuracy on ImageNet.</li>
 </ul>
-<h3 id="2-Towards-Optimal-Structured-CNN-Pruning-via-Generative-Adversarial-Learning-GAN-prune"><a href="#2-Towards-Optimal-Structured-CNN-Pruning-via-Generative-Adversarial-Learning-GAN-prune" class="headerlink" title="2. Towards Optimal Structured CNN Pruning via Generative Adversarial Learning[^GAN-prune]"></a>2. Towards Optimal Structured CNN Pruning via Generative Adversarial Learning[^GAN-prune]</h3><ul>
+<h3 id="2-Towards-Optimal-Structured-CNN-Pruning-via-Generative-Adversarial-Learning">2. Towards Optimal Structured CNN Pruning via Generative Adversarial Learning<sup class="footnote-ref"><a href="#fn2" id="fnref2">[2]</a></sup></h3>
+<ul>
 <li>Institutes: Xiamen University, Beihang University, UCAS (China), BestImage of Tecent Technology (Shanghai), University of Buffalo (the same group as above)</li>
 <li>Notes</li>
 </ul>
 <ol>
-<li>Using GAN to guide filter pruning. Specifically, the <code>Generator</code> is used to generate pruned network, the <code>Discriminator</code> is used to judge whether the output is from the original network or the pruned network with the Objective function based on L<sub>1</sub>-regularization. </li>
-<li>Label free due to no need of label information. </li>
-<li>Using a soft mask to build a generator. <img src="Quick-read-methods-of-network-compression-in-2019/2.2.png" width="400"></li>
+<li>Using GAN to guide filter pruning. Specifically, the <code>Generator</code> is used to generate pruned network, the <code>Discriminator</code> is used to judge whether the output is from the original network or the pruned network with the Objective function based on L<sub>1</sub>-regularization.</li>
+<li>Label free due to no need of label information.</li>
+<li>Using a soft mask to build a generator.<br>
+<img src="2.2.png" width="400"></li>
 </ol>
 <ul>
-<li>Results<br>ResNet-50 3.7x speedup and a reduction of 3.75% Top-5 accuracy on ImageNet. Not as good as the above one.</li>
+<li>Results<br>
+ResNet-50 3.7x speedup and a reduction of 3.75% Top-5 accuracy on ImageNet. Not as good as the above one.</li>
 </ul>
-<h3 id="3-RePr-Improved-Training-of-Convolutional-Filters-RePr"><a href="#3-RePr-Improved-Training-of-Convolutional-Filters-RePr" class="headerlink" title="3. RePr: Improved Training of Convolutional Filters[^RePr]"></a>3. RePr: Improved Training of Convolutional Filters[^RePr]</h3><ul>
+<h3 id="3-RePr-Improved-Training-of-Convolutional-Filters">3. RePr: Improved Training of Convolutional Filters<sup class="footnote-ref"><a href="#fn3" id="fnref3">[3]</a></sup></h3>
+<ul>
 <li>Institutes: Brandeis University, Microsoft Research</li>
 <li>Notes</li>
 </ul>
@@ -287,136 +293,165 @@
 <li>They discover that no matter the size of network, even those small under-parameterized networks, the network would always tend to learn redundant filters, which suggests that filter redundancy is not solely a result of over-parameterization, but is also due to ineffective training;</li>
 <li>So the method of the work is to first train a network with standard training, then select a subset of the model’s filters to be temporarily dropped, continue training. After that, reintroduce the previously dropped filters which are initialized with new weights and train with standard training again. Do this several times, the performance would be improved than common standard training.</li>
 </ol>
-<img src="Quick-read-methods-of-network-compression-in-2019/2.3.png" width="400">
-
+<img src="2.3.png" width="400">
 <ol start="3">
-<li><p>Therefore, the work also proposes a criterion to do filter selection (to select less useful filters).</p>
+<li>
+<p>Therefore, the work also proposes a criterion to do filter selection (to select less useful filters).</p>
 </li>
-<li><p>I think it’s like dropout, to some extent the strategy proposed introduce a form of regularization to gain more generality. But my doubt is why giving up less useful filters and then reintroducing helps improving training? Perhaps when we reintroduce the filters and initialize them with new weights, it can increase the capacity of the subset which has already been trained. The new weights give a new opportunity to train a better model, because we gave up them when they were not useful. From this perspective, the proposed algorithm also seeks for better solution by initializing the reintroduced weights to make sure they are orthogonal to their value before being dropped and the current value of non-pruned filters, thus ensuring small redundancy.</p>
+<li>
+<p>I think it’s like dropout, to some extent the strategy proposed introduce a form of regularization to gain more generality. But my doubt is why giving up less useful filters and then reintroducing helps improving training? Perhaps when we reintroduce the filters and initialize them with new weights, it can increase the capacity of the subset which has already been trained. The new weights give a new opportunity to train a better model, because we gave up them when they were not useful. From this perspective, the proposed algorithm also seeks for better solution by initializing the reintroduced weights to make sure they are orthogonal to their value before being dropped and the current value of non-pruned filters, thus ensuring small redundancy.</p>
 </li>
 </ol>
-<h3 id="4-Fully-Learnable-Group-Convolution-for-Acceleration-of-Deep-Neural-Networks-FLGC-FLGC"><a href="#4-Fully-Learnable-Group-Convolution-for-Acceleration-of-Deep-Neural-Networks-FLGC-FLGC" class="headerlink" title="4. Fully Learnable Group Convolution for Acceleration of Deep Neural Networks[^FLGC] (FLGC)"></a>4. Fully Learnable Group Convolution for Acceleration of Deep Neural Networks[^FLGC] (FLGC)</h3><ul>
+<h3 id="4-Fully-Learnable-Group-Convolution-for-Acceleration-of-Deep-Neural-Networks-FLGC">4. Fully Learnable Group Convolution for Acceleration of Deep Neural Networks<sup class="footnote-ref"><a href="#fn4" id="fnref4">[4]</a></sup> (FLGC)</h3>
+<ul>
 <li>Institutes: CAS, UCAS</li>
 <li>Notes</li>
 </ul>
 <ol>
-<li>The <em>Introduction</em> section does a really good recall and conclusion in the network compression literature. It’s worth reading while the recall seems has nothing to do with the main algorithms proposed. </li>
-<li>The main point of the paper is to propose a new strategy of <code>Group Convolution</code>, which can be seen as an improvement of <strong>ShuffleNet</strong>. The difference is, for ShuffleNet, only the <em>filters</em> are not fixed (input channels connected to each filter are changed through channel shuffle, so it also means the filter is changed while the input channels are fixed) during group convolution, while for this paper, both <em>input channels</em> and <em>filters</em> are not fixed and each filter can connect to different number of input channels. <img src="Quick-read-methods-of-network-compression-in-2019/2.4.png" width="400"></li>
+<li>The <em>Introduction</em> section does a really good recall and conclusion in the network compression literature. It’s worth reading while the recall seems has nothing to do with the main algorithms proposed.</li>
+<li>The main point of the paper is to propose a new strategy of <code>Group Convolution</code>, which can be seen as an improvement of <strong>ShuffleNet</strong>. The difference is, for ShuffleNet, only the <em>filters</em> are not fixed (input channels connected to each filter are changed through channel shuffle, so it also means the filter is changed while the input channels are fixed) during group convolution, while for this paper, both <em>input channels</em> and <em>filters</em> are not fixed and each filter can connect to different number of input channels.<br>
+<img src="2.4.png" width="400"></li>
 </ol>
 <ul>
-<li>Results<img src="Quick-read-methods-of-network-compression-in-2019/2.5.png" width="400"></li>
+<li>Results<br>
+<img src="2.5.png" width="400"></li>
 </ul>
-<h3 id="5-A-Main-Subsidiary-Network-Framework-for-Simplifing-Binary-Networks-Prune-Binary"><a href="#5-A-Main-Subsidiary-Network-Framework-for-Simplifing-Binary-Networks-Prune-Binary" class="headerlink" title="5. A Main&#x2F;Subsidiary Network Framework for Simplifing Binary Networks[^Prune-Binary]"></a>5. A Main&#x2F;Subsidiary Network Framework for Simplifing Binary Networks[^Prune-Binary]</h3><ul>
+<h3 id="5-A-Main-Subsidiary-Network-Framework-for-Simplifing-Binary-Networks">5. A Main/Subsidiary Network Framework for Simplifing Binary Networks<sup class="footnote-ref"><a href="#fn5" id="fnref5">[5]</a></sup></h3>
+<ul>
 <li>Institutes: Zhejiang University, Harvard University, UC (University of California, San Diego), UESTC (China)</li>
 <li>Notes</li>
 </ul>
 <ol>
-<li>The authors prove that even for <code>Binary Network</code>, there exits redundancy. </li>
+<li>The authors prove that even for <code>Binary Network</code>, there exits redundancy.</li>
 <li>So they <strong>prune Binary Network directly</strong>.</li>
 </ol>
 <ul>
-<li>Results<br>For binary ResNet-18 on ImageNet, the authors use 78.6% filters but can achieve slightly better test error 49.87% (50.02%-0.15%) than the original model.</li>
+<li>Results<br>
+For binary ResNet-18 on ImageNet, the authors use 78.6% filters but can achieve slightly better test error 49.87% (50.02%-0.15%) than the original model.</li>
 </ul>
-<h3 id="6-Binary-Ensemble-Neural-Network-More-Bits-per-Network-or-More-Networks-per-Bit-Ensemble"><a href="#6-Binary-Ensemble-Neural-Network-More-Bits-per-Network-or-More-Networks-per-Bit-Ensemble" class="headerlink" title="6. Binary Ensemble Neural Network: More Bits per Network or More Networks per Bit?[^Ensemble]"></a>6. Binary Ensemble Neural Network: More Bits per Network or More Networks per Bit?[^Ensemble]</h3><ul>
+<h3 id="6-Binary-Ensemble-Neural-Network-More-Bits-per-Network-or-More-Networks-per-Bit">6. Binary Ensemble Neural Network: More Bits per Network or More Networks per Bit?<sup class="footnote-ref"><a href="#fn6" id="fnref6">[6]</a></sup></h3>
+<ul>
 <li>Institutes: UC San Diego, Harvard University (the same group as above)</li>
 <li>Notes</li>
 </ul>
 <ol>
-<li>They prove why the Binary network suffer from sever accuracy degradation, especially when the activations are also binarized, through extensive experiments on representation power, bias, variance, stability and robustness, and think that the degradation are not likely to be resolved by solely improving the optimization techniques. </li>
+<li>They prove why the Binary network suffer from sever accuracy degradation, especially when the activations are also binarized, through extensive experiments on representation power, bias, variance, stability and robustness, and think that the degradation are not likely to be resolved by solely improving the optimization techniques.</li>
 <li>Error of BNNs are predominantly caused by <strong>Intrinsic Instability</strong> and <strong>Non-robustness</strong>. Therefore, they propose a <code>Binary Ensemble Neural Network</code> (BENN) to boost performance.</li>
 <li>BENN is faster and more robust than the state-of-art binary networks and sometimes even more accurate than the full-precision floating number of network.</li>
 </ol>
 <ul>
-<li>Results<img src="Quick-read-methods-of-network-compression-in-2019/2.6.png" width="400"></li>
+<li>Results<br>
+<img src="2.6.png" width="400"></li>
 </ul>
-<h3 id="7-ESPNet-v2-A-light-weight-Power-Efficient-and-General-Purpose-Convolutional-Neural-Network-ESPNetV2"><a href="#7-ESPNet-v2-A-light-weight-Power-Efficient-and-General-Purpose-Convolutional-Neural-Network-ESPNetV2" class="headerlink" title="7. ESPNet v2: A light-weight, Power Efficient, and General Purpose Convolutional Neural Network[^ESPNetV2]"></a>7. ESPNet v2: A light-weight, Power Efficient, and General Purpose Convolutional Neural Network[^ESPNetV2]</h3><ul>
-<li><p>Institutes: University of Washington, Allen Institute for AI, XNOR.AI</p>
+<h3 id="7-ESPNet-v2-A-light-weight-Power-Efficient-and-General-Purpose-Convolutional-Neural-Network">7. ESPNet v2: A light-weight, Power Efficient, and General Purpose Convolutional Neural Network<sup class="footnote-ref"><a href="#fn7" id="fnref7">[7]</a></sup></h3>
+<ul>
+<li>
+<p>Institutes: University of Washington, Allen Institute for AI, XNOR.AI</p>
 </li>
-<li><p>Notes</p>
+<li>
+<p>Notes</p>
 </li>
 </ul>
 <ol>
 <li>Group point-wise and depth-wise dilated separable convolutions</li>
-<li>Based on ESPNet[^ESPNet] and better than that.</li>
+<li>Based on ESPNet<sup class="footnote-ref"><a href="#fn8" id="fnref8">[8]</a></sup> and better than that.</li>
 </ol>
-<h3 id="8-Filter-Pruning-via-Geometric-Median-for-Deep-Convolutional-Neural-Networks-Acceleration-FPGM-FPGM"><a href="#8-Filter-Pruning-via-Geometric-Median-for-Deep-Convolutional-Neural-Networks-Acceleration-FPGM-FPGM" class="headerlink" title="8. Filter Pruning via Geometric Median for Deep Convolutional Neural Networks Acceleration[^FPGM] (FPGM)"></a>8. Filter Pruning via Geometric Median for Deep Convolutional Neural Networks Acceleration[^FPGM] (FPGM)</h3><ul>
+<h3 id="8-Filter-Pruning-via-Geometric-Median-for-Deep-Convolutional-Neural-Networks-Acceleration-FPGM">8. Filter Pruning via Geometric Median for Deep Convolutional Neural Networks Acceleration<sup class="footnote-ref"><a href="#fn9" id="fnref9">[9]</a></sup> (FPGM)</h3>
+<ul>
 <li>Institutes: University of Technology Sydney, JD.com, CETC, Huawei, Baidu Research</li>
 <li>Notes</li>
 </ul>
 <ol>
 <li>The norm-based criterion utilized in previous works lead to limitations due to failure of two requirements: Low deviation and small minimum norm.</li>
 <li>Propose FPGM to prune filters regardless of the two requirements, by pruning replaceable filters containing redundant information.</li>
-<li>The theoretic basement may come from <em>Rethinking the smaller-norm-less-informative assumption in channel pruning of convolution layers. In ICLR, 2018.</em>[^Rethinking-norm]</li>
+<li>The theoretic basement may come from <em>Rethinking the smaller-norm-less-informative assumption in channel pruning of convolution layers. In ICLR, 2018.</em><sup class="footnote-ref"><a href="#fn10" id="fnref10">[10]</a></sup></li>
 </ol>
-<h3 id="9-MnasNet-Platform-Aware-Neural-Architecture-Search-for-Mobile-MnasNet"><a href="#9-MnasNet-Platform-Aware-Neural-Architecture-Search-for-Mobile-MnasNet" class="headerlink" title="9. MnasNet: Platform-Aware Neural Architecture Search for Mobile[^MnasNet]"></a>9. MnasNet: Platform-Aware Neural Architecture Search for Mobile[^MnasNet]</h3><ul>
+<h3 id="9-MnasNet-Platform-Aware-Neural-Architecture-Search-for-Mobile">9. MnasNet: Platform-Aware Neural Architecture Search for Mobile<sup class="footnote-ref"><a href="#fn11" id="fnref11">[11]</a></sup></h3>
+<ul>
 <li>Institutes: Google Brain, Google Inc</li>
 <li>Notes</li>
 </ul>
 <ol>
-<li>Using Architecture search to find fast and high-performance CNN model. </li>
-<li>Unlike previous models using FLOPs which are often inaccurate to evaluate model’s latency, they directly measure the read-world latency by executing the model on real mobile devices. <img src="Quick-read-methods-of-network-compression-in-2019/2.7.png" width="400"></li>
-<li>Accomplish two trade-offs: <ul>
-<li>Accuracy &amp; Inference latency: Formulate the design problem as a multi-objective optimization problem considering the two things. </li>
+<li>Using Architecture search to find fast and high-performance CNN model.</li>
+<li>Unlike previous models using FLOPs which are often inaccurate to evaluate model’s latency, they directly measure the read-world latency by executing the model on real mobile devices.<br>
+<img src="2.7.png" width="400"></li>
+<li>Accomplish two trade-offs:
+<ul>
+<li>Accuracy &amp; Inference latency: Formulate the design problem as a multi-objective optimization problem considering the two things.</li>
 <li>Search space &amp; Layer diversity: Propose a novel factorized hierarchical search space (where each block in the stacked structure can be different, while layers in each block should be with the same structure)</li>
 </ul>
 </li>
 </ol>
 <ul>
-<li>Results (On ImageNet)<img src="Quick-read-methods-of-network-compression-in-2019/2.8.png" width="400"></li>
+<li>Results (On ImageNet)<br>
+<img src="2.8.png" width="400"></li>
 </ul>
-<h3 id="10-HAQ-Hardware-Aware-Automated-Quantization-with-Mixed-Precision-HAQ"><a href="#10-HAQ-Hardware-Aware-Automated-Quantization-with-Mixed-Precision-HAQ" class="headerlink" title="10. HAQ: Hardware-Aware Automated Quantization with Mixed Precision[^HAQ]"></a>10. HAQ: Hardware-Aware Automated Quantization with Mixed Precision[^HAQ]</h3><ul>
+<h3 id="10-HAQ-Hardware-Aware-Automated-Quantization-with-Mixed-Precision">10. HAQ: Hardware-Aware Automated Quantization with Mixed Precision<sup class="footnote-ref"><a href="#fn12" id="fnref12">[12]</a></sup></h3>
+<ul>
 <li>Institutes: MIT (Song Han)</li>
 <li>Notes</li>
 </ul>
 <ol>
-<li>Conventional quantization methods use the same number of bits for all layers, but as different layer have different redundancy and arithmetic behaviours (computation bounded or memory bounded), this strategy is sub-optimal and it’s necessary to use mixed precision for different layers. </li>
+<li>Conventional quantization methods use the same number of bits for all layers, but as different layer have different redundancy and arithmetic behaviours (computation bounded or memory bounded), this strategy is sub-optimal and it’s necessary to use mixed precision for different layers.</li>
 <li>Because there are numerous possibilities of design polices (which determine the bitwidth of both weights and activations for each layer), the authors introduce the RL (Reinforcement Learning) agent to automatically determine the quantization policy, and take the hardware accelerator’s feedback in the design loop. So it is <em>Hardware-Aware</em> by considering latency, energy and storage on the target hardware directly instead of relying on proxy signals like FLOPs and model size.</li>
 </ol>
 <ul>
-<li>Results<br>Reduce latency by 1.4~1.95x and the energy consumption by 1.9x with negligible loss of accuracy compared with fixed bitwidth (8-bit) quantization.</li>
+<li>Results<br>
+Reduce latency by 1.4~1.95x and the energy consumption by 1.9x with negligible loss of accuracy compared with fixed bitwidth (8-bit) quantization.</li>
 </ul>
-<h2 id="ICLR-2019"><a href="#ICLR-2019" class="headerlink" title="ICLR 2019"></a>ICLR 2019</h2><h3 id="1-The-lottery-ticket-hypothesis-finding-sparse-trainable-neural-networks-Lottery"><a href="#1-The-lottery-ticket-hypothesis-finding-sparse-trainable-neural-networks-Lottery" class="headerlink" title="1. The lottery ticket hypothesis: finding sparse, trainable neural networks[^Lottery]"></a>1. The lottery ticket hypothesis: finding sparse, trainable neural networks[^Lottery]</h3><ul>
-<li>Institutes: MIT CSAIL </li>
+<h2 id="ICLR-2019">ICLR 2019</h2>
+<h3 id="1-The-lottery-ticket-hypothesis-finding-sparse-trainable-neural-networks">1. The lottery ticket hypothesis: finding sparse, trainable neural networks<sup class="footnote-ref"><a href="#fn13" id="fnref13">[13]</a></sup></h3>
+<ul>
+<li>Institutes: MIT CSAIL</li>
 <li>Notes</li>
 </ul>
 <ol>
-<li>Find winning tickets (subnetworks) that then trained in isolation, they can reach test accuracy comparable to the original network. </li>
+<li>Find winning tickets (subnetworks) that then trained in isolation, they can reach test accuracy comparable to the original network.</li>
 <li>Worth reading and understanding more deeply.</li>
 </ol>
-<h3 id="2-An-empirical-study-of-binary-Neural-Networks’-optimization-Empirical-study"><a href="#2-An-empirical-study-of-binary-Neural-Networks’-optimization-Empirical-study" class="headerlink" title="2. An empirical study of binary Neural Networks’ optimization[^Empirical-study]"></a>2. An empirical study of binary Neural Networks’ optimization[^Empirical-study]</h3><ul>
-<li>Institutes: University of Oxford </li>
+<h3 id="2-An-empirical-study-of-binary-Neural-Networks’-optimization">2. An empirical study of binary Neural Networks’ optimization<sup class="footnote-ref"><a href="#fn14" id="fnref14">[14]</a></sup></h3>
+<ul>
+<li>Institutes: University of Oxford</li>
 <li>Notes</li>
 </ul>
 <ol>
-<li>The training process with Straight-Through-Estimator (STE) is not well-founded due to the discrepancy between the evaluated function in the forward path and the weight updates in the back-propagation, updates which do not correspond to gradients of the forward path. </li>
+<li>The training process with Straight-Through-Estimator (STE) is not well-founded due to the discrepancy between the evaluated function in the forward path and the weight updates in the back-propagation, updates which do not correspond to gradients of the forward path.</li>
 <li>Normally training a BNN needs many ad-hoc techniques (STE, optimizer, etc). These are well analyzed through the corresponding experiments in this paper and understood whether they are necessary, so that better training process is guided for BNN.</li>
 </ol>
-<h3 id="3-Rethinking-the-value-of-Network-pruning-Rethinking-prune"><a href="#3-Rethinking-the-value-of-Network-pruning-Rethinking-prune" class="headerlink" title="3. Rethinking the value of Network pruning[^Rethinking-prune]"></a>3. Rethinking the value of Network pruning[^Rethinking-prune]</h3><ul>
-<li>Institutes: UC Berkeley, Tsinghua University </li>
+<h3 id="3-Rethinking-the-value-of-Network-pruning">3. Rethinking the value of Network pruning<sup class="footnote-ref"><a href="#fn15" id="fnref15">[15]</a></sup></h3>
+<ul>
+<li>Institutes: UC Berkeley, Tsinghua University</li>
 <li>Notes</li>
 </ul>
 <ol>
-<li>An excellent work reconsidering the traditional way of network pruning (3-stage: Training-&gt;Pruning-&gt;Fine-tuning). Under this rethinking, many previous work seems not to be persuasive again due to the lack of theoretical support. </li>
-<li>What’s that? Previous work thinks that <em>A model with fewer filters can not be trained from scratch to achieve the performance of a large model that has been pruned to be roughly the same size</em>. Now, this paper points out that <strong>it actually can</strong>. The contradiction behind this might be explained by less carefully chosen hyper-parameters, data augmentation schemes and unfair computation budget for evaluating baseline approaches. </li>
+<li>An excellent work reconsidering the traditional way of network pruning (3-stage: Training-&gt;Pruning-&gt;Fine-tuning). Under this rethinking, many previous work seems not to be persuasive again due to the lack of theoretical support.</li>
+<li>What’s that? Previous work thinks that <em>A model with fewer filters can not be trained from scratch to achieve the performance of a large model that has been pruned to be roughly the same size</em>. Now, this paper points out that <strong>it actually can</strong>. The contradiction behind this might be explained by less carefully chosen hyper-parameters, data augmentation schemes and unfair computation budget for evaluating baseline approaches.</li>
 <li>It suggests that the value of automatic structured pruning algorithms sometimes lie in identifying efficient structures and performing implicit architecture search, rather than selecting “important” weights.</li>
 </ol>
-<h3 id="4-ProxylessNAS-Direct-Neural-Architecture-Search-on-Target-Task-and-Hardware-ProxylessNAS"><a href="#4-ProxylessNAS-Direct-Neural-Architecture-Search-on-Target-Task-and-Hardware-ProxylessNAS" class="headerlink" title="4. ProxylessNAS: Direct Neural Architecture Search on Target Task and Hardware[^ProxylessNAS]"></a>4. ProxylessNAS: Direct Neural Architecture Search on Target Task and Hardware[^ProxylessNAS]</h3><ul>
+<h3 id="4-ProxylessNAS-Direct-Neural-Architecture-Search-on-Target-Task-and-Hardware">4. ProxylessNAS: Direct Neural Architecture Search on Target Task and Hardware<sup class="footnote-ref"><a href="#fn16" id="fnref16">[16]</a></sup></h3>
+<ul>
 <li>Institutes: MIT (Song Han)</li>
 <li>Notes</li>
 </ul>
 <ol>
-<li>What is Proxy-based NAS (Network Architecture Search)? NAS utilizing proxy tasks, such as training on a smaller dataset, or learning with only a few blocks, or training just for a few epochs. </li>
+<li>What is Proxy-based NAS (Network Architecture Search)? NAS utilizing proxy tasks, such as training on a smaller dataset, or learning with only a few blocks, or training just for a few epochs.</li>
 <li>Why previous works are proxy-based? Because the prohibitive computational demand of conventional NAS algorithms makes it difficult to directly search the architecture on large-scale tasks. On the other hand, differentiable NAS can reduce GPU hours but also increase CPU memory consumption.</li>
-<li>The drawback of proxy-based NAS: They are not guaranteed to be optimal on the target task. </li>
-<li>How to solve the difficulties when using proxyless (directly optimizes neural network architectures on target task and hardware) NAS? <img src="Quick-read-methods-of-network-compression-in-2019/3.1.png" width="400">
-- To reduce GPU hours, the authors first directly train on an over-parameterized network that contains all candidates and gradually prune redundant paths.
-- To reduce GPU memory consumption, the authors binarize network parameters, and train them via a gradient-based approach based on BinaryConnect[^BinaryConnect]
-- To handle on non-differentiable hardware objective (e.g., latency), the authors model network latency as a continuous function and optimize it as regularization loss.</li>
+<li>The drawback of proxy-based NAS: They are not guaranteed to be optimal on the target task.</li>
+<li>How to solve the difficulties when using proxyless (directly optimizes neural network architectures on target task and hardware) NAS?<br>
+<img src="3.1.png" width="400">
+<ul>
+<li>To reduce GPU hours, the authors first directly train on an over-parameterized network that contains all candidates and gradually prune redundant paths.</li>
+<li>To reduce GPU memory consumption, the authors binarize network parameters, and train them via a gradient-based approach based on BinaryConnect<sup class="footnote-ref"><a href="#fn17" id="fnref17">[17]</a></sup></li>
+<li>To handle on non-differentiable hardware objective (e.g., latency), the authors model network latency as a continuous function and optimize it as regularization loss.</li>
+</ul>
+</li>
 </ol>
 <ul>
-<li>Results<br>With only 200 GPU hours, got same top-1 accuracy as <code>MobileNet v2 1.4</code>, while 1.8x faster.</li>
+<li>Results<br>
+With only 200 GPU hours, got same top-1 accuracy as <code>MobileNet v2 1.4</code>, while 1.8x faster.</li>
 </ul>
-<h3 id="5-Defensive-Quantization-When-Efficiency-meets-Robustness-DQ"><a href="#5-Defensive-Quantization-When-Efficiency-meets-Robustness-DQ" class="headerlink" title="5. Defensive Quantization: When Efficiency meets Robustness[^DQ]"></a>5. Defensive Quantization: When Efficiency meets Robustness[^DQ]</h3><ul>
+<h3 id="5-Defensive-Quantization-When-Efficiency-meets-Robustness">5. Defensive Quantization: When Efficiency meets Robustness<sup class="footnote-ref"><a href="#fn18" id="fnref18">[18]</a></sup></h3>
+<ul>
 <li>Institutes: MIT (Song Han)</li>
 <li>Notes</li>
 </ul>
@@ -426,7 +461,9 @@
 <li>They find that when the magnitude of the noise is small, activation quantization is capable of reducing it while fails when the noise is greater than a certain threshold. Based on this, they propose Defensive Quantization (DQ) to control the Lipschitz constant of the network so that noise is kept within a small magnitude for all layers.</li>
 <li>DQ can also make quantization itself easier thanks to the constrained dynamic range.</li>
 </ol>
-<h2 id="ICML-2019"><a href="#ICML-2019" class="headerlink" title="ICML 2019"></a>ICML 2019</h2><h3 id="1-Collaborative-Channel-Pruning-for-Deep-Networks-Coll-channel"><a href="#1-Collaborative-Channel-Pruning-for-Deep-Networks-Coll-channel" class="headerlink" title="1. Collaborative Channel Pruning for Deep Networks[^Coll-channel]"></a>1. Collaborative Channel Pruning for Deep Networks[^Coll-channel]</h3><ul>
+<h2 id="ICML-2019">ICML 2019</h2>
+<h3 id="1-Collaborative-Channel-Pruning-for-Deep-Networks">1. Collaborative Channel Pruning for Deep Networks<sup class="footnote-ref"><a href="#fn19" id="fnref19">[19]</a></sup></h3>
+<ul>
 <li>Institutes: Tencent AI Lab, CAS, University of Texas at Arlington</li>
 <li>Notes</li>
 </ul>
@@ -434,21 +471,74 @@
 <li>OK, it unluckily can be categorized to the 3-stage network pruning methods discussed above.</li>
 <li>Investigate how the inter-channel relationship can be utilized to guide pruning.</li>
 </ol>
-<h3 id="2-EfficientNet-Rethinking-Model-Scaling-for-Convolutional-Neural-Network-EfficientNet"><a href="#2-EfficientNet-Rethinking-Model-Scaling-for-Convolutional-Neural-Network-EfficientNet" class="headerlink" title="2. EfficientNet: Rethinking Model Scaling for Convolutional Neural Network[^EfficientNet]"></a>2. EfficientNet: Rethinking Model Scaling for Convolutional Neural Network[^EfficientNet]</h3><ul>
+<h3 id="2-EfficientNet-Rethinking-Model-Scaling-for-Convolutional-Neural-Network">2. EfficientNet: Rethinking Model Scaling for Convolutional Neural Network<sup class="footnote-ref"><a href="#fn20" id="fnref20">[20]</a></sup></h3>
+<ul>
 <li>Institutes: [Google Research, Brain Team, Mountain View, CA]</li>
 <li>Notes:</li>
 </ul>
 <ol>
-<li>It is critical to balance all dimensions of network width&#x2F;depth&#x2F;resolution. Therefore, they scale the three dimensions simultaneously.<br>  The Intuition behind this is that if the input image is bigger, then the network needs more layers to increase the receptive field and more channels to capture more find-grained patterns on the bigger image. </li>
-<li>Architecture search + Scaling –&gt; EfficientNet, much better than the state-of-art. <img src="Quick-read-methods-of-network-compression-in-2019/4.1.png" width="400"></li>
+<li>It is critical to balance all dimensions of network width/depth/resolution. Therefore, they scale the three dimensions simultaneously.<br>
+The Intuition behind this is that if the input image is bigger, then the network needs more layers to increase the receptive field and more channels to capture more find-grained patterns on the bigger image.</li>
+<li>Architecture search + Scaling --&gt; EfficientNet, much better than the state-of-art.<br>
+<img src="4.1.png" width="400"></li>
 <li>There is also a similar network search paper: MNasNet, CVPR 2019</li>
 </ol>
-<h2 id="Others-in-2019"><a href="#Others-in-2019" class="headerlink" title="Others in 2019"></a>Others in 2019</h2><h3 id="1-Searching-for-MobileNetV3-MobileNetV3"><a href="#1-Searching-for-MobileNetV3-MobileNetV3" class="headerlink" title="1. Searching for MobileNetV3[^MobileNetV3]"></a>1. Searching for MobileNetV3[^MobileNetV3]</h3><ul>
+<h2 id="Others-in-2019">Others in 2019</h2>
+<h3 id="1-Searching-for-MobileNetV3">1. Searching for MobileNetV3<sup class="footnote-ref"><a href="#fn21" id="fnref21">[21]</a></sup></h3>
+<ul>
 <li>Institutes: Google AI, Google Brain</li>
-<li>Notes:<br>Network architecture search + Network design.</li>
-<li>Results (ImageNet):<img src="Quick-read-methods-of-network-compression-in-2019/5.1.png" width="400"></li>
+<li>Notes:<br>
+Network architecture search + Network design.</li>
+<li>Results (ImageNet):<br>
+<img src="5.1.png" width="400"></li>
 </ul>
-<p>[^KSE]: <a target="_blank" rel="noopener" href="http://openaccess.thecvf.com/content_CVPR_2019/papers/Li_Exploiting_Kernel_Sparsity_and_Entropy_for_Interpretable_CNN_Compression_CVPR_2019_paper.pdf">Li, Yuchao, et al. “Exploiting Kernel Sparsity and Entropy for Interpretable CNN Compression.” Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition. 2019.</a><br>[^GAN-prune]: <a target="_blank" rel="noopener" href="https://arxiv.org/abs/1903.09291">Lin, Shaohui, et al. “Towards Optimal Structured CNN Pruning via Generative Adversarial Learning.” arXiv preprint arXiv:1903.09291 (2019).</a><br>[^RePr]: <a target="_blank" rel="noopener" href="http://openaccess.thecvf.com/content_CVPR_2019/papers/Prakash_RePr_Improved_Training_of_Convolutional_Filters_CVPR_2019_paper.pdf">Prakash, Aaditya, et al. “RePr: Improved Training of Convolutional Filters.” Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition. 2019.</a><br>[^FLGC]: <a target="_blank" rel="noopener" href="https://arxiv.org/abs/1904.00346">Wang, Xijun, et al. “Fully Learnable Group Convolution for Acceleration of Deep Neural Networks.” Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition. 2019.</a><br>[^Prune-Binary]: <a target="_blank" rel="noopener" href="https://arxiv.org/abs/1812.04210">Xu, Yinghao, et al. “A Main&#x2F;Subsidiary Network Framework for Simplifying Binary Neural Networks.” Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition. 2019.</a><br>[^Ensemble]: <a target="_blank" rel="noopener" href="https://arxiv.org/abs/1806.07550">Zhu, Shilin, Xin Dong, and Hao Su. “Binary Ensemble Neural Network: More Bits per Network or More Networks per Bit?.” Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition. 2019.</a><br>[^ESPNetV2]: <a target="_blank" rel="noopener" href="https://arxiv.org/abs/1811.11431">Mehta, Sachin, et al. “ESPNetv2: A Light-weight, Power Efficient, and General Purpose Convolutional Neural Network.” arXiv preprint arXiv:1811.11431 (2018).</a><br>[^FPGM]: <a target="_blank" rel="noopener" href="https://arxiv.org/abs/1811.00250">He, Yang, et al. “Filter pruning via geometric median for deep convolutional neural networks acceleration.” Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition. 2019.</a><br>[^MnasNet]: <a target="_blank" rel="noopener" href="https://arxiv.org/abs/1807.11626">Tan, Mingxing, et al. “Mnasnet: Platform-aware neural architecture search for mobile.” Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition. 2019.</a><br>[^ESPNet]: <a target="_blank" rel="noopener" href="https://arxiv.org/abs/1804.00015">Watanabe, Shinji, et al. “Espnet: End-to-end speech processing toolkit.” arXiv preprint arXiv:1804.00015 (2018).</a><br>[^Rethinking-norm]: <a target="_blank" rel="noopener" href="https://arxiv.org/abs/1802.00124">Ye, Jianbo, et al. “Rethinking the smaller-norm-less-informative assumption in channel pruning of convolution layers.” arXiv preprint arXiv:1802.00124 (2018).</a><br>[^Lottery]: <a target="_blank" rel="noopener" href="https://arxiv.org/abs/1803.03635">Frankle, Jonathan, and Michael Carbin. “The lottery ticket hypothesis: Finding sparse, trainable neural networks.” arXiv preprint arXiv:1803.03635 (2018).</a><br>[^Empirical-study]: <a target="_blank" rel="noopener" href="https://openreview.net/pdf?id=rJfUCoR5KX">Milad Alizadeh and Javier Fernández-Marqués and Nicholas D. Lane and Yarin Gal. “An empirical study of binary Neural Networks’ optimization.” ICLR. 2019.</a><br>[^Rethinking-prune]: <a target="_blank" rel="noopener" href="https://arxiv.org/abs/1810.05270">Liu, Zhuang, et al. “Rethinking the value of network pruning.” ICLR. (2019).</a><br>[^Coll-channel]: <a target="_blank" rel="noopener" href="http://proceedings.mlr.press/v97/peng19c/peng19c.pdf">Hanyu Peng, Jiaxiang Wu, Shifeng Chen, Junzhou Huang ; Proceedings of the 36th International Conference on Machine Learning, PMLR 97:5113-5122, 2019.</a><br>[^EfficientNet]: <a target="_blank" rel="noopener" href="http://proceedings.mlr.press/v97/tan19a/tan19a.pdf">Mingxing Tan, Quoc Le ; Proceedings of the 36th International Conference on Machine Learning, PMLR 97:6105-6114, 2019.</a><br>[^MobileNetV3]: <a target="_blank" rel="noopener" href="https://arxiv.org/abs/1905.02244">Howard, Andrew, et al. “Searching for mobilenetv3.” arXiv preprint arXiv:1905.02244 (2019).</a><br>[^HAQ]: <a target="_blank" rel="noopener" href="https://arxiv.org/abs/1811.08886">Wang, Kuan, et al. “HAQ: Hardware-Aware Automated Quantization with Mixed Precision.” Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition. 2019.</a><br>[^ProxylessNAS]: <a target="_blank" rel="noopener" href="https://arxiv.org/abs/1812.00332">Cai, Han, Ligeng Zhu, and Song Han. “ProxylessNAS: Direct neural architecture search on target task and hardware.” arXiv preprint arXiv:1812.00332 (2018).</a><br>[^DQ]: <a target="_blank" rel="noopener" href="https://arxiv.org/abs/1904.08444">Lin, Ji, Chuang Gan, and Song Han. “Defensive quantization: When efficiency meets robustness.” arXiv preprint arXiv:1904.08444 (2019).</a><br>[^BinaryConnect]: <a target="_blank" rel="noopener" href="http://papers.nips.cc/paper/5647-binaryconnect-training-deep-neural-networks-with-binary-weights-during-propagations.pdf">Courbariaux, Matthieu, Yoshua Bengio, and Jean-Pierre David. “Binaryconnect: Training deep neural networks with binary weights during propagations.” Advances in neural information processing systems. 2015.</a></p>
+<hr class="footnotes-sep">
+<section class="footnotes">
+<ol class="footnotes-list">
+<li id="fn1" class="footnote-item"><p><a target="_blank" rel="noopener" href="http://openaccess.thecvf.com/content_CVPR_2019/papers/Li_Exploiting_Kernel_Sparsity_and_Entropy_for_Interpretable_CNN_Compression_CVPR_2019_paper.pdf">Li, Yuchao, et al. “Exploiting Kernel Sparsity and Entropy for Interpretable CNN Compression.” Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition. 2019.</a> <a href="#fnref1" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn2" class="footnote-item"><p><a target="_blank" rel="noopener" href="https://arxiv.org/abs/1903.09291">Lin, Shaohui, et al. “Towards Optimal Structured CNN Pruning via Generative Adversarial Learning.” arXiv preprint arXiv:1903.09291 (2019).</a> <a href="#fnref2" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn3" class="footnote-item"><p><a target="_blank" rel="noopener" href="http://openaccess.thecvf.com/content_CVPR_2019/papers/Prakash_RePr_Improved_Training_of_Convolutional_Filters_CVPR_2019_paper.pdf">Prakash, Aaditya, et al. “RePr: Improved Training of Convolutional Filters.” Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition. 2019.</a> <a href="#fnref3" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn4" class="footnote-item"><p><a target="_blank" rel="noopener" href="https://arxiv.org/abs/1904.00346">Wang, Xijun, et al. “Fully Learnable Group Convolution for Acceleration of Deep Neural Networks.” Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition. 2019.</a> <a href="#fnref4" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn5" class="footnote-item"><p><a target="_blank" rel="noopener" href="https://arxiv.org/abs/1812.04210">Xu, Yinghao, et al. “A Main/Subsidiary Network Framework for Simplifying Binary Neural Networks.” Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition. 2019.</a> <a href="#fnref5" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn6" class="footnote-item"><p><a target="_blank" rel="noopener" href="https://arxiv.org/abs/1806.07550">Zhu, Shilin, Xin Dong, and Hao Su. “Binary Ensemble Neural Network: More Bits per Network or More Networks per Bit?.” Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition. 2019.</a> <a href="#fnref6" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn7" class="footnote-item"><p><a target="_blank" rel="noopener" href="https://arxiv.org/abs/1811.11431">Mehta, Sachin, et al. “ESPNetv2: A Light-weight, Power Efficient, and General Purpose Convolutional Neural Network.” arXiv preprint arXiv:1811.11431 (2018).</a> <a href="#fnref7" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn8" class="footnote-item"><p><a target="_blank" rel="noopener" href="https://arxiv.org/abs/1804.00015">Watanabe, Shinji, et al. “Espnet: End-to-end speech processing toolkit.” arXiv preprint arXiv:1804.00015 (2018).</a> <a href="#fnref8" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn9" class="footnote-item"><p><a target="_blank" rel="noopener" href="https://arxiv.org/abs/1811.00250">He, Yang, et al. “Filter pruning via geometric median for deep convolutional neural networks acceleration.” Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition. 2019.</a> <a href="#fnref9" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn10" class="footnote-item"><p><a target="_blank" rel="noopener" href="https://arxiv.org/abs/1802.00124">Ye, Jianbo, et al. “Rethinking the smaller-norm-less-informative assumption in channel pruning of convolution layers.” arXiv preprint arXiv:1802.00124 (2018).</a> <a href="#fnref10" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn11" class="footnote-item"><p><a target="_blank" rel="noopener" href="https://arxiv.org/abs/1807.11626">Tan, Mingxing, et al. “Mnasnet: Platform-aware neural architecture search for mobile.” Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition. 2019.</a> <a href="#fnref11" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn12" class="footnote-item"><p><a target="_blank" rel="noopener" href="https://arxiv.org/abs/1811.08886">Wang, Kuan, et al. “HAQ: Hardware-Aware Automated Quantization with Mixed Precision.” Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition. 2019.</a> <a href="#fnref12" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn13" class="footnote-item"><p><a target="_blank" rel="noopener" href="https://arxiv.org/abs/1803.03635">Frankle, Jonathan, and Michael Carbin. “The lottery ticket hypothesis: Finding sparse, trainable neural networks.” arXiv preprint arXiv:1803.03635 (2018).</a> <a href="#fnref13" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn14" class="footnote-item"><p><a target="_blank" rel="noopener" href="https://openreview.net/pdf?id=rJfUCoR5KX">Milad Alizadeh and Javier Fernández-Marqués and Nicholas D. Lane and Yarin Gal. “An empirical study of binary Neural Networks’ optimization.” ICLR. 2019.</a> <a href="#fnref14" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn15" class="footnote-item"><p><a target="_blank" rel="noopener" href="https://arxiv.org/abs/1810.05270">Liu, Zhuang, et al. “Rethinking the value of network pruning.” ICLR. (2019).</a> <a href="#fnref15" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn16" class="footnote-item"><p><a target="_blank" rel="noopener" href="https://arxiv.org/abs/1812.00332">Cai, Han, Ligeng Zhu, and Song Han. “ProxylessNAS: Direct neural architecture search on target task and hardware.” arXiv preprint arXiv:1812.00332 (2018).</a> <a href="#fnref16" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn17" class="footnote-item"><p><a target="_blank" rel="noopener" href="http://papers.nips.cc/paper/5647-binaryconnect-training-deep-neural-networks-with-binary-weights-during-propagations.pdf">Courbariaux, Matthieu, Yoshua Bengio, and Jean-Pierre David. “Binaryconnect: Training deep neural networks with binary weights during propagations.” Advances in neural information processing systems. 2015.</a> <a href="#fnref17" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn18" class="footnote-item"><p><a target="_blank" rel="noopener" href="https://arxiv.org/abs/1904.08444">Lin, Ji, Chuang Gan, and Song Han. “Defensive quantization: When efficiency meets robustness.” arXiv preprint arXiv:1904.08444 (2019).</a> <a href="#fnref18" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn19" class="footnote-item"><p><a target="_blank" rel="noopener" href="http://proceedings.mlr.press/v97/peng19c/peng19c.pdf">Hanyu Peng, Jiaxiang Wu, Shifeng Chen, Junzhou Huang ; Proceedings of the 36th International Conference on Machine Learning, PMLR 97:5113-5122, 2019.</a> <a href="#fnref19" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn20" class="footnote-item"><p><a target="_blank" rel="noopener" href="http://proceedings.mlr.press/v97/tan19a/tan19a.pdf">Mingxing Tan, Quoc Le ; Proceedings of the 36th International Conference on Machine Learning, PMLR 97:6105-6114, 2019.</a> <a href="#fnref20" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn21" class="footnote-item"><p><a target="_blank" rel="noopener" href="https://arxiv.org/abs/1905.02244">Howard, Andrew, et al. “Searching for mobilenetv3.” arXiv preprint arXiv:1905.02244 (2019).</a> <a href="#fnref21" class="footnote-backref">↩︎</a></p>
+</li>
+</ol>
+</section>
 
     </div>
 
@@ -471,8 +561,8 @@
                 </a>
             </div>
             <div class="post-nav-item">
-                <a href="/blogs/2024/12/26/Megatron-LM-1/" rel="next" title="Megatron-LM (1)">
-                  Megatron-LM (1) <i class="fa fa-angle-right"></i>
+                <a href="/blogs/2024/06/26/CLIP-%E7%9B%B8%E5%85%B3%E5%B7%A5%E4%BD%9C1/" rel="next" title="CLIP 相关工作1">
+                  CLIP 相关工作1 <i class="fa fa-angle-right"></i>
                 </a>
             </div>
           </div>
@@ -500,7 +590,7 @@
     </span>
     <span class="author" itemprop="copyrightHolder">Zhuo ge ge</span>
   </div>
-  <div class="powered-by">Powered by <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a>
   </div>
 
     </div>
@@ -539,7 +629,13 @@
 
 
 
-<script class="next-config" data-name="utterances" type="application/json">{"enable":true,"repo":"hellozhuo/blogs","issue_term":"pathname","theme":"github-light"}</script>
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"ams","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/blogs/js/third-party/math/mathjax.js"></script>
+
+
+<script class="next-config" data-name="utterances" type="application/json">{"enable":true,"repo":"hellozhuo/blogs","issue_term":"pathname","theme":"preferred-color-scheme"}</script>
 <script src="/blogs/js/third-party/comments/utterances.js"></script>
 
 </body>
