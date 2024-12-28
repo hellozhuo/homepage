@@ -124,7 +124,7 @@ Paper: https://arxiv.org/abs/2305.18290</p>
 <h3 id="Highlight">Highlight</h3>
 <p>It solve the RLHF problem which aims to align the output of LLMs to the uer desires, for example, to give human-prefered outputs that are more polite, friendly, no descrimination, etc. but without using reinforcement learning, but the common SGD.</p>
 <h3 id="How">How?</h3>
-<p>Recall in RLHF, we train a reward model (e.g., Bradley Terry model) $r^*$ such that for a human-prefered answer $y_1$ and a unprefered answer $y_2$ for a given prompt $x$, the probability that $y_1$ ranks before $y_2<br>
+<p>Recall in RLHF, we train a reward model (e.g., Bradley Terry model) $r^*$ such that for a human-prefered answer $y_1$ and a unprefered answer $y_2$ for a given prompt $x$, the probability that $y_1$ ranks before $y_2$<br>
 <img src="/blogs/joplin_resources/85da2fba0e5bb3957642706bcf413e2b.png" alt=""><br>
 has a high value.<br>
 We can collect a dataset<br>
