@@ -152,7 +152,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/blogs/archives/">
-          <span class="site-state-item-count">21</span>
+          <span class="site-state-item-count">22</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>
@@ -163,7 +163,7 @@
       </div>
       <div class="site-state-item site-state-tags">
           <a href="/blogs/tags/">
-        <span class="site-state-item-count">12</span>
+        <span class="site-state-item-count">13</span>
         <span class="site-state-item-name">tags</span></a>
       </div>
   </nav>
@@ -188,6 +188,138 @@
     </div>
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://zhuogege1943.com/blogs/2025/01/01/ZeRO-DeepSpeed-from-Microsoft/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/blogs/images/dushen.png">
+      <meta itemprop="name" content="Zhuo ge ge">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zhuo's Blog">
+      <meta itemprop="description" content="Hi, nice to meet you">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | Zhuo's Blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/blogs/2025/01/01/ZeRO-DeepSpeed-from-Microsoft/" class="post-title-link" itemprop="url">ZeRO (DeepSpeed from Microsoft)</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+      
+
+      <time title="Created: 2025-01-01 11:04:06 / Modified: 17:09:44" itemprop="dateCreated datePublished" datetime="2025-01-01T11:04:06+02:00">2025-01-01</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">In</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/blogs/categories/Paper-reading/" itemprop="url" rel="index"><span itemprop="name">Paper reading</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h2 id="ZeRO-Memory-Optimizations-Toward-Training-Trillion-Parameter-Models">ZeRO: Memory Optimizations Toward Training Trillion Parameter Models</h2>
+<p>paper (2019 arxiv, SC’20): <a target="_blank" rel="noopener" href="https://arxiv.org/abs/1910.02054">https://arxiv.org/abs/1910.02054</a><br>
+website: <a target="_blank" rel="noopener" href="https://www.deepspeed.ai/">https://www.deepspeed.ai/</a></p>
+<h3 id="Overivew-of-ZeRO-optimizers">Overivew of ZeRO optimizers</h3>
+<p><img src="/blogs/joplin_resources/d7080c98a06ed87132146d152825625a.png" alt=""></p>
+<p>So basically, ZeRO has two sets of optimizations: <code>ZeRO-DP</code> to reduce the memory footprint along with data parallelism (like optimizer states by $P_{os}$, gradients by $P_g$, and parameters by $P_p$), and <code>ZeRO-R</code> to reduce the residual memory (like activations by $P_a$, temporary buffers by $C_B$, and memory fragementation by $M_D$). Particularly, activation are reduced along with model parallelism (I would say might be implemented as “sequence parallelism” in Megagron).</p>
+<p>The highlight is that ZeRO-DP can significantly reduce the memory per GPU while keeping the communication overhead between GPUs unchanged when only applying DP alone (without the need of MP), therefore allow bigger models to train efficiently.<br>
+<img src="/blogs/joplin_resources/5a8f4be1364e8b6e41e42537eb06c768.png" alt=""></p>
+<p>For example, as shown in above figure, Megagron-LM (which only applying tensor model parallelism here) will need to use multiple nodes because a single node (16 GPUs) cannot fit a bigger model (larger than 40B), causing inter-node communications that are very slow. However, for ZeRO, MP always fits in a node. Megatron make the computation granularity smaller (by splitting the model into smaller pieces) while ZeRO keeps every whole layer of transformer (my opinion). In addition, ZeRO also performs better than Megatron becuase the memory on each DP GPU is reduced without increasing communication overhead (as can be seen in the 1.5B case).</p>
+<p>By adjusing the degree of ZeRO-DP, degree of MP, batch size, etc, ZeRO can gives good scalability for large models, even super-linear scalability:<br>
+<img src="/blogs/joplin_resources/8557e921935a44025263389ac9a74fc6.png" alt=""><br>
+It is because $P{os+g}$ reduces per GPU memory consumption of ZeRO-100B with increase in DP degree, allowing ZeRO-100B to fit larger batch sizes per GPU, which in turn improves throughput as a result of increasing arithmetic intensity. For example, we assume MP is fit in a node with 16 GPUs, thus the degree of MP is bounded to 16, then the degree of DP can be increased with more GPUs.</p>
+<p>So let’s describe more about the methods.</p>
+<h3 id="Let’s-see-which-occupies-the-GPU-memory-during-training">Let’s see which occupies the GPU memory during training</h3>
+<p>Let’s assume the training is via mixed precision (fp16/32) training where the parameters and gradients are stored in 16 bit (2bytes) while the optimizer states use 32-bit (4bytes). Let the number of parameters is $\Psi$ and Adam optimizer is used, then here is the memory consumption:</p>
+<ul>
+<li>Parameters: $2\Psi$</li>
+<li>Gradients: $2\Psi$</li>
+<li>Optimizer states: parameters + momentum + variance cuase $4\Psi + 4\Psi + 4\Psi = 12\Psi$</li>
+<li>Activations: It depends on the sequence length, batch size, and the structure of transformer models (please also see <a href="/blogs/2024/12/26/Megatron-LM-3">Megatron-LM series 3</a>). For example, GPT-2 with 1.5B parameters, 1K sequence length, and batch size 32 causes 60G memory.</li>
+<li>Temporary buffers: Operations such as gradient all-reduce, or gradient norm computation tend to fuse all the gradients into a single flattened buffer before applying the operation in an effort to improve throughput.</li>
+<li>Memory fragmentation: It is caused by the interleaving between short lived and long lived memory objects. For example, the activations checkpointed (uisng activation checkpointing) lives longer than those need to be recomputed during forward pass. The gradients of parameters live longer than the gradients of activations during backward pass. A long contiguous memory will be fragmented into small pieces when the interleaved short memory has been released. So it will still possible to cause OOM error when the total available memory is larger than requested because of the lack of longer enough contiguous memory.</li>
+</ul>
+<h3 id="ZeRO-DP-to-reduce-the-first-three-memory-parts-parameters-gradients-and-optimizer-states">ZeRO-DP to reduce the first three memory parts (parameters, gradients, and optimizer states)</h3>
+<p><img src="/blogs/joplin_resources/8fdb71dae74d76259cc162100ddd3d80.png" alt=""><br>
+As shown in the above figure, ZeRO has three stages $P_{os}$, $P_{os+g}$, and $P{os+g+p}$ that gradually reduce the memory consumed per GPU ($N_d$ is the degree of data parallelism).</p>
+<h4 id="ZeRO-DP-P-os">ZeRO-DP $P_{os}$</h4>
+<p>For $P_{os}$, the idea is quite simple. In this case, only the optimizer states are partioned to different DP GPUs, but all the parameters are replicated in each GPU. During forward and backward passes, the each DP GPU run for its own minibatch and get the loss via forward pass and gradient via backward pass. Then the gradients are kind of processed with “reduce-scatter” to the optimizers in each GPU (first reduce the gradients to calculate the average, and scatter the gradients to different pieces and give each GPU a piece). After that, each GPU run optimizer.step() to update the corresponding parameters. Finally, the “all-gather” operation is used to gather different pieces of updated parameters as the new parameters on each GPU.</p>
+<blockquote>
+<p>Communication overhead<br>
+Compared with the original way of DP, the “reduce-scatter” and “all-gather” operations cause the same communication overhead as the “all-reduce” operation in the original DP.</p>
+</blockquote>
+<h4 id="ZeRO-DP-P-os-g">ZeRO-DP $P_{os+g}$</h4>
+<p>For gradients, the forward pass is the same as above, but for the backward pass, whenever the gradients of a certain part of the parameters are calculated, use “reduction” operation for the gradients on different GPUs to get the average and store the average on the associated GPU only. After backward, each GPU has its own gradients part for a certain par of parameters, means the GPU can directly apply optimizer.step() to update those parameters. After tha, “all-gather” is used to update all parameters on each GPU.</p>
+<blockquote>
+<p>Communication overhead<br>
+Put all the “reduction” operations together gives the same amount of communication as the “reduce-scatter” operation based on all gradient in $P_{os}$, plus “all-gather”, it give the same communication as the original DP.</p>
+</blockquote>
+<h4 id="ZeRO-DP-P-os-g-p">ZeRO-DP $P_{os+g+p}$</h4>
+<p>Each DP GPU only store a certain part of parameters further. When the parameters outside of its partition are required for forward and backward propagation, they are received from the appropriate data parallel process through broadcast. The rest is the same as $P_{os+g}$.</p>
+<blockquote>
+<p>Coummnication overhead<br>
+As stated by the authors, these extra broadcast operations cuases $1.5\times$ overhead compared with the previous two cases.</p>
+</blockquote>
+<p>When $P_{os+g+p}$ is applied, the memory per GPU can be reduced by $N_d\times$, enabling very large models (1 trillion parameters) to fit in the GPU cluster with 1024 GPUs:</p>
+<p><img src="/blogs/joplin_resources/dd7fc0c7103eb20c0510374bd42e44a6.png" alt=""><br>
+Here, with 1024 DP, each GPU only consumes 15.6 G memory for a 1 T model, which is lower than its limit (i.e., 32G for V100).</p>
+<h3 id="ZeRO-R-to-reduce-residual-memry">ZeRO-R to reduce residual memry</h3>
+<h4 id="ZeRO-R-P-a-and-P-a-cpu">ZeRO-R $P_a$ and $P_{a+cpu}$</h4>
+<p>In my opinion, $P_a$ would be similar to <code>sequence parallelism</code> in Megatron-LM, but ZeRO might partition the activations along different dimensions along MP. Then $P_{a+cpu}$ additionally store the activations in CPU to free GPU memory.</p>
+<h4 id="ZeRO-R-C-B-and-M-D">ZeRO-R $C_B$ and $M_D$</h4>
+<p>For $C_B$, they  simply use a performance-efficient constant-size fused buffer when the model becomes too large. For $M_D$, ZeRO does memory defragmentation on-the-fly by pre-allocating contiguous memory chunks for activation checkpoints and gradients, and copying them over to the pre-allocated memory as they are produced. MD not only enables ZeRO to train larger models with larger batch sizes, but also improves efficiency when training with limited memory.</p>
+<h3 id="Conlusion">Conlusion</h3>
+<p>ZeRO goes with DP, so from the perspective of model parameters, it doesn’t refactor the archiecture like MP. It can be combined with MP like Megatron to further scale the training while outperforming combining DP and MP alone.</p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -1057,99 +1189,6 @@ Paper: https://arxiv.org/abs/2305.18290</p>
 
 
 
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://zhuogege1943.com/blogs/2024/07/03/Mistral-Mistral-AI-company/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/blogs/images/dushen.png">
-      <meta itemprop="name" content="Zhuo ge ge">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Zhuo's Blog">
-      <meta itemprop="description" content="Hi, nice to meet you">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | Zhuo's Blog">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/blogs/2024/07/03/Mistral-Mistral-AI-company/" class="post-title-link" itemprop="url">Mistral - Mistral.AI company</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">Posted on</span>
-
-      <time title="Created: 2024-07-03 16:39:20" itemprop="dateCreated datePublished" datetime="2024-07-03T16:39:20+03:00">2024-07-03</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">Edited on</span>
-      <time title="Modified: 2024-12-28 20:41:50" itemprop="dateModified" datetime="2024-12-28T20:41:50+02:00">2024-12-28</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">In</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/blogs/categories/Paper-reading/" itemprop="url" rel="index"><span itemprop="name">Paper reading</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>Tutorial:https://www.youtube.com/watch?v=UiX8K-xBUpE</p>
-<h2 id="Mistral-7B">Mistral 7B</h2>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/blogs/2024/07/03/Mistral-Mistral-AI-company/#more" rel="contents">
-                Read more &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
   <nav class="pagination">
     <span class="page-number current">1</span><a class="page-number" href="/blogs/page/2/">2</a><a class="page-number" href="/blogs/page/3/">3</a><a class="extend next" rel="next" title="Next page" aria-label="Next page" href="/blogs/page/2/"><i class="fa fa-angle-right"></i></a>
   </nav>
@@ -1162,7 +1201,7 @@ Paper: https://arxiv.org/abs/2305.18290</p>
 
   <div class="copyright">
     &copy; 
-    <span itemprop="copyrightYear">2024</span>
+    <span itemprop="copyrightYear">2025</span>
     <span class="with-love">
       <i class="fa fa-heart"></i>
     </span>
