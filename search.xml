@@ -1286,6 +1286,7 @@ In pc3:</p>
     <content><![CDATA[<h2 id="ZeRO-Memory-Optimizations-Toward-Training-Trillion-Parameter-Models">ZeRO: Memory Optimizations Toward Training Trillion Parameter Models</h2>
 <p>paper (2019 arxiv, SC’20): <a href="https://arxiv.org/abs/1910.02054">https://arxiv.org/abs/1910.02054</a><br>
 website: <a href="https://www.deepspeed.ai/">https://www.deepspeed.ai/</a></p>
+<span id="more"></span>
 <h3 id="Overivew-of-ZeRO-optimizers">Overivew of ZeRO optimizers</h3>
 <p><img src="/blogs/joplin_resources/d7080c98a06ed87132146d152825625a.png" alt=""></p>
 <p>So basically, ZeRO has two sets of optimizations: <code>ZeRO-DP</code> to reduce the memory footprint along with data parallelism (like optimizer states by $P_{os}$, gradients by $P_g$, and parameters by $P_p$), and <code>ZeRO-R</code> to reduce the residual memory (like activations by $P_a$, temporary buffers by $C_B$, and memory fragementation by $M_D$). Particularly, activation are reduced along with model parallelism (I would say might be implemented as “sequence parallelism” in Megagron).</p>

@@ -20,12 +20,12 @@
 
 <script class="next-config" data-name="main" type="application/json">{"hostname":"zhuogege1943.com","root":"/blogs/","images":"/blogs/images","scheme":"Gemini","darkmode":true,"version":"8.21.1","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"},"path":"/blogs/search.xml","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/blogs/js/config.js"></script>
 
-    <meta name="description" content="ZeRO: Memory Optimizations Toward Training Trillion Parameter Models paper (2019 arxiv, SC’20): https:&#x2F;&#x2F;arxiv.org&#x2F;abs&#x2F;1910.02054 website: https:&#x2F;&#x2F;www.deepspeed.ai&#x2F; Overivew of ZeRO optimizers  So basi">
+    <meta name="description" content="ZeRO: Memory Optimizations Toward Training Trillion Parameter Models paper (2019 arxiv, SC’20): https:&#x2F;&#x2F;arxiv.org&#x2F;abs&#x2F;1910.02054 website: https:&#x2F;&#x2F;www.deepspeed.ai&#x2F;">
 <meta property="og:type" content="article">
 <meta property="og:title" content="ZeRO (DeepSpeed from Microsoft)">
 <meta property="og:url" content="https://zhuogege1943.com/blogs/2025/01/01/ZeRO-DeepSpeed-from-Microsoft/index.html">
 <meta property="og:site_name" content="Zhuo&#39;s Blog">
-<meta property="og:description" content="ZeRO: Memory Optimizations Toward Training Trillion Parameter Models paper (2019 arxiv, SC’20): https:&#x2F;&#x2F;arxiv.org&#x2F;abs&#x2F;1910.02054 website: https:&#x2F;&#x2F;www.deepspeed.ai&#x2F; Overivew of ZeRO optimizers  So basi">
+<meta property="og:description" content="ZeRO: Memory Optimizations Toward Training Trillion Parameter Models paper (2019 arxiv, SC’20): https:&#x2F;&#x2F;arxiv.org&#x2F;abs&#x2F;1910.02054 website: https:&#x2F;&#x2F;www.deepspeed.ai&#x2F;">
 <meta property="og:locale" content="en_US">
 <meta property="og:image" content="https://zhuogege1943.com/blogs/joplin_resources/d7080c98a06ed87132146d152825625a.png">
 <meta property="og:image" content="https://zhuogege1943.com/blogs/joplin_resources/5a8f4be1364e8b6e41e42537eb06c768.png">
@@ -33,7 +33,7 @@
 <meta property="og:image" content="https://zhuogege1943.com/blogs/joplin_resources/8fdb71dae74d76259cc162100ddd3d80.png">
 <meta property="og:image" content="https://zhuogege1943.com/blogs/joplin_resources/dd7fc0c7103eb20c0510374bd42e44a6.png">
 <meta property="article:published_time" content="2025-01-01T09:04:06.000Z">
-<meta property="article:modified_time" content="2025-01-01T15:09:44.527Z">
+<meta property="article:modified_time" content="2025-01-01T15:15:59.766Z">
 <meta property="article:author" content="Zhuo ge ge">
 <meta property="article:tag" content="tbd">
 <meta name="twitter:card" content="summary">
@@ -238,7 +238,7 @@
       <span class="post-meta-item-text">Posted on</span>
       
 
-      <time title="Created: 2025-01-01 11:04:06 / Modified: 17:09:44" itemprop="dateCreated datePublished" datetime="2025-01-01T11:04:06+02:00">2025-01-01</time>
+      <time title="Created: 2025-01-01 11:04:06 / Modified: 17:15:59" itemprop="dateCreated datePublished" datetime="2025-01-01T11:04:06+02:00">2025-01-01</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -269,6 +269,7 @@
     <div class="post-body" itemprop="articleBody"><h2 id="ZeRO-Memory-Optimizations-Toward-Training-Trillion-Parameter-Models">ZeRO: Memory Optimizations Toward Training Trillion Parameter Models</h2>
 <p>paper (2019 arxiv, SC’20): <a target="_blank" rel="noopener" href="https://arxiv.org/abs/1910.02054">https://arxiv.org/abs/1910.02054</a><br>
 website: <a target="_blank" rel="noopener" href="https://www.deepspeed.ai/">https://www.deepspeed.ai/</a></p>
+<span id="more"></span>
 <h3 id="Overivew-of-ZeRO-optimizers">Overivew of ZeRO optimizers</h3>
 <p><img src="/blogs/joplin_resources/d7080c98a06ed87132146d152825625a.png" alt=""></p>
 <p>So basically, ZeRO has two sets of optimizations: <code>ZeRO-DP</code> to reduce the memory footprint along with data parallelism (like optimizer states by $P_{os}$, gradients by $P_g$, and parameters by $P_p$), and <code>ZeRO-R</code> to reduce the residual memory (like activations by $P_a$, temporary buffers by $C_B$, and memory fragementation by $M_D$). Particularly, activation are reduced along with model parallelism (I would say might be implemented as “sequence parallelism” in Megagron).</p>
