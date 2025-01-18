@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/blogs/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/blogs/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/blogs/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/blogs/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/blogs/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha256-5eIC48iZUHmSlSUz9XtjRyK2mzQkHScZY1WdMaoz74E=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"zhuogege1943.com","root":"/blogs/","images":"/blogs/images","scheme":"Gemini","darkmode":true,"version":"8.21.1","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"},"path":"/blogs/search.xml","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/blogs/js/config.js"></script>
+
+    <meta name="description" content="ZeRO-Infinity: Breaking the GPU Memory Wall for Extreme Scale Deep Learning paper (2021 arxiv): https:&#x2F;&#x2F;arxiv.org&#x2F;abs&#x2F;2104.07857 The highlight of the method  The much larger models training can scale">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ZeRO-Infinity">
+<meta property="og:url" content="https://zhuogege1943.com/blogs/2025/01/13/ZeRO-Infinity/index.html">
+<meta property="og:site_name" content="Zhuo&#39;s Blog">
+<meta property="og:description" content="ZeRO-Infinity: Breaking the GPU Memory Wall for Extreme Scale Deep Learning paper (2021 arxiv): https:&#x2F;&#x2F;arxiv.org&#x2F;abs&#x2F;2104.07857 The highlight of the method  The much larger models training can scale">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://zhuogege1943.com/blogs/joplin_resources/00b9efa88bd0739b7e943fe529a345e2.png">
+<meta property="og:image" content="https://zhuogege1943.com/blogs/joplin_resources/8a85f10d4d6dc087d5c8c909ec405344.png">
+<meta property="og:image" content="https://zhuogege1943.com/blogs/joplin_resources/c3cedb168b6a6721a4dff204318e3de6.png">
+<meta property="og:image" content="https://zhuogege1943.com/blogs/joplin_resources/b148a02b87899d410bd9bf9f5ef1a732.png">
+<meta property="og:image" content="https://zhuogege1943.com/blogs/joplin_resources/28563fd4e1e63c8ef9529a73538dbf48.png">
+<meta property="og:image" content="https://zhuogege1943.com/blogs/joplin_resources/aa0c31714a328bfc8c34e6562c281067.png">
+<meta property="og:image" content="https://zhuogege1943.com/blogs/joplin_resources/0e5f20e06b0f0057017448b9bedf5413.png">
+<meta property="article:published_time" content="2025-01-13T21:55:40.000Z">
+<meta property="article:modified_time" content="2025-01-18T22:22:18.123Z">
+<meta property="article:author" content="Zhuo ge ge">
+<meta property="article:tag" content="Optimization">
+<meta property="article:tag" content="Distributed training">
+<meta property="article:tag" content="LLM">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://zhuogege1943.com/blogs/joplin_resources/00b9efa88bd0739b7e943fe529a345e2.png">
+
+
+<link rel="canonical" href="https://zhuogege1943.com/blogs/2025/01/13/ZeRO-Infinity/">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"en","comments":true,"permalink":"https://zhuogege1943.com/blogs/2025/01/13/ZeRO-Infinity/","path":"2025/01/13/ZeRO-Infinity/","title":"ZeRO-Infinity"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>ZeRO-Infinity | Zhuo's Blog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/blogs/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/blogs/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Zhuo's Blog</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="Search" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/blogs/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a></li><li class="menu-item menu-item-about"><a href="/blogs/about/" rel="section"><i class="fa fa-user fa-fw"></i>About</a></li><li class="menu-item menu-item-tags"><a href="/blogs/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a></li><li class="menu-item menu-item-categories"><a href="/blogs/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a></li><li class="menu-item menu-item-all-blogs"><a href="/blogs/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>All blogs</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="Searching..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#ZeRO-Infinity-Breaking-the-GPU-Memory-Wall-for-Extreme-Scale-Deep-Learning"><span class="nav-number">1.</span> <span class="nav-text">ZeRO-Infinity: Breaking the GPU Memory Wall for Extreme Scale Deep Learning</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#The-highlight-of-the-method"><span class="nav-number">1.1.</span> <span class="nav-text">The highlight of the method</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#My-memory-on-ZeRO-Infinity"><span class="nav-number">1.2.</span> <span class="nav-text">My memory on ZeRO-Infinity</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Memory-we-have"><span class="nav-number">1.2.1.</span> <span class="nav-text">Memory we have</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Requirement-on-memory-bandwidth-for-efficient-training"><span class="nav-number">1.2.2.</span> <span class="nav-text">Requirement on memory bandwidth for efficient training</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#How-to-fully-use-memory-to-scale-to-trillion-parameter-models"><span class="nav-number">1.2.3.</span> <span class="nav-text">How to fully use memory to scale to trillion-parameter models?</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#How-to-fully-use-slow-memory-bandwidth-to-remain-high-training-efficiency"><span class="nav-number">1.2.4.</span> <span class="nav-text">How to fully use slow memory bandwidth to remain high training efficiency?</span></a></li></ol></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <a href="https://zhuogege1943.com" title=" → personal homepage">
+    <img class="site-author-image" itemprop="image" alt="Zhuo ge ge"
+      src="/blogs/images/dushen.png">
+    </a>
+  <p class="site-author-name" itemprop="name">Zhuo ge ge</p>
+  <div class="site-description" itemprop="description">Hi, nice to meet you</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/blogs/archives/">
+          <span class="site-state-item-count">27</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/blogs/categories/">
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/blogs/tags/">
+        <span class="site-state-item-count">13</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/hellozhuo" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;hellozhuo" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:zuike2013@outlook.com" title="E-Mail → mailto:zuike2013@outlook.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://zhuogege1943.com/blogs/2025/01/13/ZeRO-Infinity/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/blogs/images/dushen.png">
+      <meta itemprop="name" content="Zhuo ge ge">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zhuo's Blog">
+      <meta itemprop="description" content="Hi, nice to meet you">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="ZeRO-Infinity | Zhuo's Blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          ZeRO-Infinity
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2025-01-13 23:55:40" itemprop="dateCreated datePublished" datetime="2025-01-13T23:55:40+02:00">2025-01-13</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">Edited on</span>
+      <time title="Modified: 2025-01-19 00:22:18" itemprop="dateModified" datetime="2025-01-19T00:22:18+02:00">2025-01-19</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">In</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/blogs/categories/Paper-reading/" itemprop="url" rel="index"><span itemprop="name">Paper reading</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">Views: </span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h2 id="ZeRO-Infinity-Breaking-the-GPU-Memory-Wall-for-Extreme-Scale-Deep-Learning">ZeRO-Infinity: Breaking the GPU Memory Wall for Extreme Scale Deep Learning</h2>
+<p>paper (2021 arxiv): <a target="_blank" rel="noopener" href="https://arxiv.org/abs/2104.07857">https://arxiv.org/abs/2104.07857</a></p>
+<h3 id="The-highlight-of-the-method">The highlight of the method</h3>
+<ol>
+<li>The much larger models training can scale to with the same number of GPUs compared with prior methods.<br>
+<img src="/blogs/joplin_resources/00b9efa88bd0739b7e943fe529a345e2.png" alt=""></li>
+<li>High throughput and good scalability<br>
+<img src="/blogs/joplin_resources/8a85f10d4d6dc087d5c8c909ec405344.png" alt=""><br>
+Surprisingly, even with small model size, ZeRO-Infinity performs comparably with 3D parallelism and ZeRO-Offload.</li>
+</ol>
+<span id="more"></span>
+<h3 id="My-memory-on-ZeRO-Infinity">My memory on ZeRO-Infinity</h3>
+<h4 id="Memory-we-have">Memory we have</h4>
+<p><img src="/blogs/joplin_resources/c3cedb168b6a6721a4dff204318e3de6.png" alt=""></p>
+<p>The above figure shows the memory requirement for different sizes of models, where sequence length is 1024 and batch size is 32 (most likely, as implied in the paper), and the memory bandwidth for communication between different devices (refer to the paper for detailed calculation).<br>
+Theoretically, for a single GDX-2 node with 16 GPUs, the aggregate memory on NVMe is 28T, allowing a 1-T model to be trained which requires about 19T memory during training (if activation checkpoints are used).</p>
+<h4 id="Requirement-on-memory-bandwidth-for-efficient-training">Requirement on memory bandwidth for efficient training</h4>
+<p>The problem is the bandwidth from GPU to CPU/NVMe is slow that would likely to be the bottleneck of throughput. How to fully use the slow memory bandwidth to prevent it being the bottleneck is the core of this paper.</p>
+<p>By analyzing the equation of efficiency:<br>
+<img src="/blogs/joplin_resources/b148a02b87899d410bd9bf9f5ef1a732.png" alt=""><br>
+The $ait$ (arithmetic intensity) can be obtained for the following three parts: model parameters and gradients, optimizer states, and activation memory, respectively, by computing the total computation and data movement per training iteration for the transformer model. The $ait$ is a function of batch size, hidden dimension, and sequence length. After that, we let the $peak_{tp}$ is 70TFlops/GPU based on v100, and we can draw the curves of efficiency w.r.t. batch size, hidden dimension, and bandwidth, assuming the sequence length is 1024 (I am not going to details about how the $ait$ is calculated, please refer to the original paper):</p>
+<p><img src="/blogs/joplin_resources/28563fd4e1e63c8ef9529a73538dbf48.png" alt=""></p>
+<p>From the above figure, we got three important numbers for the bandwidth that can allow efficient training.</p>
+<ul>
+<li>For parameters and gradients, the bandwidth requirement is <strong>70GB/s</strong> corresponding to an efficiency of 50%, because for this case, communication can be overlapped with computation, since forward and backward propagation are both executed sequentially. For example, while doing forward propagation for the $i$th operator, the parameters for $(i+1)$th operator can be moved at the same time (i.e., when applying ZeRO-3, move of parameters is actually broadcasting parameters from the host GPU of the parameters to other GPUs). The same mechanism applies to gradients and parameters during backward propagation.</li>
+<li>For optimizer states, the authors of the paper state that the communication cannot be overlapped with computation. Therefore, a bandwidth of <strong>1.5TB/s</strong> is required in order to achieve a 90% efficiency.</li>
+<li>For activation checkpoint memory, a bandwidth of <strong>2GB/s</strong> is obtained to also achieve a 50% efficiency due to the the possibility of overlapped computation and communication.</li>
+</ul>
+<blockquote>
+<p>Note: ZeRO-Infinity is applied based on ZeRO-3</p>
+</blockquote>
+<h4 id="How-to-fully-use-memory-to-scale-to-trillion-parameter-models">How to fully use memory to scale to trillion-parameter models?</h4>
+<p><img src="/blogs/joplin_resources/aa0c31714a328bfc8c34e6562c281067.png" alt=""></p>
+<ul>
+<li>Like above, just offload memory to CPU/NVMe (implemented with a proposed <em>infinity offload engin</em> by the authors).</li>
+<li>CPU offload for activation, as the memory requirement of activations are small.</li>
+<li>Reduce the working memory, by breaking down a large operator into small tiles that can be executed sequentially (the working memory for model state in Figure 2 (a) is calculated based on the largest operator, i.e., the h-&gt;4h linear projection. By using the tiling strategy, the linear operator is represented by a mathematically equivalent sequence of smaller linear operators).</li>
+</ul>
+<h4 id="How-to-fully-use-slow-memory-bandwidth-to-remain-high-training-efficiency">How to fully use slow memory bandwidth to remain high training efficiency?</h4>
+<p><img src="/blogs/joplin_resources/0e5f20e06b0f0057017448b9bedf5413.png" alt=""></p>
+<ol>
+<li>For parameters and gradients<br>
+There are two strategies to enable efficient communication.
+<ul>
+<li>Now we are using ZeRO-3, in the original way, the parameters (usually of a individual operator) are broadcast from other GPUs whenever needed, during which the parameters located in the CPU or NVMe is first moved to the owner GPU via PCIe, followed by broadcast to other GPUs. This causes many idle PCIes because  only the PCIe connected to the owner GPU is active. To solve that, the parameters of the individual operator is further partitioned into all the data parallel GPUs. In this way, the parameters of even an individual operator has many owner GPUs instead of only a single owner GPU. Therefore, during moving the data from CPU or NVMe to GPU, all the PCIes can be active, achieving an aggregate bandwidth linear to the data parallel degree. For example, with 1024 GPUs used in a data parallelism, the aggregate bandwidth for moving data from CPUs to GPUs can be 3TB/s (1024 * 3GB/s). The process is shown above, applying to both parameters and gradients.</li>
+<li>The second is called overlap centric design, which is also quite simple. Basically speaking, when doing the forward pass for the $i$th operator, the parameters of the $(i+1)$th parameters can be at the same time moved from CPUs to GPUs, and the parameters of the $(i+2)$th operator is moved from NVMe to CPUs. Same spirit is applied in backward propagation.</li>
+</ul>
+</li>
+<li>For optimizer states
+<ul>
+<li>A powerful C++ library called <em>DeepNVMe</em> for asynchronous communication that allows ZeRO-Infinity to overlap NVMe to CPU reads with CPU to NVMe writes, as well as the CPU computation for the optimizer step (bring the data from NVMe to CPU memory and back in chunks that can fit in the CPU memory to perform the optimizer step, one chunk at a time).</li>
+<li>Pinned memory management layer that reuses a pinned memory to gradually move the entire optimizer states memory from GPU to CPu or NVMe (pinned memory buffer is important to ensure high-performance tensor reads and writes).</li>
+</ul>
+</li>
+</ol>
+<blockquote>
+<p>Notes: the authors also propose “Ease inspired implementation” to ease use, please refer to the paper for details at section 7.</p>
+</blockquote>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/blogs/tags/Optimization/" rel="tag"># Optimization</a>
+              <a href="/blogs/tags/Distributed-training/" rel="tag"># Distributed training</a>
+              <a href="/blogs/tags/LLM/" rel="tag"># LLM</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/blogs/2025/01/13/ZeRO-Offload/" rel="prev" title="ZeRO-Offload">
+                  <i class="fa fa-angle-left"></i> ZeRO-Offload
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/blogs/2025/01/15/DeepSpeed-MoE/" rel="next" title="DeepSpeed-MoE">
+                  DeepSpeed-MoE <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+    <div class="comments utterances-container"></div>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2025</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Zhuo ge ge</span>
+  </div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="Back to top">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/blogs/js/comments.js"></script><script src="/blogs/js/utils.js"></script><script src="/blogs/js/motion.js"></script><script src="/blogs/js/sidebar.js"></script><script src="/blogs/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/blogs/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"ams","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/blogs/js/third-party/math/mathjax.js"></script>
+
+
+<script class="next-config" data-name="utterances" type="application/json">{"enable":true,"repo":"hellozhuo/blogs","issue_term":"pathname","theme":"preferred-color-scheme"}</script>
+<script src="/blogs/js/third-party/comments/utterances.js"></script>
+
+</body>
+</html>

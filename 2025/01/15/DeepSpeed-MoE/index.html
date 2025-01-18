@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/blogs/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/blogs/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/blogs/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/blogs/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/blogs/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha256-5eIC48iZUHmSlSUz9XtjRyK2mzQkHScZY1WdMaoz74E=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"zhuogege1943.com","root":"/blogs/","images":"/blogs/images","scheme":"Gemini","darkmode":true,"version":"8.21.1","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"},"path":"/blogs/search.xml","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/blogs/js/config.js"></script>
+
+    <meta name="description" content="DeepSpeed-MoE: Advancing Mixture-of-Experts Inference and Training to Power Next-Generation AI Scale paper （2022 arxiv): https:&#x2F;&#x2F;arxiv.org&#x2F;abs&#x2F;2201.05596 First, let’s look at how MoE architectures loo">
+<meta property="og:type" content="article">
+<meta property="og:title" content="DeepSpeed-MoE">
+<meta property="og:url" content="https://zhuogege1943.com/blogs/2025/01/15/DeepSpeed-MoE/index.html">
+<meta property="og:site_name" content="Zhuo&#39;s Blog">
+<meta property="og:description" content="DeepSpeed-MoE: Advancing Mixture-of-Experts Inference and Training to Power Next-Generation AI Scale paper （2022 arxiv): https:&#x2F;&#x2F;arxiv.org&#x2F;abs&#x2F;2201.05596 First, let’s look at how MoE architectures loo">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://zhuogege1943.com/blogs/joplin_resources/56510c03ab3f663e61ef5ad6d7b26b27.png">
+<meta property="og:image" content="https://zhuogege1943.com/blogs/joplin_resources/6512ce37e9868e657baf926fcec2c506.png">
+<meta property="og:image" content="https://zhuogege1943.com/blogs/joplin_resources/917f9e143d592408f47757ff42630b5e.png">
+<meta property="og:image" content="https://zhuogege1943.com/blogs/joplin_resources/f986b67fad17bfaa3a8340da0a4bb94a.png">
+<meta property="og:image" content="https://zhuogege1943.com/blogs/joplin_resources/b0d5a6393bdb235e2ac0b1edaca8e538.png">
+<meta property="article:published_time" content="2025-01-15T20:37:40.000Z">
+<meta property="article:modified_time" content="2025-01-18T22:20:02.131Z">
+<meta property="article:author" content="Zhuo ge ge">
+<meta property="article:tag" content="Optimization">
+<meta property="article:tag" content="Distributed training">
+<meta property="article:tag" content="LLM">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://zhuogege1943.com/blogs/joplin_resources/56510c03ab3f663e61ef5ad6d7b26b27.png">
+
+
+<link rel="canonical" href="https://zhuogege1943.com/blogs/2025/01/15/DeepSpeed-MoE/">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"en","comments":true,"permalink":"https://zhuogege1943.com/blogs/2025/01/15/DeepSpeed-MoE/","path":"2025/01/15/DeepSpeed-MoE/","title":"DeepSpeed-MoE"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>DeepSpeed-MoE | Zhuo's Blog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/blogs/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/blogs/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Zhuo's Blog</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="Search" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/blogs/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a></li><li class="menu-item menu-item-about"><a href="/blogs/about/" rel="section"><i class="fa fa-user fa-fw"></i>About</a></li><li class="menu-item menu-item-tags"><a href="/blogs/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a></li><li class="menu-item menu-item-categories"><a href="/blogs/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a></li><li class="menu-item menu-item-all-blogs"><a href="/blogs/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>All blogs</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="Searching..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link"><span class="nav-number">1.</span> <span class="nav-text">DeepSpeed-MoE: Advancing Mixture-of-Experts Inference and Training to Power Next-Generation AI Scale</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#First-let%E2%80%99s-look-at-how-MoE-architectures-look-like"><span class="nav-number">1.1.</span> <span class="nav-text">First, let’s look at how MoE architectures look like?</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#What-other-methods-do-we-think-about"><span class="nav-number">1.1.1.</span> <span class="nav-text">What other methods do we think about?</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#What-are-we-expecting"><span class="nav-number">1.1.2.</span> <span class="nav-text">What are we expecting?</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Second-lets%E2%80%99-train-all-the-dense-or-MoE-models"><span class="nav-number">1.2.</span> <span class="nav-text">Second, lets’ train all the dense or MoE models.</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#First-how-we-train-the-big-MoE-model"><span class="nav-number">1.2.1.</span> <span class="nav-text">First, how we train the big MoE model?</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Do-we-get-our-expectations"><span class="nav-number">1.2.2.</span> <span class="nav-text">Do we get our expectations?</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Regarding-prediction-performance"><span class="nav-number">1.2.2.1.</span> <span class="nav-text">Regarding prediction performance</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Regarding-training-cost"><span class="nav-number">1.2.2.2.</span> <span class="nav-text">Regarding training cost</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#What-can-we-imagine"><span class="nav-number">1.2.3.</span> <span class="nav-text">What can we imagine?</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Third-PR-MoE-and-MoS"><span class="nav-number">1.3.</span> <span class="nav-text">Third, PR-MoE and MoS</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#PR-MoE-Pyramid-Residual-MoE-for-smaller-size-and-fast-inference-but-same-quality"><span class="nav-number">1.3.1.</span> <span class="nav-text">PR-MoE: Pyramid-Residual-MoE for smaller size and fast inference but same quality</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#But-how-to-train-PR-MoE-in-parallel"><span class="nav-number">1.3.1.1.</span> <span class="nav-text">But how to train PR-MoE in parallel?</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#MoS-Mixture-of-Students-the-student-is-now-a-MoE-model-too"><span class="nav-number">1.3.2.</span> <span class="nav-text">MoS: Mixture-of-Students: the student is now a MoE model too</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#A-strategy-on-training-MoS"><span class="nav-number">1.3.2.1.</span> <span class="nav-text">A strategy on training MoS</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Finally-DeepSpeed-MoE-inference"><span class="nav-number">1.4.</span> <span class="nav-text">Finally, DeepSpeed-MoE inference</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <a href="https://zhuogege1943.com" title=" → personal homepage">
+    <img class="site-author-image" itemprop="image" alt="Zhuo ge ge"
+      src="/blogs/images/dushen.png">
+    </a>
+  <p class="site-author-name" itemprop="name">Zhuo ge ge</p>
+  <div class="site-description" itemprop="description">Hi, nice to meet you</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/blogs/archives/">
+          <span class="site-state-item-count">27</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/blogs/categories/">
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/blogs/tags/">
+        <span class="site-state-item-count">13</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/hellozhuo" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;hellozhuo" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:zuike2013@outlook.com" title="E-Mail → mailto:zuike2013@outlook.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://zhuogege1943.com/blogs/2025/01/15/DeepSpeed-MoE/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/blogs/images/dushen.png">
+      <meta itemprop="name" content="Zhuo ge ge">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zhuo's Blog">
+      <meta itemprop="description" content="Hi, nice to meet you">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="DeepSpeed-MoE | Zhuo's Blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          DeepSpeed-MoE
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2025-01-15 22:37:40" itemprop="dateCreated datePublished" datetime="2025-01-15T22:37:40+02:00">2025-01-15</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">Edited on</span>
+      <time title="Modified: 2025-01-19 00:20:02" itemprop="dateModified" datetime="2025-01-19T00:20:02+02:00">2025-01-19</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">In</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/blogs/categories/Paper-reading/" itemprop="url" rel="index"><span itemprop="name">Paper reading</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">Views: </span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h1>DeepSpeed-MoE: Advancing Mixture-of-Experts Inference and Training to Power Next-Generation AI Scale</h1>
+<p>paper （2022 arxiv): https://arxiv.org/abs/2201.05596</p>
+<h2 id="First-let’s-look-at-how-MoE-architectures-look-like">First, let’s look at how MoE architectures look like?</h2>
+<span id="more"></span>
+<p><img src="/blogs/joplin_resources/56510c03ab3f663e61ef5ad6d7b26b27.png" alt=""></p>
+<p>As shown above, basically, each MoE has a corresponding dense base model. For example, let the 350M dense model be the base model, then on every other feedforward layer, the feedforward layer is expanded with multiple branches (e.g., 128) where each feedforward branch can be seen as an expert on this layer, leading to a MoE architecture (e.g., 350M + MoE-128).</p>
+<p>The number of parameters of MoE is tens times of bigger than the corresponding base model, but the training or inference cost is similar to the base model (assuming that the number of training tokens keeps the same), because only a single expert on each expert layer is activated for each token, via a gating function.</p>
+<h3 id="What-other-methods-do-we-think-about">What other methods do we think about?</h3>
+<ul>
+<li>Network pruning, especially channel pruning (we only activate a certain part of channels in each layer).</li>
+<li>Dynamic pruning, dynamic routing, where a gating function is used to make decisions about which channels, or which layers, will be activated.</li>
+</ul>
+<h3 id="What-are-we-expecting">What are we expecting?</h3>
+<ol>
+<li>We expect that the quality of a MoE model should match the quality of a dense model that is much bigger than the MoE’s base model.</li>
+<li>Yeah, now maybe just point 1.</li>
+</ol>
+<h2 id="Second-lets’-train-all-the-dense-or-MoE-models">Second, lets’ train all the dense or MoE models.</h2>
+<h3 id="First-how-we-train-the-big-MoE-model">First, how we train the big MoE model?</h3>
+<p>Simple, use data parallelism and expert parallelism. For data parallelism, ZeRO series are a good option. For expert parallelism, for each feedforward layer with experts, just partition the parameters along the expert dimension, for example, each GPU has an equal number of experts.</p>
+<p>Since data parallel and expert parallel training are used, before feed the data to experts, we should use a <code>all-to-all</code> operator where we collect the tokens that should be</p>
+<h3 id="Do-we-get-our-expectations">Do we get our expectations?</h3>
+<h4 id="Regarding-prediction-performance">Regarding prediction performance</h4>
+<p><img src="/blogs/joplin_resources/6512ce37e9868e657baf926fcec2c506.png" alt=""></p>
+<p>As shown above, the 350M+MoE-128 performs on par with the 1.3B dense model. Similarly, the 1.3B+MoE-128 performs on par with the 6.7B dense model.</p>
+<h4 id="Regarding-training-cost">Regarding training cost</h4>
+<p><img src="/blogs/joplin_resources/917f9e143d592408f47757ff42630b5e.png" alt=""></p>
+<p>1.3B+MoE-128 model achieves 5$\times$ efficiency compared with the 6.7B dense model.</p>
+<h3 id="What-can-we-imagine">What can we imagine?</h3>
+<p>We can train GPT-3 or MT-NLG 530B quality model with a 5$\times$ reduction in training cost, via MoE models, assuming that the scaling holds.</p>
+<h2 id="Third-PR-MoE-and-MoS">Third, PR-MoE and MoS</h2>
+<h3 id="PR-MoE-Pyramid-Residual-MoE-for-smaller-size-and-fast-inference-but-same-quality">PR-MoE: Pyramid-Residual-MoE for smaller size and fast inference but same quality</h3>
+<p><img src="/blogs/joplin_resources/f986b67fad17bfaa3a8340da0a4bb94a.png" alt=""><br>
+Here is the structure for PR-MoE. The first idea is that the deeper layers could be assigned with more experts while the shallower layers less, similar to the basic CNN structures.<br>
+The second idea is that we can fix one expert and dynamically select the second expert (as the residual) in the expert layers, in order to get the same quality as a Top-2 MoE.</p>
+<h4 id="But-how-to-train-PR-MoE-in-parallel">But how to train PR-MoE in parallel?</h4>
+<p>Solution: <strong>flexible</strong> multi-expert and multi-data parallelism design that allows for training different parts of the model with different expert and data parallelism degree. For example, we have three parts in the architecture with 32, 64, and 128 experts respectively, and the number of GPUs available is 128. The design of parallelism degree could be:</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Non-expert parameters</th>
+<th>Expert parameters in part with 32 experts</th>
+<th>Expert parameters in part with 64 experts</th>
+<th>Expert parameters in part with 128 experts</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Expert parallelism degree</td>
+<td>N/A</td>
+<td>32</td>
+<td>64</td>
+<td>128</td>
+</tr>
+<tr>
+<td>Data parallelism degree (I guess using ZeRO)</td>
+<td>128</td>
+<td>4</td>
+<td>2</td>
+<td>1</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>Note: The training process should be like this: for example, for the layers with 64 experts, each GPU has 1/128 part of the global batch as its minibatch for its non-expert parameters. For non-expert parameters, lets’ say the index of the expert in this GPU is i, the all-to-all operator will assign all tokens belonging to expert i based on the global batch, and the tokens will be partitioned into half and one half will be put to this GPU (because now the data parallelism degree is 2). It means the data fed to non-expert and expert parameters could be from different samples from different minibatches. During the backward propagation, the gradients are averaged following the index information of which data is fed to which parameter. Please also refer to Figure 7 below.</p>
+</blockquote>
+<h3 id="MoS-Mixture-of-Students-the-student-is-now-a-MoE-model-too">MoS: Mixture-of-Students: the student is now a MoE model too</h3>
+<p>The authors state that with standard KD where the student is a dense model, the distilled student model loses the sparse fine-tuning and inference benefits provided by MoE. So they make the student also a MoE model. To make the student smaller, they reduce the depth of each expert branch in the teacher model. The general KD loss is used that forces the MoS to imitate the outputs from the teacher MoE on the training dataset.</p>
+<h4 id="A-strategy-on-training-MoS">A strategy on training MoS</h4>
+<p>MoS is trained in two stages, where the first stage is the normal training with standard loss and KD loss. The second stage stops KD and only train with the standard loss. The motivation is that the student cannot perform as good as the teacher at the end of the training, and the authors hypothesize that the student don’t have enough capacity to minimize both losses, so it should focus on only one loss at the end.</p>
+<h2 id="Finally-DeepSpeed-MoE-inference">Finally, DeepSpeed-MoE inference</h2>
+<p>It should be in the same spirit as in training PR-MoE. Here is the figure illustration:<br>
+<img src="/blogs/joplin_resources/b0d5a6393bdb235e2ac0b1edaca8e538.png" alt=""></p>
+<p>What I guess the process is:<br>
+in non-expert parameters, data parallelism and tensor-slicing model parallelism are used, the all-reduce is for model parallelism to average the output from different tensor slice before going to the next layer (just like Megatron-LM).<br>
+The next layer might be the router to calculate the probabilities for different experts for the following expert parameters. Then because we have used 4-degree data parallelism, but the parallelism for expert parameters doesn’t use it, so we need to use “allgather” to gather the outputs from different data parallelism groups, so that each expert parallelism group see all the data, and takes the corresponding tokens that it is allocated according to the router response for each token. In each expert parallelism group, it further applies expert-slicing to increase parallelism by vertical/horizontal partitioning of expert parameters, and use “all-reduce” to average the output. Among different expert parallelism groups, it uses “alltoall” to update the information.</p>
+<blockquote>
+<p>The authors also designed some subsystems to optimize communications for the collective operators.</p>
+</blockquote>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/blogs/tags/Optimization/" rel="tag"># Optimization</a>
+              <a href="/blogs/tags/Distributed-training/" rel="tag"># Distributed training</a>
+              <a href="/blogs/tags/LLM/" rel="tag"># LLM</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/blogs/2025/01/13/ZeRO-Infinity/" rel="prev" title="ZeRO-Infinity">
+                  <i class="fa fa-angle-left"></i> ZeRO-Infinity
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/blogs/2025/01/18/Other-papers-on-DeepSpeed-MoE/" rel="next" title="Other papers on DeepSpeed-MoE">
+                  Other papers on DeepSpeed-MoE <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+    <div class="comments utterances-container"></div>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2025</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Zhuo ge ge</span>
+  </div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="Back to top">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/blogs/js/comments.js"></script><script src="/blogs/js/utils.js"></script><script src="/blogs/js/motion.js"></script><script src="/blogs/js/sidebar.js"></script><script src="/blogs/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/blogs/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"ams","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/blogs/js/third-party/math/mathjax.js"></script>
+
+
+<script class="next-config" data-name="utterances" type="application/json">{"enable":true,"repo":"hellozhuo/blogs","issue_term":"pathname","theme":"preferred-color-scheme"}</script>
+<script src="/blogs/js/third-party/comments/utterances.js"></script>
+
+</body>
+</html>

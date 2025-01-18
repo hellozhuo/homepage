@@ -1343,7 +1343,366 @@ Here, with 1024 DP, each GPU only consumes 15.6 G memory for a 1 T model, which 
         <category>Paper reading</category>
       </categories>
       <tags>
-        <tag>tbd</tag>
+        <tag>Optimization</tag>
+        <tag>Distributed training</tag>
+        <tag>LLM</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>DeepSpeed-MoE</title>
+    <url>/blogs/2025/01/15/DeepSpeed-MoE/</url>
+    <content><![CDATA[<h1>DeepSpeed-MoE: Advancing Mixture-of-Experts Inference and Training to Power Next-Generation AI Scale</h1>
+<p>paper （2022 arxiv): https://arxiv.org/abs/2201.05596</p>
+<h2 id="First-let’s-look-at-how-MoE-architectures-look-like">First, let’s look at how MoE architectures look like?</h2>
+<span id="more"></span>
+<p><img src="/blogs/joplin_resources/56510c03ab3f663e61ef5ad6d7b26b27.png" alt=""></p>
+<p>As shown above, basically, each MoE has a corresponding dense base model. For example, let the 350M dense model be the base model, then on every other feedforward layer, the feedforward layer is expanded with multiple branches (e.g., 128) where each feedforward branch can be seen as an expert on this layer, leading to a MoE architecture (e.g., 350M + MoE-128).</p>
+<p>The number of parameters of MoE is tens times of bigger than the corresponding base model, but the training or inference cost is similar to the base model (assuming that the number of training tokens keeps the same), because only a single expert on each expert layer is activated for each token, via a gating function.</p>
+<h3 id="What-other-methods-do-we-think-about">What other methods do we think about?</h3>
+<ul>
+<li>Network pruning, especially channel pruning (we only activate a certain part of channels in each layer).</li>
+<li>Dynamic pruning, dynamic routing, where a gating function is used to make decisions about which channels, or which layers, will be activated.</li>
+</ul>
+<h3 id="What-are-we-expecting">What are we expecting?</h3>
+<ol>
+<li>We expect that the quality of a MoE model should match the quality of a dense model that is much bigger than the MoE’s base model.</li>
+<li>Yeah, now maybe just point 1.</li>
+</ol>
+<h2 id="Second-lets’-train-all-the-dense-or-MoE-models">Second, lets’ train all the dense or MoE models.</h2>
+<h3 id="First-how-we-train-the-big-MoE-model">First, how we train the big MoE model?</h3>
+<p>Simple, use data parallelism and expert parallelism. For data parallelism, ZeRO series are a good option. For expert parallelism, for each feedforward layer with experts, just partition the parameters along the expert dimension, for example, each GPU has an equal number of experts.</p>
+<p>Since data parallel and expert parallel training are used, before feed the data to experts, we should use a <code>all-to-all</code> operator where we collect the tokens that should be</p>
+<h3 id="Do-we-get-our-expectations">Do we get our expectations?</h3>
+<h4 id="Regarding-prediction-performance">Regarding prediction performance</h4>
+<p><img src="/blogs/joplin_resources/6512ce37e9868e657baf926fcec2c506.png" alt=""></p>
+<p>As shown above, the 350M+MoE-128 performs on par with the 1.3B dense model. Similarly, the 1.3B+MoE-128 performs on par with the 6.7B dense model.</p>
+<h4 id="Regarding-training-cost">Regarding training cost</h4>
+<p><img src="/blogs/joplin_resources/917f9e143d592408f47757ff42630b5e.png" alt=""></p>
+<p>1.3B+MoE-128 model achieves 5$\times$ efficiency compared with the 6.7B dense model.</p>
+<h3 id="What-can-we-imagine">What can we imagine?</h3>
+<p>We can train GPT-3 or MT-NLG 530B quality model with a 5$\times$ reduction in training cost, via MoE models, assuming that the scaling holds.</p>
+<h2 id="Third-PR-MoE-and-MoS">Third, PR-MoE and MoS</h2>
+<h3 id="PR-MoE-Pyramid-Residual-MoE-for-smaller-size-and-fast-inference-but-same-quality">PR-MoE: Pyramid-Residual-MoE for smaller size and fast inference but same quality</h3>
+<p><img src="/blogs/joplin_resources/f986b67fad17bfaa3a8340da0a4bb94a.png" alt=""><br>
+Here is the structure for PR-MoE. The first idea is that the deeper layers could be assigned with more experts while the shallower layers less, similar to the basic CNN structures.<br>
+The second idea is that we can fix one expert and dynamically select the second expert (as the residual) in the expert layers, in order to get the same quality as a Top-2 MoE.</p>
+<h4 id="But-how-to-train-PR-MoE-in-parallel">But how to train PR-MoE in parallel?</h4>
+<p>Solution: <strong>flexible</strong> multi-expert and multi-data parallelism design that allows for training different parts of the model with different expert and data parallelism degree. For example, we have three parts in the architecture with 32, 64, and 128 experts respectively, and the number of GPUs available is 128. The design of parallelism degree could be:</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Non-expert parameters</th>
+<th>Expert parameters in part with 32 experts</th>
+<th>Expert parameters in part with 64 experts</th>
+<th>Expert parameters in part with 128 experts</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Expert parallelism degree</td>
+<td>N/A</td>
+<td>32</td>
+<td>64</td>
+<td>128</td>
+</tr>
+<tr>
+<td>Data parallelism degree (I guess using ZeRO)</td>
+<td>128</td>
+<td>4</td>
+<td>2</td>
+<td>1</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>Note: The training process should be like this: for example, for the layers with 64 experts, each GPU has 1/128 part of the global batch as its minibatch for its non-expert parameters. For non-expert parameters, lets’ say the index of the expert in this GPU is i, the all-to-all operator will assign all tokens belonging to expert i based on the global batch, and the tokens will be partitioned into half and one half will be put to this GPU (because now the data parallelism degree is 2). It means the data fed to non-expert and expert parameters could be from different samples from different minibatches. During the backward propagation, the gradients are averaged following the index information of which data is fed to which parameter. Please also refer to Figure 7 below.</p>
+</blockquote>
+<h3 id="MoS-Mixture-of-Students-the-student-is-now-a-MoE-model-too">MoS: Mixture-of-Students: the student is now a MoE model too</h3>
+<p>The authors state that with standard KD where the student is a dense model, the distilled student model loses the sparse fine-tuning and inference benefits provided by MoE. So they make the student also a MoE model. To make the student smaller, they reduce the depth of each expert branch in the teacher model. The general KD loss is used that forces the MoS to imitate the outputs from the teacher MoE on the training dataset.</p>
+<h4 id="A-strategy-on-training-MoS">A strategy on training MoS</h4>
+<p>MoS is trained in two stages, where the first stage is the normal training with standard loss and KD loss. The second stage stops KD and only train with the standard loss. The motivation is that the student cannot perform as good as the teacher at the end of the training, and the authors hypothesize that the student don’t have enough capacity to minimize both losses, so it should focus on only one loss at the end.</p>
+<h2 id="Finally-DeepSpeed-MoE-inference">Finally, DeepSpeed-MoE inference</h2>
+<p>It should be in the same spirit as in training PR-MoE. Here is the figure illustration:<br>
+<img src="/blogs/joplin_resources/b0d5a6393bdb235e2ac0b1edaca8e538.png" alt=""></p>
+<p>What I guess the process is:<br>
+in non-expert parameters, data parallelism and tensor-slicing model parallelism are used, the all-reduce is for model parallelism to average the output from different tensor slice before going to the next layer (just like Megatron-LM).<br>
+The next layer might be the router to calculate the probabilities for different experts for the following expert parameters. Then because we have used 4-degree data parallelism, but the parallelism for expert parameters doesn’t use it, so we need to use “allgather” to gather the outputs from different data parallelism groups, so that each expert parallelism group see all the data, and takes the corresponding tokens that it is allocated according to the router response for each token. In each expert parallelism group, it further applies expert-slicing to increase parallelism by vertical/horizontal partitioning of expert parameters, and use “all-reduce” to average the output. Among different expert parallelism groups, it uses “alltoall” to update the information.</p>
+<blockquote>
+<p>The authors also designed some subsystems to optimize communications for the collective operators.</p>
+</blockquote>
+]]></content>
+      <categories>
+        <category>Paper reading</category>
+      </categories>
+      <tags>
+        <tag>Optimization</tag>
+        <tag>Distributed training</tag>
+        <tag>LLM</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Megatron-Turing NLG 530B</title>
+    <url>/blogs/2025/01/18/Megatron-Turing-NLG-530B/</url>
+    <content><![CDATA[<h1>Using DeepSpeed and Megatron to Train Megatron-Turing NLG 530B, A Large-Scale Generative Language Model</h1>
+<p>paper (2021 arxiv): <a href="https://arxiv.org/abs/2201.11990">https://arxiv.org/abs/2201.11990</a></p>
+<h2 id="Model-architecture-and-training-hyperparameters">Model architecture and training hyperparameters</h2>
+<span id="more"></span>
+<p><img src="/blogs/joplin_resources/5ea3e82602184dbccc6d6e7c72d1559d.png" alt=""></p>
+<p>The model has 510B parameters scaled from the transformer decoder. Sequence length is 2048, and the global batch size is 1920.</p>
+<ul>
+<li>LR: use 1B tokens to linearly warmup LR to $5.0e^{-5}$. The LR is then decayed to 10% of its value over 340B tokens with cosine decay.</li>
+<li>Batch size: starts at 32 and gradually increases to 1920 with a step of 32, in the first 12B tokens.</li>
+<li>Weight initialization: normal distribution with 0 mean and standard deviation of $4.0e^{-3}$</li>
+<li>Optimizer: Adam, $\beta_1=0.9$, $\beta_2=0.95$, $\epsilon=10^{-8}$.</li>
+<li>Gradient norm clipping at 1.0, weight decay 0.1.</li>
+</ul>
+<h2 id="Dataset">Dataset</h2>
+<p><img src="/blogs/joplin_resources/a4987b442d321886f97a47d8c418fe2e.png" alt=""></p>
+<p>In total 339B tokens.</p>
+<h2 id="Parallelism-in-training">Parallelism in training</h2>
+<p>Overall: ZeRO Data parallelism + Megatron-LM Tensor parallelism + 1F1B Pipeline parallelism.</p>
+<h3 id="Considerations-on-bandwidth">Considerations on bandwidth</h3>
+<ul>
+<li>Tensor parallelism has the largest communication overhead of the three strategies, and so we prioritize placing tensor parallel works within a node.</li>
+<li>Pipeline parallelism has the lowest communication volume, and so we can schedule pipeline stages across nodes.</li>
+<li>Data parallel works are placed within a node to accelerate gradient communications when possible, otherwise are mapped to nearby nodes when possible.</li>
+</ul>
+<h3 id="Parallelism-degree">Parallelism degree</h3>
+<ul>
+<li>Each 530B parameter model replica spans 280 NVIDIA A100 GPUs, with 8-way tensor parallelism within a node and 35-way pipeline parallelism across nodes. Data parallelism is used to further scale out to thousands of GPUs.</li>
+<li>Model is trained with mixed precision on NVIDIA’s Selene supercomputer with 560 DGX A100 nodes, with each node having 8 NVIDIA 80-GB A100 GPUs (so in total 4480 GPUs). GPUs are connected with NVLink and NVSwitch within node and Infiniband across nodes.</li>
+</ul>
+<h2 id="Results">Results</h2>
+<p>On LAMBADA<br>
+<img src="/blogs/joplin_resources/81a78454a41ffe033f20f81605df6ba6.png" alt=""></p>
+]]></content>
+      <categories>
+        <category>Paper reading</category>
+      </categories>
+      <tags>
+        <tag>Optimization</tag>
+        <tag>Distributed training</tag>
+        <tag>LLM</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Other papers on DeepSpeed-MoE</title>
+    <url>/blogs/2025/01/18/Other-papers-on-DeepSpeed-MoE/</url>
+    <content><![CDATA[<h2 id="A-Hybrid-Tensor-Expert-Data-Parallelism-Approach-to-Optimize-Mixture-of-Experts-Training">A Hybrid Tensor-Expert-Data Parallelism Approach to Optimize Mixture-of-Experts Training</h2>
+<p>This paper further adopts tensor model parallelism from Megatron-LM with Expert parallelism and ZeRO data parallelism for MoE model training. The design spirit is similar to DeepSpeed-MoE:</p>
+<span id="more"></span>
+<p><img src="/blogs/joplin_resources/0c9e4c4fd307433aa71d55d75226e244.png" alt=""></p>
+<p>In forward pass, two “all-reduce” and two “all-to-all” for each transformer layer. In backward pass, an additional “all-reduce” operator is used to synchronize gradients from different data parallel groups.</p>
+<blockquote>
+<p>The authors in this paper also proposed a tiled version of optimizer that partitions the parameters into tiles which could be process sequentially, so that the temporary memory for 32-bit gradients is independent of the number of experts and the base model sizes.</p>
+</blockquote>
+<h2 id="Scaling-Vision-Language-Models-with-Sparse-Mixture-of-Experts">Scaling Vision-Language Models with Sparse Mixture of Experts</h2>
+<p>This is an application on VLM.</p>
+<h3 id="Architecture">Architecture</h3>
+<p>Similar to BeiT v3, but replace the FFN every second layer with the expert layer (only for the first $L-F$ layers, normal FFN in the last $F$ layers).</p>
+<p><img src="/blogs/joplin_resources/7993c31955d1c0d7161da317b0d14593.png" alt=""></p>
+<p>The first $L-F$ layers are for unimodal inputs, where text or image tokens are fed accordingly to V-MoE or T-MoE. The last $F$ layers have additional VL-FFN that can take data if the input is image-text multimodal input.</p>
+<h3 id="Training-objectives">Training objectives</h3>
+<p>It uses masked data modeling like BeiT v3.</p>
+<ul>
+<li>For texts, like BERT, the mask ratio is 15% and the model is trained to recover the masked tokens.</li>
+<li>For images, like MAE, using block-wise masking but mask ratio is 40%, the input image is tokenized using the tokenizer in BEiT v2, where tokens are discretized (similar to VQ-VAE).</li>
+<li>For image-text pairs, text and image mask ratio keeps the same as MLM and MIM (i.e., 15% and 40% I think), and the masked contents need to be recovered by the model based on multimodal input.</li>
+</ul>
+<p>Training objectives will also consider the loading loss for experts.</p>
+<p>During fine-tuning, all the MoE modules, i.e., routers and experts, are frozed.</p>
+<h3 id="Model-configuration-and-size">Model configuration and size</h3>
+<table>
+<thead>
+<tr>
+<th>Model</th>
+<th>#layers</th>
+<th>L-F/F</th>
+<th>#parameters</th>
+<th>Maximum sequence length/Tokenizer</th>
+<th>Image resolution/Tokenizer</th>
+<th>Batch size</th>
+<th>Content in each batch</th>
+<th>Training steps/epochs</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Base</td>
+<td>12</td>
+<td>9/3</td>
+<td>2B (180M per token)</td>
+<td>128/SentencePiece</td>
+<td>224x224/BEiT v2 tokenizer</td>
+<td>6144</td>
+<td>2048 images, 2048 texts, 2048 image-text pairs</td>
+<td>200k steps/40 epochs</td>
+</tr>
+<tr>
+<td>Small</td>
+<td>8</td>
+<td>7/1</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h3 id="Dataset-for-pre-training">Dataset for pre-training</h3>
+<table>
+<thead>
+<tr>
+<th>Modal</th>
+<th>Dataset</th>
+<th>Size</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Text</td>
+<td>English Wikipedia, BookCorpus</td>
+<td>4.7B words for EW + 1B words for BC</td>
+</tr>
+<tr>
+<td>Image</td>
+<td>ImageNet-22K</td>
+<td>14M images</td>
+</tr>
+<tr>
+<td>Text-Image</td>
+<td>Conceptual Captions, SBU Captions, COCO, and Visual Genome</td>
+<td>4M images and 10M image-text pairs in total</td>
+</tr>
+</tbody>
+</table>
+<h3 id="Performance-on-fine-tuning-on-downstream-tasks">Performance on fine-tuning on downstream tasks</h3>
+<p><img src="/blogs/joplin_resources/4256c377ad897626662b1871efd811b6.png" alt=""></p>
+<p>Above is for VL tasks.</p>
+<p><img src="/blogs/joplin_resources/c2c6f4f2d2c6a964974f80c4c5523ca3.png" alt=""></p>
+<p>Above is for Vision/Language only downstream tasks. ImageNet has 1.3M images with 1K classes, and MNLI has 433K sentence pairs.</p>
+]]></content>
+      <categories>
+        <category>Paper reading</category>
+      </categories>
+      <tags>
+        <tag>Optimization</tag>
+        <tag>Distributed training</tag>
+        <tag>VLM</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>ZeRO-Infinity</title>
+    <url>/blogs/2025/01/13/ZeRO-Infinity/</url>
+    <content><![CDATA[<h2 id="ZeRO-Infinity-Breaking-the-GPU-Memory-Wall-for-Extreme-Scale-Deep-Learning">ZeRO-Infinity: Breaking the GPU Memory Wall for Extreme Scale Deep Learning</h2>
+<p>paper (2021 arxiv): <a href="https://arxiv.org/abs/2104.07857">https://arxiv.org/abs/2104.07857</a></p>
+<h3 id="The-highlight-of-the-method">The highlight of the method</h3>
+<ol>
+<li>The much larger models training can scale to with the same number of GPUs compared with prior methods.<br>
+<img src="/blogs/joplin_resources/00b9efa88bd0739b7e943fe529a345e2.png" alt=""></li>
+<li>High throughput and good scalability<br>
+<img src="/blogs/joplin_resources/8a85f10d4d6dc087d5c8c909ec405344.png" alt=""><br>
+Surprisingly, even with small model size, ZeRO-Infinity performs comparably with 3D parallelism and ZeRO-Offload.</li>
+</ol>
+<span id="more"></span>
+<h3 id="My-memory-on-ZeRO-Infinity">My memory on ZeRO-Infinity</h3>
+<h4 id="Memory-we-have">Memory we have</h4>
+<p><img src="/blogs/joplin_resources/c3cedb168b6a6721a4dff204318e3de6.png" alt=""></p>
+<p>The above figure shows the memory requirement for different sizes of models, where sequence length is 1024 and batch size is 32 (most likely, as implied in the paper), and the memory bandwidth for communication between different devices (refer to the paper for detailed calculation).<br>
+Theoretically, for a single GDX-2 node with 16 GPUs, the aggregate memory on NVMe is 28T, allowing a 1-T model to be trained which requires about 19T memory during training (if activation checkpoints are used).</p>
+<h4 id="Requirement-on-memory-bandwidth-for-efficient-training">Requirement on memory bandwidth for efficient training</h4>
+<p>The problem is the bandwidth from GPU to CPU/NVMe is slow that would likely to be the bottleneck of throughput. How to fully use the slow memory bandwidth to prevent it being the bottleneck is the core of this paper.</p>
+<p>By analyzing the equation of efficiency:<br>
+<img src="/blogs/joplin_resources/b148a02b87899d410bd9bf9f5ef1a732.png" alt=""><br>
+The $ait$ (arithmetic intensity) can be obtained for the following three parts: model parameters and gradients, optimizer states, and activation memory, respectively, by computing the total computation and data movement per training iteration for the transformer model. The $ait$ is a function of batch size, hidden dimension, and sequence length. After that, we let the $peak_{tp}$ is 70TFlops/GPU based on v100, and we can draw the curves of efficiency w.r.t. batch size, hidden dimension, and bandwidth, assuming the sequence length is 1024 (I am not going to details about how the $ait$ is calculated, please refer to the original paper):</p>
+<p><img src="/blogs/joplin_resources/28563fd4e1e63c8ef9529a73538dbf48.png" alt=""></p>
+<p>From the above figure, we got three important numbers for the bandwidth that can allow efficient training.</p>
+<ul>
+<li>For parameters and gradients, the bandwidth requirement is <strong>70GB/s</strong> corresponding to an efficiency of 50%, because for this case, communication can be overlapped with computation, since forward and backward propagation are both executed sequentially. For example, while doing forward propagation for the $i$th operator, the parameters for $(i+1)$th operator can be moved at the same time (i.e., when applying ZeRO-3, move of parameters is actually broadcasting parameters from the host GPU of the parameters to other GPUs). The same mechanism applies to gradients and parameters during backward propagation.</li>
+<li>For optimizer states, the authors of the paper state that the communication cannot be overlapped with computation. Therefore, a bandwidth of <strong>1.5TB/s</strong> is required in order to achieve a 90% efficiency.</li>
+<li>For activation checkpoint memory, a bandwidth of <strong>2GB/s</strong> is obtained to also achieve a 50% efficiency due to the the possibility of overlapped computation and communication.</li>
+</ul>
+<blockquote>
+<p>Note: ZeRO-Infinity is applied based on ZeRO-3</p>
+</blockquote>
+<h4 id="How-to-fully-use-memory-to-scale-to-trillion-parameter-models">How to fully use memory to scale to trillion-parameter models?</h4>
+<p><img src="/blogs/joplin_resources/aa0c31714a328bfc8c34e6562c281067.png" alt=""></p>
+<ul>
+<li>Like above, just offload memory to CPU/NVMe (implemented with a proposed <em>infinity offload engin</em> by the authors).</li>
+<li>CPU offload for activation, as the memory requirement of activations are small.</li>
+<li>Reduce the working memory, by breaking down a large operator into small tiles that can be executed sequentially (the working memory for model state in Figure 2 (a) is calculated based on the largest operator, i.e., the h-&gt;4h linear projection. By using the tiling strategy, the linear operator is represented by a mathematically equivalent sequence of smaller linear operators).</li>
+</ul>
+<h4 id="How-to-fully-use-slow-memory-bandwidth-to-remain-high-training-efficiency">How to fully use slow memory bandwidth to remain high training efficiency?</h4>
+<p><img src="/blogs/joplin_resources/0e5f20e06b0f0057017448b9bedf5413.png" alt=""></p>
+<ol>
+<li>For parameters and gradients<br>
+There are two strategies to enable efficient communication.
+<ul>
+<li>Now we are using ZeRO-3, in the original way, the parameters (usually of a individual operator) are broadcast from other GPUs whenever needed, during which the parameters located in the CPU or NVMe is first moved to the owner GPU via PCIe, followed by broadcast to other GPUs. This causes many idle PCIes because  only the PCIe connected to the owner GPU is active. To solve that, the parameters of the individual operator is further partitioned into all the data parallel GPUs. In this way, the parameters of even an individual operator has many owner GPUs instead of only a single owner GPU. Therefore, during moving the data from CPU or NVMe to GPU, all the PCIes can be active, achieving an aggregate bandwidth linear to the data parallel degree. For example, with 1024 GPUs used in a data parallelism, the aggregate bandwidth for moving data from CPUs to GPUs can be 3TB/s (1024 * 3GB/s). The process is shown above, applying to both parameters and gradients.</li>
+<li>The second is called overlap centric design, which is also quite simple. Basically speaking, when doing the forward pass for the $i$th operator, the parameters of the $(i+1)$th parameters can be at the same time moved from CPUs to GPUs, and the parameters of the $(i+2)$th operator is moved from NVMe to CPUs. Same spirit is applied in backward propagation.</li>
+</ul>
+</li>
+<li>For optimizer states
+<ul>
+<li>A powerful C++ library called <em>DeepNVMe</em> for asynchronous communication that allows ZeRO-Infinity to overlap NVMe to CPU reads with CPU to NVMe writes, as well as the CPU computation for the optimizer step (bring the data from NVMe to CPU memory and back in chunks that can fit in the CPU memory to perform the optimizer step, one chunk at a time).</li>
+<li>Pinned memory management layer that reuses a pinned memory to gradually move the entire optimizer states memory from GPU to CPu or NVMe (pinned memory buffer is important to ensure high-performance tensor reads and writes).</li>
+</ul>
+</li>
+</ol>
+<blockquote>
+<p>Notes: the authors also propose “Ease inspired implementation” to ease use, please refer to the paper for details at section 7.</p>
+</blockquote>
+]]></content>
+      <categories>
+        <category>Paper reading</category>
+      </categories>
+      <tags>
+        <tag>Optimization</tag>
+        <tag>Distributed training</tag>
+        <tag>LLM</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>ZeRO-Offload</title>
+    <url>/blogs/2025/01/13/ZeRO-Offload/</url>
+    <content><![CDATA[<h2 id="ZeRO-Offload-Democratizing-Billion-Scale-Model-Training">ZeRO-Offload: Democratizing Billion-Scale Model Training</h2>
+<p>paper (2021 arxiv): <a href="https://arxiv.org/abs/2101.06840">https://arxiv.org/abs/2101.06840</a></p>
+<h3 id="My-memory-on-ZeRO-Offload">My memory on ZeRO-Offload</h3>
+<p>ZeRO-Offlad helps multiple GPUs to scale to larger models that have more number of parameters by offloading the part of the memory to CPUs during training, without affecting the efficiency.</p>
+<p>Way of thinking:</p>
+<ul>
+<li>As much memory as possible offloaded to CPUs.</li>
+<li>The communication overhead should be as small as possible.</li>
+<li>The computation overhead on CPUs shouldn’t affect the training efficiency.</li>
+</ul>
+<span id="more"></span>
+<p>Here is the solution for offloading:<br>
+<img src="/blogs/joplin_resources/aef786e78878724e9ee9422bb14d23a5.png" alt=""></p>
+<p>Based on that, the authors propose to offload the optimizer (i.e., Adam optimizer) to CPUs where mixed precision training is applied, where 16-bit parameters are located in GPUs, but 16-bit gradients,  32-bit parameters, 32-bit variance, and 32-bit momentum[^1] are located in CPUs. Particularly,</p>
+<ol>
+<li>For the single-GPU case, after the 16-bit gradients are obtained by backward propagation in GPU, they are offloaded to CPUs and the optimizer uses the gradients for calculating parameter updates. Then the updated 32-bit parameters are converted to 16-bit which are then moved back to GPU.</li>
+<li>For the multi-GPU case, where ZeRO-2 is applied, then during the backward propagation, gradients are calculated from back to front. When a certain part of parameters got the gradients, the gradients are averaged by the reduce operator and sent to the corresponding data parallel GPU, which are then offloaded to CPU. After the step function is executed in CPU, the updated parameters are convreted to 16-bit and sent back to the GPU, followed by the all-gather operation or broadcast operation[^2] when parameters are updated and located in GPUs (the actual communication process may differ according to the communication strategy when applying ZeRO-2 and the offload method).</li>
+<li>The step function in CPU for the gradients of parameters in later layers and the GPU-&gt;CPU communication can actually be overlapped with backward computation for parameters in previous layers,</li>
+<li>For small batch sizes, the communication and computation in CPUs would occupy a big part of the overall computation, which may be a bottleneck of the throughput. Therefore, the authors proposed to delay the CPU offloading by one iteration, to make sure that the CPU computation can be overlapped with the GPU computation.</li>
+</ol>
+<h3 id="Some-interesting-results">Some interesting results</h3>
+<p><img src="/blogs/joplin_resources/e4272620943e493d8fc12b57e790780b.png" alt=""></p>
+<p>For Figure 10 where a single DGX-2 node is used (16 GPUs), each experiment uses a fixed total batch of 512 (possibly use gradient accumulation). For 1B-15B models, ZeRO-Offload achiever higher throughput than any model because it allows to train with larger batch sizes since the GPU memory is partially offloaded to CPUs. ZeRO-Offload with model parallelism can scale to a 70B-parameter model.</p>
+<p><img src="/blogs/joplin_resources/0eba1fd3580766b70a9f22f3acadd7e2.png" alt=""></p>
+<p>For Figure 11, with more GPUs (such as 64 and 128), ZeRO-2 starts to outperform ZeRO-Offload, because both can now run similar batch sizes, achieving similar computation efficiency, whereas ZeRO-2 does not suffer from the additional overhead of CPU-GPU communication.</p>
+<p>[^1] In mixed-precision training, Adam optimizer state has 32-bit parameters, variance, and momentum, while the model itself has the 16-bit parameters and gradients.<br>
+[^2] For all-gather operation, the the CPUs will execute the step function in parallel when the whole backward propagation is finished and all the gradients are offloaded to CPUs. Then the updated parameters in optimizer states will be moved back to the corresponding GPUs followed by this all-gather operation. For broadcast operation, the CPUs execute step function sequentially once a certain part of gradients are calculated and offloaded to the CPUs. Similarly, the updated parameters will be moved back to the corresponding GPU. Since these parameters only in a single GPU now (in ZeRO-2 data parallelism), they are broadcast to other GPUs.</p>
+]]></content>
+      <categories>
+        <category>Paper reading</category>
+      </categories>
+      <tags>
+        <tag>Optimization</tag>
+        <tag>Distributed training</tag>
+        <tag>LLM</tag>
       </tags>
   </entry>
 </search>
