@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/blogs/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/blogs/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/blogs/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/blogs/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/blogs/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha256-5eIC48iZUHmSlSUz9XtjRyK2mzQkHScZY1WdMaoz74E=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"zhuogege1943.com","root":"/blogs/","images":"/blogs/images","scheme":"Gemini","darkmode":true,"version":"8.21.1","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"},"path":"/blogs/search.xml","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/blogs/js/config.js"></script>
+
+    <meta name="description" content="FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness paper (2022 arxiv): https:&#x2F;&#x2F;arxiv.org&#x2F;abs&#x2F;2205.14135 Background: compute-bound and memory-bound  The performance on throughp">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Flash Attention 1 &amp; 2">
+<meta property="og:url" content="https://zhuogege1943.com/blogs/2025/01/20/Flash-Attention-1-2/index.html">
+<meta property="og:site_name" content="Zhuo&#39;s Blog">
+<meta property="og:description" content="FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness paper (2022 arxiv): https:&#x2F;&#x2F;arxiv.org&#x2F;abs&#x2F;2205.14135 Background: compute-bound and memory-bound  The performance on throughp">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://zhuogege1943.com/blogs/joplin_resources/05003393e95ed1d262dd674027b277fc.png">
+<meta property="og:image" content="https://zhuogege1943.com/blogs/joplin_resources/86cc4118282213911c4965f64c09dfd2.png">
+<meta property="og:image" content="https://zhuogege1943.com/blogs/joplin_resources/876688f56d9a770a95df6f545979003f.png">
+<meta property="og:image" content="https://zhuogege1943.com/blogs/joplin_resources/c9a06b8042a690d65efd34cedffcf1d3.png">
+<meta property="og:image" content="https://zhuogege1943.com/blogs/joplin_resources/9cb4d32da27f092ae9acb25a1b87b758.png">
+<meta property="og:image" content="https://zhuogege1943.com/blogs/joplin_resources/4eb0a485640619986ac3299e883a5e3b.png">
+<meta property="og:image" content="https://zhuogege1943.com/blogs/joplin_resources/f082d5a6fd10e7a791b035c81841516e.png">
+<meta property="og:image" content="https://zhuogege1943.com/blogs/joplin_resources/07027be4807a999525fabdba0c4cf6c4.png">
+<meta property="og:image" content="https://zhuogege1943.com/blogs/joplin_resources/a901af6682d5eec4cc59c463a0251a87.png">
+<meta property="og:image" content="https://zhuogege1943.com/blogs/joplin_resources/c1bd17415d2b700587bd540f304a6c05.png">
+<meta property="og:image" content="https://zhuogege1943.com/blogs/joplin_resources/6d5909408863e2435a0ed74a32423071.png">
+<meta property="og:image" content="https://zhuogege1943.com/blogs/joplin_resources/edb85315cd62f418b02a5d17ef5544ed.png">
+<meta property="article:published_time" content="2025-01-20T20:59:25.000Z">
+<meta property="article:modified_time" content="2025-01-21T00:05:46.125Z">
+<meta property="article:author" content="Zhuo ge ge">
+<meta property="article:tag" content="Optimization">
+<meta property="article:tag" content="Distributed training">
+<meta property="article:tag" content="LLM">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://zhuogege1943.com/blogs/joplin_resources/05003393e95ed1d262dd674027b277fc.png">
+
+
+<link rel="canonical" href="https://zhuogege1943.com/blogs/2025/01/20/Flash-Attention-1-2/">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"en","comments":true,"permalink":"https://zhuogege1943.com/blogs/2025/01/20/Flash-Attention-1-2/","path":"2025/01/20/Flash-Attention-1-2/","title":"Flash Attention 1 & 2"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>Flash Attention 1 & 2 | Zhuo's Blog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/blogs/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/blogs/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Zhuo's Blog</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="Search" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/blogs/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a></li><li class="menu-item menu-item-about"><a href="/blogs/about/" rel="section"><i class="fa fa-user fa-fw"></i>About</a></li><li class="menu-item menu-item-tags"><a href="/blogs/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a></li><li class="menu-item menu-item-categories"><a href="/blogs/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a></li><li class="menu-item menu-item-all-blogs"><a href="/blogs/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>All blogs</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="Searching..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link"><span class="nav-number">1.</span> <span class="nav-text">FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Background-compute-bound-and-memory-bound"><span class="nav-number">1.1.</span> <span class="nav-text">Background: compute-bound and memory-bound</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Equation-of-attention"><span class="nav-number">1.1.1.</span> <span class="nav-text">Equation of attention</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Standard-attention-implementation-is-memory-bound"><span class="nav-number">1.1.2.</span> <span class="nav-text">Standard attention implementation is memory-bound</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Solution"><span class="nav-number">1.1.3.</span> <span class="nav-text">Solution?</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#FlashAttention-via-tiling-and-recomputation"><span class="nav-number">1.2.</span> <span class="nav-text">FlashAttention via tiling and recomputation</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Complexity-of-computation-or-HBM-accesses"><span class="nav-number">1.2.1.</span> <span class="nav-text">Complexity of computation (or HBM accesses)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Block-sparse-FlashAttention"><span class="nav-number">1.2.2.</span> <span class="nav-text">Block-sparse FlashAttention</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Results"><span class="nav-number">1.3.</span> <span class="nav-text">Results</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Conclusion"><span class="nav-number">1.4.</span> <span class="nav-text">Conclusion:</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link"><span class="nav-number">2.</span> <span class="nav-text">FlashAttention-2: Faster Attention with Better Parallelism and Work Partitioning</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Background"><span class="nav-number">2.1.</span> <span class="nav-text">Background</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#FlashAttention-2"><span class="nav-number">2.2.</span> <span class="nav-text">FlashAttention-2</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Another-finding-in-the-algorithm"><span class="nav-number">2.2.1.</span> <span class="nav-text">Another finding in the algorithm</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Parallelism"><span class="nav-number">2.3.</span> <span class="nav-text">Parallelism</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Results-v2"><span class="nav-number">2.4.</span> <span class="nav-text">Results</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <a href="https://zhuogege1943.com" title=" → personal homepage">
+    <img class="site-author-image" itemprop="image" alt="Zhuo ge ge"
+      src="/blogs/images/dushen.png">
+    </a>
+  <p class="site-author-name" itemprop="name">Zhuo ge ge</p>
+  <div class="site-description" itemprop="description">Hi, nice to meet you</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/blogs/archives/">
+          <span class="site-state-item-count">28</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/blogs/categories/">
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/blogs/tags/">
+        <span class="site-state-item-count">13</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/hellozhuo" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;hellozhuo" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:zuike2013@outlook.com" title="E-Mail → mailto:zuike2013@outlook.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://zhuogege1943.com/blogs/2025/01/20/Flash-Attention-1-2/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/blogs/images/dushen.png">
+      <meta itemprop="name" content="Zhuo ge ge">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zhuo's Blog">
+      <meta itemprop="description" content="Hi, nice to meet you">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="Flash Attention 1 & 2 | Zhuo's Blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Flash Attention 1 & 2
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2025-01-20 22:59:25" itemprop="dateCreated datePublished" datetime="2025-01-20T22:59:25+02:00">2025-01-20</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">Edited on</span>
+      <time title="Modified: 2025-01-21 02:05:46" itemprop="dateModified" datetime="2025-01-21T02:05:46+02:00">2025-01-21</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">In</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/blogs/categories/Paper-reading/" itemprop="url" rel="index"><span itemprop="name">Paper reading</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">Views: </span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h1>FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness</h1>
+<p>paper (2022 arxiv): <a target="_blank" rel="noopener" href="https://arxiv.org/abs/2205.14135">https://arxiv.org/abs/2205.14135</a></p>
+<h2 id="Background-compute-bound-and-memory-bound">Background: compute-bound and memory-bound</h2>
+<ul>
+<li>The performance on throughput of transformer layers can be either compute-bound or memory-bound. The higher the arithmetic intensity, the more likely to be memory-bound.</li>
+<li>Compute-bound operators include matrix multiplication where the computation takes more time than communication or data movement, memory-bound operators perform in an opposite way, including element-wise operators, and reduction, e.g., sum, softmax, batch norm, etc.</li>
+</ul>
+<span id="more"></span>
+<h3 id="Equation-of-attention">Equation of attention</h3>
+<p>Here I just take a snip from the paper:</p>
+<p><img src="/blogs/joplin_resources/05003393e95ed1d262dd674027b277fc.png" alt=""></p>
+<h3 id="Standard-attention-implementation-is-memory-bound">Standard attention implementation is memory-bound</h3>
+<p>It is memory-bound due to the quadratic complexity of memory reads/writes (or data movement) to the sequence length, i.e., $O(N^2)$, due to the softmax function and other element-wise operations applied to the attention matrix like masking, dropout.</p>
+<p>In addition, GPU has hierarchy memory structure that comprises multiple forms of memory of different sizes and speeds:<br>
+<img src="/blogs/joplin_resources/86cc4118282213911c4965f64c09dfd2.png" alt=""></p>
+<p>We could see that SRAM has much higher bandwidth than HBM (high bandwidth memory), but unfortunately, the standard implementation involves the $O(N^2)$ data movement from and to HBM, becoming a bottleneck of performance:</p>
+<p><img src="/blogs/joplin_resources/876688f56d9a770a95df6f545979003f.png" alt=""></p>
+<blockquote>
+<p>Note: from my personal view, seems like the statement of the issue is problematic since we could simply don’t write $S$ to HBM and continue using it to computer $P$. In line 3, we can also avoid writing $P$ to HBM and directly use it with $V$ loaded from HBM to computer $O$.<br>
+But the authors also say that GPUs have a massive number of threads to execute an operation (called a kernel). Each kernel loads inputs from HBM to registers and SRAM, computes, then writes outputs to HBM. So it is because the computation of attention is divided into multiple kernels, e.g., $P=softmax(S)$, so these individual kernels should read data from HBM, and write the result back to HBM for the second kernel to read.</p>
+</blockquote>
+<h3 id="Solution">Solution?</h3>
+<p>Obviously, we can <strong>fuse these kernels into one kernel</strong> to be executed in SRAM without reading $S$ from and writing $P$ to HBM. This is actually what FlashAttention is doing.</p>
+<h2 id="FlashAttention-via-tiling-and-recomputation">FlashAttention via tiling and recomputation</h2>
+<p>Here is the algorithm for the forward implementation:<br>
+<img src="/blogs/joplin_resources/c9a06b8042a690d65efd34cedffcf1d3.png" alt=""></p>
+<p>Basically, the tricks that divide $Q$ into $T_r$ segments along the rows, and divide $K$ and $V$ into $T_c$ segments along the columns is called <code>tiling</code>. So after tiling, the computation of attention layer is divided into $T_r\times T_c$ small pieces, for each piece the SRAM could locate all the intermediate results to finish the computation. We use $l\in \mathbb{R}^N$ to record the updated softmax normalization factor, and $m\in \mathbb{R}^N$ to record the maximum elements in rows. Because the the inner loop is long the columns of $K$, so $l$ and $m$ will only be finally determined after the whole inner loop.</p>
+<p>The use of $m$, I guess, is to maintain the numerical stability to avoid huge numbers that can cause overflow.</p>
+<p>If you still don’t understand the tiling, here is the original introduction:<br>
+<img src="/blogs/joplin_resources/9cb4d32da27f092ae9acb25a1b87b758.png" alt=""><br>
+where, we have to track $l$ and $m$ during tiling.</p>
+<p>Actually, the above algorithm skips dropout, causal mask, and scaling of $QK^T$ by $1/\sqrt(d)$. But the addition of these operations is straightforward.</p>
+<p>For backward implementation, it follows the similar spirit. One difference is that it additionally uses gradient checkpointing (activation <code>recomputation</code>) for the attention map, and the dropout mask can be also recomputed known the pseudo-random number generator in the forward pass. Please refer to the appendix in the original paper.</p>
+<h3 id="Complexity-of-computation-or-HBM-accesses">Complexity of computation (or HBM accesses)</h3>
+<p>Here, since FlashAttention prevent the movement of the data with size $N^2$, by combing all the movement from and to HBM, the complexity (number of HBM accesses) is proved to be $o(N<sup>2d</sup>2M^{-1})$.</p>
+<h3 id="Block-sparse-FlashAttention">Block-sparse FlashAttention</h3>
+<p>This is quite simple, since some techniques can be used to sparsify the attention maps block-wise to speed up inference, so we could safely skip all the spasified blocks out of the total $T_r\times T_c$ blocks.</p>
+<h2 id="Results">Results</h2>
+<p><img src="/blogs/joplin_resources/4eb0a485640619986ac3299e883a5e3b.png" alt=""><br>
+Above figure shows that for context length with 1K, FlashAttention gives higher speedup. And:</p>
+<p><img src="/blogs/joplin_resources/f082d5a6fd10e7a791b035c81841516e.png" alt=""></p>
+<h2 id="Conclusion">Conclusion:</h2>
+<p>IO is important, for memory-bound operations.</p>
+<h1>FlashAttention-2: Faster Attention with Better Parallelism and Work Partitioning</h1>
+<h2 id="Background">Background</h2>
+<p>The non-matmul FLOPs are now becoming a bottleneck since its throughput is $16\times$ slower than that of the matmul FLOPs. This is because matmul operations are highly optimized in GPUs.</p>
+<p>So the solution is to reduce the number of non-matmul FLOPs in FlashAttention.</p>
+<h2 id="FlashAttention-2">FlashAttention-2</h2>
+<p>Assuming $T_r=2$ and $T_c=2$, the tiling of computation can be expressed as:<br>
+<img src="/blogs/joplin_resources/07027be4807a999525fabdba0c4cf6c4.png" alt=""></p>
+<p>Then we found that<br>
+<img src="/blogs/joplin_resources/a901af6682d5eec4cc59c463a0251a87.png" alt=""><br>
+and (the below is for backpropagation)<br>
+<img src="/blogs/joplin_resources/c1bd17415d2b700587bd540f304a6c05.png" alt=""></p>
+<p>So the algorithm of forward propagation now becomes:<br>
+<img src="/blogs/joplin_resources/6d5909408863e2435a0ed74a32423071.png" alt=""></p>
+<p>The algorithm for backward propagation follows the same spirit.</p>
+<h3 id="Another-finding-in-the-algorithm">Another finding in the algorithm</h3>
+<p>We could see another big difference is that the order of loops is switched compared to original FlashAttention. Here, the outer loop is along the rows of $Q$, which means each iteration in the outer loop can be executed independently without communicating with each other. In other words, the outer loops can be executed in parallel. But the backward propagation should be further taken care of since it involves some communication between outer loop executions.</p>
+<h2 id="Parallelism">Parallelism</h2>
+<p>The original FlashAttention can be paralleled alongside data (or batch) and head. Based on the above finding, FlashAttention-2 can be further paralleled alongside its outer loop, i.e., the rows of $Q$, or the sequence.</p>
+<p>For backward propagation, we also parallelize the computation along sequence but along the columns of $K$ and $V$, and use atomic adds to communicate between different workers.</p>
+<p>The additional parallelism dimension allows us to better use of multiprocessors on the GPU to improve the occupancy of GPUs.</p>
+<h2 id="Results-v2">Results</h2>
+<p><img src="/blogs/joplin_resources/edb85315cd62f418b02a5d17ef5544ed.png" alt=""></p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/blogs/tags/Optimization/" rel="tag"># Optimization</a>
+              <a href="/blogs/tags/Distributed-training/" rel="tag"># Distributed training</a>
+              <a href="/blogs/tags/LLM/" rel="tag"># LLM</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/blogs/2025/01/18/Megatron-Turing-NLG-530B/" rel="prev" title="Megatron-Turing NLG 530B">
+                  <i class="fa fa-angle-left"></i> Megatron-Turing NLG 530B
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+    <div class="comments utterances-container"></div>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2025</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Zhuo ge ge</span>
+  </div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="Back to top">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/blogs/js/comments.js"></script><script src="/blogs/js/utils.js"></script><script src="/blogs/js/motion.js"></script><script src="/blogs/js/sidebar.js"></script><script src="/blogs/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/blogs/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"ams","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/blogs/js/third-party/math/mathjax.js"></script>
+
+
+<script class="next-config" data-name="utterances" type="application/json">{"enable":true,"repo":"hellozhuo/blogs","issue_term":"pathname","theme":"preferred-color-scheme"}</script>
+<script src="/blogs/js/third-party/comments/utterances.js"></script>
+
+</body>
+</html>

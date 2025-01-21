@@ -1705,4 +1705,82 @@ There are two strategies to enable efficient communication.
         <tag>LLM</tag>
       </tags>
   </entry>
+  <entry>
+    <title>Flash Attention 1 &amp; 2</title>
+    <url>/blogs/2025/01/20/Flash-Attention-1-2/</url>
+    <content><![CDATA[<h1>FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness</h1>
+<p>paper (2022 arxiv): <a href="https://arxiv.org/abs/2205.14135">https://arxiv.org/abs/2205.14135</a></p>
+<h2 id="Background-compute-bound-and-memory-bound">Background: compute-bound and memory-bound</h2>
+<ul>
+<li>The performance on throughput of transformer layers can be either compute-bound or memory-bound. The higher the arithmetic intensity, the more likely to be memory-bound.</li>
+<li>Compute-bound operators include matrix multiplication where the computation takes more time than communication or data movement, memory-bound operators perform in an opposite way, including element-wise operators, and reduction, e.g., sum, softmax, batch norm, etc.</li>
+</ul>
+<span id="more"></span>
+<h3 id="Equation-of-attention">Equation of attention</h3>
+<p>Here I just take a snip from the paper:</p>
+<p><img src="/blogs/joplin_resources/05003393e95ed1d262dd674027b277fc.png" alt=""></p>
+<h3 id="Standard-attention-implementation-is-memory-bound">Standard attention implementation is memory-bound</h3>
+<p>It is memory-bound due to the quadratic complexity of memory reads/writes (or data movement) to the sequence length, i.e., $O(N^2)$, due to the softmax function and other element-wise operations applied to the attention matrix like masking, dropout.</p>
+<p>In addition, GPU has hierarchy memory structure that comprises multiple forms of memory of different sizes and speeds:<br>
+<img src="/blogs/joplin_resources/86cc4118282213911c4965f64c09dfd2.png" alt=""></p>
+<p>We could see that SRAM has much higher bandwidth than HBM (high bandwidth memory), but unfortunately, the standard implementation involves the $O(N^2)$ data movement from and to HBM, becoming a bottleneck of performance:</p>
+<p><img src="/blogs/joplin_resources/876688f56d9a770a95df6f545979003f.png" alt=""></p>
+<blockquote>
+<p>Note: from my personal view, seems like the statement of the issue is problematic since we could simply don’t write $S$ to HBM and continue using it to computer $P$. In line 3, we can also avoid writing $P$ to HBM and directly use it with $V$ loaded from HBM to computer $O$.<br>
+But the authors also say that GPUs have a massive number of threads to execute an operation (called a kernel). Each kernel loads inputs from HBM to registers and SRAM, computes, then writes outputs to HBM. So it is because the computation of attention is divided into multiple kernels, e.g., $P=softmax(S)$, so these individual kernels should read data from HBM, and write the result back to HBM for the second kernel to read.</p>
+</blockquote>
+<h3 id="Solution">Solution?</h3>
+<p>Obviously, we can <strong>fuse these kernels into one kernel</strong> to be executed in SRAM without reading $S$ from and writing $P$ to HBM. This is actually what FlashAttention is doing.</p>
+<h2 id="FlashAttention-via-tiling-and-recomputation">FlashAttention via tiling and recomputation</h2>
+<p>Here is the algorithm for the forward implementation:<br>
+<img src="/blogs/joplin_resources/c9a06b8042a690d65efd34cedffcf1d3.png" alt=""></p>
+<p>Basically, the tricks that divide $Q$ into $T_r$ segments along the rows, and divide $K$ and $V$ into $T_c$ segments along the columns is called <code>tiling</code>. So after tiling, the computation of attention layer is divided into $T_r\times T_c$ small pieces, for each piece the SRAM could locate all the intermediate results to finish the computation. We use $l\in \mathbb{R}^N$ to record the updated softmax normalization factor, and $m\in \mathbb{R}^N$ to record the maximum elements in rows. Because the the inner loop is long the columns of $K$, so $l$ and $m$ will only be finally determined after the whole inner loop.</p>
+<p>The use of $m$, I guess, is to maintain the numerical stability to avoid huge numbers that can cause overflow.</p>
+<p>If you still don’t understand the tiling, here is the original introduction:<br>
+<img src="/blogs/joplin_resources/9cb4d32da27f092ae9acb25a1b87b758.png" alt=""><br>
+where, we have to track $l$ and $m$ during tiling.</p>
+<p>Actually, the above algorithm skips dropout, causal mask, and scaling of $QK^T$ by $1/\sqrt(d)$. But the addition of these operations is straightforward.</p>
+<p>For backward implementation, it follows the similar spirit. One difference is that it additionally uses gradient checkpointing (activation <code>recomputation</code>) for the attention map, and the dropout mask can be also recomputed known the pseudo-random number generator in the forward pass. Please refer to the appendix in the original paper.</p>
+<h3 id="Complexity-of-computation-or-HBM-accesses">Complexity of computation (or HBM accesses)</h3>
+<p>Here, since FlashAttention prevent the movement of the data with size $N^2$, by combing all the movement from and to HBM, the complexity (number of HBM accesses) is proved to be $o(N<sup>2d</sup>2M^{-1})$.</p>
+<h3 id="Block-sparse-FlashAttention">Block-sparse FlashAttention</h3>
+<p>This is quite simple, since some techniques can be used to sparsify the attention maps block-wise to speed up inference, so we could safely skip all the spasified blocks out of the total $T_r\times T_c$ blocks.</p>
+<h2 id="Results">Results</h2>
+<p><img src="/blogs/joplin_resources/4eb0a485640619986ac3299e883a5e3b.png" alt=""><br>
+Above figure shows that for context length with 1K, FlashAttention gives higher speedup. And:</p>
+<p><img src="/blogs/joplin_resources/f082d5a6fd10e7a791b035c81841516e.png" alt=""></p>
+<h2 id="Conclusion">Conclusion:</h2>
+<p>IO is important, for memory-bound operations.</p>
+<h1>FlashAttention-2: Faster Attention with Better Parallelism and Work Partitioning</h1>
+<h2 id="Background">Background</h2>
+<p>The non-matmul FLOPs are now becoming a bottleneck since its throughput is $16\times$ slower than that of the matmul FLOPs. This is because matmul operations are highly optimized in GPUs.</p>
+<p>So the solution is to reduce the number of non-matmul FLOPs in FlashAttention.</p>
+<h2 id="FlashAttention-2">FlashAttention-2</h2>
+<p>Assuming $T_r=2$ and $T_c=2$, the tiling of computation can be expressed as:<br>
+<img src="/blogs/joplin_resources/07027be4807a999525fabdba0c4cf6c4.png" alt=""></p>
+<p>Then we found that<br>
+<img src="/blogs/joplin_resources/a901af6682d5eec4cc59c463a0251a87.png" alt=""><br>
+and (the below is for backpropagation)<br>
+<img src="/blogs/joplin_resources/c1bd17415d2b700587bd540f304a6c05.png" alt=""></p>
+<p>So the algorithm of forward propagation now becomes:<br>
+<img src="/blogs/joplin_resources/6d5909408863e2435a0ed74a32423071.png" alt=""></p>
+<p>The algorithm for backward propagation follows the same spirit.</p>
+<h3 id="Another-finding-in-the-algorithm">Another finding in the algorithm</h3>
+<p>We could see another big difference is that the order of loops is switched compared to original FlashAttention. Here, the outer loop is along the rows of $Q$, which means each iteration in the outer loop can be executed independently without communicating with each other. In other words, the outer loops can be executed in parallel. But the backward propagation should be further taken care of since it involves some communication between outer loop executions.</p>
+<h2 id="Parallelism">Parallelism</h2>
+<p>The original FlashAttention can be paralleled alongside data (or batch) and head. Based on the above finding, FlashAttention-2 can be further paralleled alongside its outer loop, i.e., the rows of $Q$, or the sequence.</p>
+<p>For backward propagation, we also parallelize the computation along sequence but along the columns of $K$ and $V$, and use atomic adds to communicate between different workers.</p>
+<p>The additional parallelism dimension allows us to better use of multiprocessors on the GPU to improve the occupancy of GPUs.</p>
+<h2 id="Results-v2">Results</h2>
+<p><img src="/blogs/joplin_resources/edb85315cd62f418b02a5d17ef5544ed.png" alt=""></p>
+]]></content>
+      <categories>
+        <category>Paper reading</category>
+      </categories>
+      <tags>
+        <tag>Optimization</tag>
+        <tag>Distributed training</tag>
+        <tag>LLM</tag>
+      </tags>
+  </entry>
 </search>
