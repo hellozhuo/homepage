@@ -901,25 +901,6 @@ To quantize the weights and activations during training, using STE to propagate 
       </tags>
   </entry>
   <entry>
-    <title>InstructGP-RLHF</title>
-    <url>/blogs/2024/06/27/InstructGP-RLHF/</url>
-    <content><![CDATA[<h2 id="Training-language-models-to-follow-instructions-with-human-feedback">Training language models to follow instructions with human feedback</h2>
-<span id="more"></span>
-<p><img src="/blogs/joplin_resources/ed41c95657c09fd229c5ed16ef514980.png" alt=""></p>
-<p>The motivation is that the output of GPT series are not aligned with the user needs, since the pre-text task in GPT is to predict next word, but the expectation of ChatGPT is to be useful and helpful for users. Thus, the authors give a 3-stage framework to fine-tune GPT-3.</p>
-<p>First, they collect some prompts (questions) and answers from users/labelers, and use these to fine-tune GPT-3.</p>
-<p>Second, they ask labelers to rank the multiple outputs of the model from step 1 for a single prompt. Then they train a reward model to match the ranking.</p>
-<p>Third, they further train the model from step 1 such that its output has a high score from the reward model from step 2.</p>
-<p>It is called reinforcement learning from human feedback, or RLHF.</p>
-]]></content>
-      <categories>
-        <category>Paper reading</category>
-      </categories>
-      <tags>
-        <tag>LLM</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>RAG - Retrieval Augmented Generation</title>
     <url>/blogs/2024/06/28/RAG-Retrieval-Augmented-Generation/</url>
     <content><![CDATA[<p>Tutorial: https://www.youtube.com/watch?v=rhZgXNdhWDY<br>
@@ -1741,8 +1722,8 @@ But the authors also say that GPUs have a massive number of threads to execute a
 where, we have to track $l$ and $m$ during tiling.</p>
 <p>Actually, the above algorithm skips dropout, causal mask, and scaling of $QK^T$ by $1/\sqrt(d)$. But the addition of these operations is straightforward.</p>
 <p>For backward implementation, it follows the similar spirit. One difference is that it additionally uses gradient checkpointing (activation <code>recomputation</code>) for the attention map, and the dropout mask can be also recomputed known the pseudo-random number generator in the forward pass. Please refer to the appendix in the original paper.</p>
-<h3 id="Complexity-of-computation-or-HBM-accesses">Complexity of computation (or HBM accesses)</h3>
-<p>Here, since FlashAttention prevent the movement of the data with size $N^2$, by combing all the movement from and to HBM, the complexity (number of HBM accesses) is proved to be $o(N<sup>2d</sup>2M^{-1})$.</p>
+<h3 id="Complexity-of-communication-or-HBM-accesses">Complexity of communication (or HBM accesses)</h3>
+<p>Here, since FlashAttention prevent the movement of the data with size $N^2$, by combing all the movement from and to HBM, the communication complexity (number of HBM accesses) is proved to be $o(N<sup>2d</sup>2M^{-1})$.</p>
 <h3 id="Block-sparse-FlashAttention">Block-sparse FlashAttention</h3>
 <p>This is quite simple, since some techniques can be used to sparsify the attention maps block-wise to speed up inference, so we could safely skip all the spasified blocks out of the total $T_r\times T_c$ blocks.</p>
 <h2 id="Results">Results</h2>
@@ -1780,6 +1761,25 @@ and (the below is for backpropagation)<br>
       <tags>
         <tag>Optimization</tag>
         <tag>Distributed training</tag>
+        <tag>LLM</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>InstructGPT-RLHF</title>
+    <url>/blogs/2024/06/27/InstructGPT-RLHF/</url>
+    <content><![CDATA[<h2 id="Training-language-models-to-follow-instructions-with-human-feedback">Training language models to follow instructions with human feedback</h2>
+<span id="more"></span>
+<p><img src="/blogs/joplin_resources/ed41c95657c09fd229c5ed16ef514980.png" alt=""></p>
+<p>The motivation is that the output of GPT series are not aligned with the user needs, since the pre-text task in GPT is to predict next word, but the expectation of ChatGPT is to be useful and helpful for users. Thus, the authors give a 3-stage framework to fine-tune GPT-3.</p>
+<p>First, they collect some prompts (questions) and answers from users/labelers, and use these to fine-tune GPT-3.</p>
+<p>Second, they ask labelers to rank the multiple outputs of the model from step 1 for a single prompt. Then they train a reward model to match the ranking.</p>
+<p>Third, they further train the model from step 1 such that its output has a high score from the reward model from step 2.</p>
+<p>It is called reinforcement learning from human feedback, or RLHF.</p>
+]]></content>
+      <categories>
+        <category>Paper reading</category>
+      </categories>
+      <tags>
         <tag>LLM</tag>
       </tags>
   </entry>
