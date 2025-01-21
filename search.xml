@@ -1723,7 +1723,7 @@ where, we have to track $l$ and $m$ during tiling.</p>
 <p>Actually, the above algorithm skips dropout, causal mask, and scaling of $QK^T$ by $1/\sqrt(d)$. But the addition of these operations is straightforward.</p>
 <p>For backward implementation, it follows the similar spirit. One difference is that it additionally uses gradient checkpointing (activation <code>recomputation</code>) for the attention map, and the dropout mask can be also recomputed known the pseudo-random number generator in the forward pass. Please refer to the appendix in the original paper.</p>
 <h3 id="Complexity-of-communication-or-HBM-accesses">Complexity of communication (or HBM accesses)</h3>
-<p>Here, since FlashAttention prevent the movement of the data with size $N^2$, by combing all the movement from and to HBM, the communication complexity (number of HBM accesses) is proved to be $ o(N<sup>2d</sup>2M^{-1})$.</p>
+<p>Here, since FlashAttention prevent the movement of the data with size $N^2$, by combing all the movement from and to HBM, the communication complexity (number of HBM accesses) is proved to be $o(N<sup>2d</sup>2M^{-1})$.</p>
 <h3 id="Block-sparse-FlashAttention">Block-sparse FlashAttention</h3>
 <p>This is quite simple, since some techniques can be used to sparsify the attention maps block-wise to speed up inference, so we could safely skip all the spasified blocks out of the total $T_r\times T_c$ blocks.</p>
 <h2 id="Results">Results</h2>
