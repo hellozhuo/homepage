@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/blogs/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/blogs/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/blogs/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/blogs/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/blogs/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha256-5eIC48iZUHmSlSUz9XtjRyK2mzQkHScZY1WdMaoz74E=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"zhuogege1943.com","root":"/blogs/","images":"/blogs/images","scheme":"Gemini","darkmode":true,"version":"8.21.1","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"},"path":"/blogs/search.xml","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/blogs/js/config.js"></script>
+
+    <meta name="description" content="Paper list  DeepSeek-VL: Towards Real-World Vision-Language Understanding Janus: Decoupling Visual Encoding for Unified Multimodal Understanding and Generation JanusFlow: Harmonizing Autoregression an">
+<meta property="og:type" content="article">
+<meta property="og:title" content="DeepSeek Series - VLM">
+<meta property="og:url" content="https://zhuogege1943.com/blogs/2025/04/01/DeepSeek-Series-VLM/index.html">
+<meta property="og:site_name" content="Zhuo&#39;s Blog">
+<meta property="og:description" content="Paper list  DeepSeek-VL: Towards Real-World Vision-Language Understanding Janus: Decoupling Visual Encoding for Unified Multimodal Understanding and Generation JanusFlow: Harmonizing Autoregression an">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://zhuogege1943.com/blogs/joplin_resources/73979f1d7ac8563c66ac3620e12fc9c0.png">
+<meta property="og:image" content="https://zhuogege1943.com/blogs/joplin_resources/ce9c596abb969eb4d41bc3787a22df09.png">
+<meta property="og:image" content="https://zhuogege1943.com/blogs/joplin_resources/de88485afccd6d3e78a249c1baf1c44f.png">
+<meta property="og:image" content="https://zhuogege1943.com/blogs/joplin_resources/1f059e7f7781c9e3dc1eb7c0ed3a8c5f.png">
+<meta property="og:image" content="https://zhuogege1943.com/blogs/joplin_resources/b67ecfc3fa09e661dcb6fb770b55738e.png">
+<meta property="og:image" content="https://zhuogege1943.com/blogs/joplin_resources/2286717cf3b6f9adcd8733210ff36604.png">
+<meta property="og:image" content="https://zhuogege1943.com/blogs/joplin_resources/a7f033d53bc0a574cfaa6e6a8cf15c15.png">
+<meta property="og:image" content="https://zhuogege1943.com/blogs/joplin_resources/bc3b6e04420368e61d8cd5f36f21fec0.png">
+<meta property="og:image" content="https://zhuogege1943.com/blogs/joplin_resources/6796c88e04a50246b5d52f8e31240b13.png">
+<meta property="og:image" content="https://zhuogege1943.com/blogs/joplin_resources/6ac4d9f4433d604aaa8910bc6da88cdf.png">
+<meta property="og:image" content="https://zhuogege1943.com/blogs/joplin_resources/41982dd75b030bdc77b72a85fb1cc939.png">
+<meta property="og:image" content="https://zhuogege1943.com/blogs/joplin_resources/5c9c082e6e6a8efd4ba1e870b028b383.png">
+<meta property="og:image" content="https://zhuogege1943.com/blogs/joplin_resources/7141e4d05e6b33a941adabf585df866a.png">
+<meta property="og:image" content="https://zhuogege1943.com/blogs/joplin_resources/e5400cbbb9bec63deaceb2cf0910ab41.png">
+<meta property="og:image" content="https://zhuogege1943.com/blogs/joplin_resources/06cfce6af84f521c6f12dc00089972dc.png">
+<meta property="og:image" content="https://zhuogege1943.com/blogs/joplin_resources/d94d5a43e525310ded726eaacff04a8b.png">
+<meta property="og:image" content="https://zhuogege1943.com/blogs/joplin_resources/f0103f380a96b1652a1c0d0923fa1deb.png">
+<meta property="article:published_time" content="2025-04-01T20:16:29.000Z">
+<meta property="article:modified_time" content="2025-04-01T22:51:33.576Z">
+<meta property="article:author" content="Zhuo ge ge">
+<meta property="article:tag" content="VLM">
+<meta property="article:tag" content="DeepSeek">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://zhuogege1943.com/blogs/joplin_resources/73979f1d7ac8563c66ac3620e12fc9c0.png">
+
+
+<link rel="canonical" href="https://zhuogege1943.com/blogs/2025/04/01/DeepSeek-Series-VLM/">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"en","comments":true,"permalink":"https://zhuogege1943.com/blogs/2025/04/01/DeepSeek-Series-VLM/","path":"2025/04/01/DeepSeek-Series-VLM/","title":"DeepSeek Series - VLM"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>DeepSeek Series - VLM | Zhuo's Blog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/blogs/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/blogs/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Zhuo's Blog</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="Search" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/blogs/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a></li><li class="menu-item menu-item-about"><a href="/blogs/about/" rel="section"><i class="fa fa-user fa-fw"></i>About</a></li><li class="menu-item menu-item-tags"><a href="/blogs/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a></li><li class="menu-item menu-item-categories"><a href="/blogs/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a></li><li class="menu-item menu-item-all-blogs"><a href="/blogs/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>All blogs</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="Searching..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#General-information"><span class="nav-number">1.</span> <span class="nav-text">General information</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DeepSeek-VL-Towards-Real-World-Vision-Language-Understanding"><span class="nav-number">2.</span> <span class="nav-text">DeepSeek-VL: Towards Real-World Vision-Language Understanding</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Overview"><span class="nav-number">2.1.</span> <span class="nav-text">Overview</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Method"><span class="nav-number">2.2.</span> <span class="nav-text">Method</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Data"><span class="nav-number">2.2.1.</span> <span class="nav-text">Data</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Architecutre"><span class="nav-number">2.2.2.</span> <span class="nav-text">Architecutre</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Training-pipeline"><span class="nav-number">2.2.3.</span> <span class="nav-text">Training pipeline</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DeepSeek-VL2-Mixture-of-Experts-Vision-Language-Models-for-Advanced-Multimodal-Understanding"><span class="nav-number">3.</span> <span class="nav-text">DeepSeek-VL2: Mixture-of-Experts Vision-Language Models for Advanced Multimodal Understanding</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Overview-v2"><span class="nav-number">3.1.</span> <span class="nav-text">Overview</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Method-v2"><span class="nav-number">3.2.</span> <span class="nav-text">Method</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Janus-Decoupling-Visual-Encoding-for-Unified-Multimodal-Understanding-and-Generation"><span class="nav-number">4.</span> <span class="nav-text">Janus: Decoupling Visual Encoding for Unified Multimodal Understanding and Generation</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Overview-v3"><span class="nav-number">4.1.</span> <span class="nav-text">Overview</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Method-v3"><span class="nav-number">4.2.</span> <span class="nav-text">Method</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Vision-encoders-and-adaptors"><span class="nav-number">4.2.1.</span> <span class="nav-text">Vision encoders and adaptors</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Training-pipeline-v2"><span class="nav-number">4.2.2.</span> <span class="nav-text">Training pipeline</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Janus-Pro-Unified-Multimodal-Understanding-and-Generation-with-Data-and-Model-Scaling"><span class="nav-number">5.</span> <span class="nav-text">Janus-Pro: Unified Multimodal Understanding and Generation with Data and Model Scaling</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Overall"><span class="nav-number">5.1.</span> <span class="nav-text">Overall</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Method-v4"><span class="nav-number">5.2.</span> <span class="nav-text">Method</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#JanusFlow-Harmonizing-Autoregression-and-Rectified-Flow-for-Unified-Multimodal-Understanding-and-Generation"><span class="nav-number">6.</span> <span class="nav-text">JanusFlow: Harmonizing Autoregression and Rectified Flow for Unified Multimodal Understanding and Generation</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Overview-and-Method"><span class="nav-number">6.1.</span> <span class="nav-text">Overview and Method</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <a href="https://zhuogege1943.com" title=" → personal homepage">
+    <img class="site-author-image" itemprop="image" alt="Zhuo ge ge"
+      src="/blogs/images/dushen.png">
+    </a>
+  <p class="site-author-name" itemprop="name">Zhuo ge ge</p>
+  <div class="site-description" itemprop="description">Hi, nice to meet you</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/blogs/archives/">
+          <span class="site-state-item-count">30</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/blogs/categories/">
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/blogs/tags/">
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/hellozhuo" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;hellozhuo" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:zuike2013@outlook.com" title="E-Mail → mailto:zuike2013@outlook.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://zhuogege1943.com/blogs/2025/04/01/DeepSeek-Series-VLM/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/blogs/images/dushen.png">
+      <meta itemprop="name" content="Zhuo ge ge">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zhuo's Blog">
+      <meta itemprop="description" content="Hi, nice to meet you">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="DeepSeek Series - VLM | Zhuo's Blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          DeepSeek Series - VLM
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2025-04-01 23:16:29" itemprop="dateCreated datePublished" datetime="2025-04-01T23:16:29+03:00">2025-04-01</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">Edited on</span>
+      <time title="Modified: 2025-04-02 01:51:33" itemprop="dateModified" datetime="2025-04-02T01:51:33+03:00">2025-04-02</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">In</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/blogs/categories/Paper-reading/" itemprop="url" rel="index"><span itemprop="name">Paper reading</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">Views: </span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>Paper list</p>
+<ul>
+<li>DeepSeek-VL: Towards Real-World Vision-Language Understanding</li>
+<li>Janus: Decoupling Visual Encoding for Unified Multimodal Understanding and Generation</li>
+<li>JanusFlow: Harmonizing Autoregression and Rectified Flow for Unified Multimodal Understanding and Generation</li>
+<li>DeepSeek-VL2: Mixture-of-Experts Vision-Language Models for Advanced Multimodal Understanding</li>
+<li>Janus-Pro: Unified Multimodal Understanding and Generation with Data and Model Scaling</li>
+</ul>
+<h2 id="General-information">General information</h2>
+<p>DeepSeek-VL and VL2 are two multimodal models for understanding, no visual generation.<br>
+Janus series are text and image generative models. Among them, Janus and Janus-Pro use autoregressive mechanism for the image generation, while JanusFlow use Rectified flow, like the diffusion models, to iteratively refine the generated contents from a noise to an image.</p>
+<span id="more"></span>
+<h2 id="DeepSeek-VL-Towards-Real-World-Vision-Language-Understanding">DeepSeek-VL: Towards Real-World Vision-Language Understanding</h2>
+<table>
+<thead>
+<tr>
+<th>Number of tokens for pretraining</th>
+<th>Model size options</th>
+<th>Training pipeline</th>
+<th>Performance</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A diverse range of data source</td>
+<td>1.3B, 7B</td>
+<td>Adapter+ Joint training + Instruction tuning</td>
+<td>Comparative to state-of-the-art</td>
+</tr>
+</tbody>
+</table>
+<h3 id="Overview">Overview</h3>
+<ol>
+<li>Open-source, it’s the most important one for the first DeepSeek paper (here, of the VLM series).</li>
+<li>Deal with both high and low image resolutions using two encoders;</li>
+<li>Preserve language capability via a modality warm-up strategy.</li>
+</ol>
+<h3 id="Method">Method</h3>
+<h4 id="Data">Data</h4>
+<p>In a few words, they encompass a diverse range of publicly accessible sources, in addition to a selection of proprietary data. They also collect a bunch of supervised fine-tuning data from a diverse range of multimodality and language data sources.</p>
+<h4 id="Architecutre">Architecutre</h4>
+<p>So the architecture consists of three parts:</p>
+<ul>
+<li>The hybrid vision encoder.
+<ul>
+<li>SAM-B, a pretrained ViTDet encoder that accepts $1024\times 1024$ image inputs.</li>
+<li>SigLIP-L encoder for $384\times 384$ image inputs.<br>
+With these two encoders, the image’s semantic and detailed information are both preserved.</li>
+</ul>
+</li>
+<li>Vision-Language adaptor<br>
+The input to the adaptor is the concatenated output from the two vision encoders. The adaptor transforms the input into the LLM’s input space through some MLPs.</li>
+<li>Language model<br>
+Use DeepSeek LLM, so the model is initialized from a selected checkpoint of DeepSeek LLM’s pretrained model.</li>
+</ul>
+<h4 id="Training-pipeline">Training pipeline</h4>
+<p><img src="/blogs/joplin_resources/73979f1d7ac8563c66ac3620e12fc9c0.png" alt=""></p>
+<p>The training objective is the next token prediction.<br>
+Like above, on stage 1 they train the adaptor to establish a conceptual link between visual and linguistic elements within the embedding space. On stage 2 jointly train the adaptor and LLM and use a ratio of roughly 7:3 of language to multimodal data, to enable the model to maintain its language capabilities while achieves better pretraining on multimodal data. On stage 3 they conduct supervised fine-tuning and train all parameters.</p>
+<p>DeepSeek-VL-7B consumed 5 days on a cluster of 64 nodes, each comprising 8 Nvidia A100 GPUs, while DeepSeek-VL-1B consumed 7 days on a setup involving 16 nodes. Here is the performance:<br>
+<img src="/blogs/joplin_resources/ce9c596abb969eb4d41bc3787a22df09.png" alt=""></p>
+<h2 id="DeepSeek-VL2-Mixture-of-Experts-Vision-Language-Models-for-Advanced-Multimodal-Understanding">DeepSeek-VL2: Mixture-of-Experts Vision-Language Models for Advanced Multimodal Understanding</h2>
+<p><img src="/blogs/joplin_resources/de88485afccd6d3e78a249c1baf1c44f.png" alt=""></p>
+<table>
+<thead>
+<tr>
+<th>Number of tokens for pretraining</th>
+<th>Model size options</th>
+<th>Training pipeline</th>
+<th>Performance</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>An improved data</td>
+<td>3B / 0.57B activated  <br>16B / 2.4B activated  <br>27B / 4.1B activated</td>
+<td>Alignment+ Joint training + Instruction tuning</td>
+<td>Shown above</td>
+</tr>
+</tbody>
+</table>
+<h3 id="Overview-v2">Overview</h3>
+<ol>
+<li>Using dynamic tiling to tackle any resolutions;</li>
+<li>Okay, now we have the DeepSeekMoE architecture.</li>
+<li>Maybe better data for training and some change on the training pipeline.</li>
+</ol>
+<h3 id="Method-v2">Method</h3>
+<p><img src="/blogs/joplin_resources/1f059e7f7781c9e3dc1eb7c0ed3a8c5f.png" alt=""></p>
+<p>The above figure shows the overall framework. So, first the dynamic tilling approach. It’s quite simple, as shown below.<br>
+<img src="/blogs/joplin_resources/b67ecfc3fa09e661dcb6fb770b55738e.png" alt=""><br>
+We basically use a single SigLIP-SO400M-384 vision encoder and divide the original image into many $384\times 384$ tiles and do the encoding.</p>
+<p>Then the architecture adopts the MoE version, and the pretraining data contains both multimodal data and pure language data to preserve the language capabilities. The rest of the others are quite similar to VL. Note that for the training pipeline, the stage 1 will optimize both the adaptor and the vision encoder.</p>
+<p>That’s all to mention here.</p>
+<h2 id="Janus-Decoupling-Visual-Encoding-for-Unified-Multimodal-Understanding-and-Generation">Janus: Decoupling Visual Encoding for Unified Multimodal Understanding and Generation</h2>
+<p><img src="/blogs/joplin_resources/2286717cf3b6f9adcd8733210ff36604.png" alt=""></p>
+<table>
+<thead>
+<tr>
+<th>Number of tokens for pretraining</th>
+<th>Model size options</th>
+<th>Training pipeline</th>
+<th>Performance</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>-</td>
+<td>DeepSeek LLM (1.3B)</td>
+<td>3-stage training</td>
+<td>Shown above</td>
+</tr>
+</tbody>
+</table>
+<h3 id="Overview-v3">Overview</h3>
+<p><img src="/blogs/joplin_resources/a7f033d53bc0a574cfaa6e6a8cf15c15.png" alt=""><br>
+The main ideas:</p>
+<ol>
+<li>Entire model adheres to an autoregressive framework;</li>
+<li>Janus decouples visual encoding for visual understanding and visual generation. I.e., it uses two vision encoders and two adaptors.</li>
+</ol>
+<h3 id="Method-v3">Method</h3>
+<h4 id="Vision-encoders-and-adaptors">Vision encoders and adaptors</h4>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Encoder and adaptor</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Understanding</td>
+<td>SigLIP, the feature maps are flattened to 1-D + an adaptor to map the feature to LLM input space</td>
+</tr>
+<tr>
+<td>Generation</td>
+<td>A VQ tokenizer, similar mapping to LLM input space</td>
+</tr>
+</tbody>
+</table>
+<p>The output of the two adaptor are concatenated and fed to the LLM.</p>
+<h4 id="Training-pipeline-v2">Training pipeline</h4>
+<p><img src="/blogs/joplin_resources/bc3b6e04420368e61d8cd5f36f21fec0.png" alt=""></p>
+<p>For stage 1, the dataset includes 1.25M image-text paired captions from ShareGPT4V, and 1.2M images from ImageNet-1K where the text is organized as ‘&lt;category_name&gt;&lt;image&gt;’.<br>
+For stage 2, they use 1) text-only data, 2) interleaved image-text data, and 3) image caption data, 4) table and chart data, and 5) visual generation data.<br>
+For stage 3, they use instruct tuning data.<br>
+Flame symbols/snowflake symbols in the diagram indicate the module updates/does not update its parameters.</p>
+<p>Maybe that’s all for the paper.</p>
+<h2 id="Janus-Pro-Unified-Multimodal-Understanding-and-Generation-with-Data-and-Model-Scaling">Janus-Pro: Unified Multimodal Understanding and Generation with Data and Model Scaling</h2>
+<p><img src="/blogs/joplin_resources/6796c88e04a50246b5d52f8e31240b13.png" alt=""></p>
+<table>
+<thead>
+<tr>
+<th>Number of tokens for pretraining</th>
+<th>Model size options</th>
+<th>Training pipeline</th>
+<th>Performance</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>-</td>
+<td>1B, 7B</td>
+<td>3-stage training</td>
+<td>Shown above</td>
+</tr>
+</tbody>
+</table>
+<h3 id="Overall">Overall</h3>
+<p>Compared with Janus, the Pro version incorporates:</p>
+<ol>
+<li>an optimized training strategy,</li>
+<li>expanded training data,</li>
+<li>scaling to larger model size.</li>
+</ol>
+<h3 id="Method-v4">Method</h3>
+<p>So for the training pipeline, I’ll directly take a snip from the paper to tell the main modification:<br>
+<img src="/blogs/joplin_resources/6ac4d9f4433d604aaa8910bc6da88cdf.png" alt=""></p>
+<p>Besides, they also scale the data and model size for better performance.</p>
+<p>Maybe that’s all.</p>
+<h2 id="JanusFlow-Harmonizing-Autoregression-and-Rectified-Flow-for-Unified-Multimodal-Understanding-and-Generation">JanusFlow: Harmonizing Autoregression and Rectified Flow for Unified Multimodal Understanding and Generation</h2>
+<p><img src="/blogs/joplin_resources/41982dd75b030bdc77b72a85fb1cc939.png" alt=""></p>
+<table>
+<thead>
+<tr>
+<th>Number of tokens for pretraining</th>
+<th>Model size options</th>
+<th>Training pipeline</th>
+<th>Performance</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>-</td>
+<td>1B, 7B</td>
+<td>3-stage training</td>
+<td>Shown above</td>
+</tr>
+</tbody>
+</table>
+<h3 id="Overview-and-Method">Overview and Method</h3>
+<p>It’s kind of another branch of Janus but using diffusion technique to generate images.</p>
+<p>Instead of the original diffusion process, they use rectified flow to iteratively transform a noise to a sample in the image distribution. The training objective is:<br>
+<img src="/blogs/joplin_resources/5c9c082e6e6a8efd4ba1e870b028b383.png" alt=""><br>
+where $z_0$ is a sample from the standard Gaussian distribution, $v_{\theta NN}$ is a neutral network taking the point in the linear path from $z_0$ to $x$ and the time step $t$ as input, to predict the difference between $x$ and $z_0$.<br>
+If you don’t understand, Sec. 3.1 in this paper gives some good introduction then.<br>
+Based on that, the framework of JanusFlow is like:<br>
+<img src="/blogs/joplin_resources/7141e4d05e6b33a941adabf585df866a.png" alt=""></p>
+<p>The figure below gives a good illustration of the 3-stage training:<br>
+<img src="/blogs/joplin_resources/e5400cbbb9bec63deaceb2cf0910ab41.png" alt=""></p>
+<p>Three training objectives are used.</p>
+<ul>
+<li>Autoregression Objective<br>
+<img src="/blogs/joplin_resources/06cfce6af84f521c6f12dc00089972dc.png" alt=""></li>
+<li>Rectified Flow Objective<br>
+<img src="/blogs/joplin_resources/d94d5a43e525310ded726eaacff04a8b.png" alt=""></li>
+<li>Representation Alignment Regularization<br>
+<img src="/blogs/joplin_resources/f0103f380a96b1652a1c0d0923fa1deb.png" alt=""></li>
+</ul>
+<p>02/04/2025 01:19<br>
+Maybe I need to go to sleep now.</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/blogs/tags/VLM/" rel="tag"># VLM</a>
+              <a href="/blogs/tags/DeepSeek/" rel="tag"># DeepSeek</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/blogs/2025/03/30/DeepSeek-Series-LLM/" rel="prev" title="DeepSeek Series - LLM">
+                  <i class="fa fa-angle-left"></i> DeepSeek Series - LLM
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+    <div class="comments utterances-container"></div>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2025</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Zhuo ge ge</span>
+  </div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="Back to top">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/blogs/js/comments.js"></script><script src="/blogs/js/utils.js"></script><script src="/blogs/js/motion.js"></script><script src="/blogs/js/sidebar.js"></script><script src="/blogs/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/blogs/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"ams","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/blogs/js/third-party/math/mathjax.js"></script>
+
+
+<script class="next-config" data-name="utterances" type="application/json">{"enable":true,"repo":"hellozhuo/blogs","issue_term":"pathname","theme":"preferred-color-scheme"}</script>
+<script src="/blogs/js/third-party/comments/utterances.js"></script>
+
+</body>
+</html>

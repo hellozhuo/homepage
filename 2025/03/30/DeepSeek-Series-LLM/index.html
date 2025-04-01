@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/blogs/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/blogs/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/blogs/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/blogs/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/blogs/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha256-5eIC48iZUHmSlSUz9XtjRyK2mzQkHScZY1WdMaoz74E=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"zhuogege1943.com","root":"/blogs/","images":"/blogs/images","scheme":"Gemini","darkmode":true,"version":"8.21.1","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"},"path":"/blogs/search.xml","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/blogs/js/config.js"></script>
+
+    <meta name="description" content="Paper list (papers in gray is not discussed in this blog)  DeepSeek LLM: Scaling Open-Source Language Models with Longtermism DeepSeekMoE: Towards Ultimate Expert Specialization in Mixture-of-Experts">
+<meta property="og:type" content="article">
+<meta property="og:title" content="DeepSeek Series - LLM">
+<meta property="og:url" content="https://zhuogege1943.com/blogs/2025/03/30/DeepSeek-Series-LLM/index.html">
+<meta property="og:site_name" content="Zhuo&#39;s Blog">
+<meta property="og:description" content="Paper list (papers in gray is not discussed in this blog)  DeepSeek LLM: Scaling Open-Source Language Models with Longtermism DeepSeekMoE: Towards Ultimate Expert Specialization in Mixture-of-Experts">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://zhuogege1943.com/blogs/joplin_resources/e4a3bb2661d2ad7e8e8a566af5bd67d7.png">
+<meta property="og:image" content="https://zhuogege1943.com/blogs/joplin_resources/1045513e17305d61e17e3bd64e6dec2d.png">
+<meta property="og:image" content="https://zhuogege1943.com/blogs/joplin_resources/4e417656419e1ac742d747388a3cd617.png">
+<meta property="og:image" content="https://zhuogege1943.com/blogs/joplin_resources/d97cf075b2124bbb04f1c581db763156.png">
+<meta property="og:image" content="https://zhuogege1943.com/blogs/joplin_resources/9ba638166577af14e90c0b92d4a47f6c.png">
+<meta property="og:image" content="https://zhuogege1943.com/blogs/joplin_resources/25ca2dbfe9703db53c94864c8dc691ca.png">
+<meta property="og:image" content="https://zhuogege1943.com/blogs/joplin_resources/f33a2c623ef9ddc06b63864f9e088d1c.png">
+<meta property="og:image" content="https://zhuogege1943.com/blogs/joplin_resources/fe798aebaec87e632dec6f34c0153708.png">
+<meta property="og:image" content="https://zhuogege1943.com/blogs/joplin_resources/ddee053120ce99b313fef78cd669415d.png">
+<meta property="og:image" content="https://zhuogege1943.com/blogs/joplin_resources/056b37fbdb9b420bbeb57d3a68be7a55.png">
+<meta property="og:image" content="https://zhuogege1943.com/blogs/joplin_resources/d649ac45f5554ebdc4b392abb6efa62b.png">
+<meta property="og:image" content="https://zhuogege1943.com/blogs/joplin_resources/9ee3898969e7193667cf725069db74b3.png">
+<meta property="og:image" content="https://zhuogege1943.com/blogs/joplin_resources/f62603c950185ee0efd3c5185b11528a.png">
+<meta property="og:image" content="https://zhuogege1943.com/blogs/joplin_resources/4255fbbbe4bdbaafb5a6d87a81bc7864.png">
+<meta property="og:image" content="https://zhuogege1943.com/blogs/joplin_resources/72cd5aa9b4cdf445c90599a165268c61.png">
+<meta property="og:image" content="https://zhuogege1943.com/blogs/joplin_resources/cd42d666dd2b105257567164e3c25ada.png">
+<meta property="og:image" content="https://zhuogege1943.com/blogs/joplin_resources/df6a79e7199fad48c8653f2ff57cc566.png">
+<meta property="og:image" content="https://zhuogege1943.com/blogs/joplin_resources/c4b047bf40e48d5bbdf14347019eed7c.png">
+<meta property="og:image" content="https://zhuogege1943.com/blogs/joplin_resources/b2211e259db3d82c367ac958607b5efc.png">
+<meta property="og:image" content="https://zhuogege1943.com/blogs/joplin_resources/afbdd712cf7c486ccb3940d3185412ab.png">
+<meta property="article:published_time" content="2025-03-30T07:29:29.000Z">
+<meta property="article:modified_time" content="2025-04-01T22:51:24.724Z">
+<meta property="article:author" content="Zhuo ge ge">
+<meta property="article:tag" content="LLM">
+<meta property="article:tag" content="DeepSeek">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://zhuogege1943.com/blogs/joplin_resources/e4a3bb2661d2ad7e8e8a566af5bd67d7.png">
+
+
+<link rel="canonical" href="https://zhuogege1943.com/blogs/2025/03/30/DeepSeek-Series-LLM/">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"en","comments":true,"permalink":"https://zhuogege1943.com/blogs/2025/03/30/DeepSeek-Series-LLM/","path":"2025/03/30/DeepSeek-Series-LLM/","title":"DeepSeek Series - LLM"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>DeepSeek Series - LLM | Zhuo's Blog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/blogs/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/blogs/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Zhuo's Blog</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="Search" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/blogs/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a></li><li class="menu-item menu-item-about"><a href="/blogs/about/" rel="section"><i class="fa fa-user fa-fw"></i>About</a></li><li class="menu-item menu-item-tags"><a href="/blogs/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a></li><li class="menu-item menu-item-categories"><a href="/blogs/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a></li><li class="menu-item menu-item-all-blogs"><a href="/blogs/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>All blogs</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="Searching..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#General-information"><span class="nav-number">1.</span> <span class="nav-text">General information</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DeepSeek-LLM-Scaling-Open-Source-Language-Models-with-Longtermism"><span class="nav-number">2.</span> <span class="nav-text">DeepSeek LLM: Scaling Open-Source Language Models with Longtermism</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Overview"><span class="nav-number">2.1.</span> <span class="nav-text">Overview</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Method"><span class="nav-number">2.2.</span> <span class="nav-text">Method</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DeepSeekMoE-Towards-Ultimate-Expert-Specialization-in-Mixture-of-Experts-Language-Models"><span class="nav-number">3.</span> <span class="nav-text">DeepSeekMoE: Towards Ultimate Expert Specialization in Mixture-of-Experts Language Models</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Overview-v2"><span class="nav-number">3.1.</span> <span class="nav-text">Overview</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Method-v2"><span class="nav-number">3.2.</span> <span class="nav-text">Method</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Fine-grained-Expert-Segmentation"><span class="nav-number">3.2.1.</span> <span class="nav-text">Fine-grained Expert Segmentation</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Shared-Expert-Isolation"><span class="nav-number">3.2.2.</span> <span class="nav-text">Shared Expert Isolation</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Load-balance-loss-functions"><span class="nav-number">3.2.3.</span> <span class="nav-text">Load balance loss functions</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DeepSeek-Coder-When-the-Large-Language-Model-Meets-Programming-%E2%80%93-The-Rise-of-Code-Intelligence"><span class="nav-number">4.</span> <span class="nav-text">DeepSeek-Coder: When the Large Language Model Meets Programming – The Rise of Code Intelligence</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DeepSeekMath-Pushing-the-Limits-of-Mathematical-Reasoning-in-Open-Language-Models"><span class="nav-number">5.</span> <span class="nav-text">DeepSeekMath: Pushing the Limits of Mathematical Reasoning in Open Language Models</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DeepSeek-V2-A-Strong-Economical-and-Efficient-Mixture-of-Experts-Language-Model"><span class="nav-number">6.</span> <span class="nav-text">DeepSeek-V2: A Strong, Economical, and Efficient Mixture-of-Experts Language Model</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Overview-v3"><span class="nav-number">6.1.</span> <span class="nav-text">Overview</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Method-v3"><span class="nav-number">6.2.</span> <span class="nav-text">Method</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Multi-head-Latent-Attention-MLA"><span class="nav-number">6.2.1.</span> <span class="nav-text">Multi-head Latent Attention (MLA)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Auxiliary-Loss-for-Load-Balance"><span class="nav-number">6.2.2.</span> <span class="nav-text">Auxiliary Loss for Load Balance</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Long-Context-Extension"><span class="nav-number">6.2.3.</span> <span class="nav-text">Long Context Extension</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DeepSeek-V3-Technical-Report"><span class="nav-number">7.</span> <span class="nav-text">DeepSeek-V3 Technical Report</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Overview-v4"><span class="nav-number">7.1.</span> <span class="nav-text">Overview</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Method-v4"><span class="nav-number">7.2.</span> <span class="nav-text">Method</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Auxiliary-Loss-Free-Load-Balancing"><span class="nav-number">7.2.1.</span> <span class="nav-text">Auxiliary-Loss-Free Load Balancing</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Multi-Token-Prediction"><span class="nav-number">7.2.2.</span> <span class="nav-text">Multi-Token Prediction</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Other-strategies"><span class="nav-number">7.2.3.</span> <span class="nav-text">Other strategies</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DeepSeek-R1-Incentivizing-Reasoning-Capability-in-LLMs-via-Reinforcement-Learning"><span class="nav-number">8.</span> <span class="nav-text">DeepSeek-R1: Incentivizing Reasoning Capability in LLMs via Reinforcement Learning</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Overview-v5"><span class="nav-number">8.1.</span> <span class="nav-text">Overview</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Method-v5"><span class="nav-number">8.1.1.</span> <span class="nav-text">Method</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#DeepSeek-R1-Zero"><span class="nav-number">8.1.2.</span> <span class="nav-text">DeepSeek-R1-Zero</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#DeepSeek-R1"><span class="nav-number">8.1.3.</span> <span class="nav-text">DeepSeek-R1</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Limitations"><span class="nav-number">8.2.</span> <span class="nav-text">Limitations</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <a href="https://zhuogege1943.com" title=" → personal homepage">
+    <img class="site-author-image" itemprop="image" alt="Zhuo ge ge"
+      src="/blogs/images/dushen.png">
+    </a>
+  <p class="site-author-name" itemprop="name">Zhuo ge ge</p>
+  <div class="site-description" itemprop="description">Hi, nice to meet you</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/blogs/archives/">
+          <span class="site-state-item-count">30</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/blogs/categories/">
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/blogs/tags/">
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/hellozhuo" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;hellozhuo" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:zuike2013@outlook.com" title="E-Mail → mailto:zuike2013@outlook.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://zhuogege1943.com/blogs/2025/03/30/DeepSeek-Series-LLM/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/blogs/images/dushen.png">
+      <meta itemprop="name" content="Zhuo ge ge">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zhuo's Blog">
+      <meta itemprop="description" content="Hi, nice to meet you">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="DeepSeek Series - LLM | Zhuo's Blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          DeepSeek Series - LLM
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2025-03-30 10:29:29" itemprop="dateCreated datePublished" datetime="2025-03-30T10:29:29+03:00">2025-03-30</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">Edited on</span>
+      <time title="Modified: 2025-04-02 01:51:24" itemprop="dateModified" datetime="2025-04-02T01:51:24+03:00">2025-04-02</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">In</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/blogs/categories/Paper-reading/" itemprop="url" rel="index"><span itemprop="name">Paper reading</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">Views: </span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>Paper list (papers in gray is not discussed in this blog)</p>
+<ul>
+<li>DeepSeek LLM: Scaling Open-Source Language Models with Longtermism</li>
+<li>DeepSeekMoE: Towards Ultimate Expert Specialization in Mixture-of-Experts Language Models</li>
+<li>DeepSeek-Coder: When the Large Language Model Meets Programming – The Rise of Code Intelligence</li>
+<li>DeepSeekMath: Pushing the Limits of Mathematical Reasoning in Open Language Models</li>
+<li><span style="color: gray;">DeepSeek-Prover: Advancing Theorem Proving in LLMs through Large-Scale Synthetic Data</span></li>
+<li><span style="color: gray;">DeepSeek-Coder-V2: Breaking the Barrier of Closed-Source Models in Code Intelligence</span></li>
+<li>DeepSeek-V2: A Strong, Economical, and Efficient Mixture-of-Experts Language Model</li>
+<li><span style="color: gray;">Let the Expert Stick to His Last: Expert-Specialized Fine-Tuning for Sparse Architectural Large Language Models</span></li>
+<li><span style="color: gray;">DeepSeek-Prover-V1.5: Harnessing Proof Assistant Feedback for Reinforcement Learning and Monte-Carlo Tree Search</span></li>
+<li>DeepSeek-V3 Technical Report</li>
+<li>DeepSeek-R1: Incentivizing Reasoning Capability in LLMs via Reinforcement Learning</li>
+</ul>
+<h2 id="General-information">General information</h2>
+<p>DeepSeek is a series of strong LLM models, open-source but trying to beat close-source models, in terms of general language generation, and specific fields like Math, coding, reasoning, etc. The famous powerful DeepSeek V2/V3/R1 use MoE architectures, a huge amount of training tokens, and novel architectural, training, and optimization innovations, to get state-of-the-art performances with efficient training and inferences. In addition, DeepSeek also developed a series powerful Vision-Language models, which will be discussed in the next blog.</p>
+<span id="more"></span>
+<p>The details are in the original papers, but let’s try to briefly introduce them here.</p>
+<blockquote>
+<p>Note: no DeepSeek models, ChatGPT, or other similar LLM tools are used in the blogs.</p>
+</blockquote>
+<h2 id="DeepSeek-LLM-Scaling-Open-Source-Language-Models-with-Longtermism">DeepSeek LLM: Scaling Open-Source Language Models with Longtermism</h2>
+<table>
+<thead>
+<tr>
+<th>Number of tokens for pretraining</th>
+<th>Model size options</th>
+<th>Training pipeline</th>
+<th>Performance</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2T</td>
+<td>7B, 67B</td>
+<td>Pretraining + SFT + DPO</td>
+<td>DeepSeek LLM 67B &gt; LLaMA-2 70B  <br><br/>After SFT + DPO:DeepSeek LLM 67B &gt; GPT-3.5</td>
+</tr>
+</tbody>
+</table>
+<h3 id="Overview">Overview</h3>
+<p>This might be the first LLM model developed by DeepSeek team. It is a dense LLM that has two versions: 7B and 67B. The main contributions (my understanding) are:</p>
+<ol>
+<li>Open-source (this is the key for long-term influence);</li>
+<li>Re-investigate the scaling law, finding the formulas of the best hyperparameters (learning rate and batch size), non-embedding FLOPs/token, and number of training tokens.</li>
+<li>Finding that the data quality is a key factor affecting the model performance. Higher quality data may need more compute budge allocated to model rather than data.</li>
+</ol>
+<h3 id="Method">Method</h3>
+<p><strong>Data</strong>: Using deduplication, filtering, and remixing to create high-quality training data;<br>
+<strong>Architecture</strong>: Largely follows the design of LLaMA but applies deeper layers.<br>
+<strong>Scaling law</strong>: The best hyperparameters are found by grid search using small scale models, and M, D are found by IsoFLOPs profile approach, where for a fixed compute budge, different M/D scale allocations are designed to draw the curve.</p>
+<h2 id="DeepSeekMoE-Towards-Ultimate-Expert-Specialization-in-Mixture-of-Experts-Language-Models">DeepSeekMoE: Towards Ultimate Expert Specialization in Mixture-of-Experts Language Models</h2>
+<table>
+<thead>
+<tr>
+<th>Number of tokens for pretraining</th>
+<th>Model size options</th>
+<th>Training pipeline</th>
+<th>Performance</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2T</td>
+<td>2B / 0.3B activated  <br><br/>16B / 2.8B activated  <br><br/>145B / 22.2B activated</td>
+<td>Pretraining + SFT (for 16B)</td>
+<td>DeepSeekMoE 2B ~ GShard 2.9B (the latter has 1.5x expert parameters)  <br><br/>DeepSeekMoE 2B ~ its dense counterpart  <br><br/>DeepSeekMoE 16B ~ LLaMA2 7B (the former has only 40% computations)  <br><br/>DeepSeekMoE 145B ~ DeepSeek 67B (the former has only 28.5% computations)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="Overview-v2">Overview</h3>
+<p>This paper mainly introduces two ideas for the architecture: fine-grained expert segmentation and shared expert isolation. In addition, some balance loss functions are designed to encourage load balance.</p>
+<p><img src="/blogs/joplin_resources/e4a3bb2661d2ad7e8e8a566af5bd67d7.png" alt=""></p>
+<h3 id="Method-v2">Method</h3>
+<h4 id="Fine-grained-Expert-Segmentation">Fine-grained Expert Segmentation</h4>
+<p>As shown in the above figure, based on the basic MoE architecture in (a), it further segments each FFN expert into $m$ smaller experts, such that the number of experts are increased by $m$. But the ratio of the number of activated experts to the total number of experts keeps the same. It means the number of activated experts are also increased by $m$ but are finer-grained. It increase the level of expert specialization.</p>
+<h4 id="Shared-Expert-Isolation">Shared Expert Isolation</h4>
+<p>It has some shared experts that are activated all the time. The shared experts are dedicated to capturing and consolidating common knowledge across varying contexts, the parameter redundancy among other routed experts will be alleviated.</p>
+<h4 id="Load-balance-loss-functions">Load balance loss functions</h4>
+<ul>
+<li>
+<p>Expert-Level Balance loss:<br>
+<img src="/blogs/joplin_resources/1045513e17305d61e17e3bd64e6dec2d.png" alt=""><br>
+where $N’$ is the number of routed experts (those who are not shared), $K’$ is the number of activated experts, $T$ is the sequence length, $s_{i, t}$ is the token-to-expert affinity (score of $t$th token on $i$th expert output by softmax). Basically, $f_i$ is the actual number of tokens assigned to expert $i$, while $P_i$ is the soft number of tokens assigned to expert $i$. The loss encourage the tokens are evenly assigned across the experts.</p>
+</li>
+<li>
+<p>Device-level Balance loss:<br>
+<img src="/blogs/joplin_resources/4e417656419e1ac742d747388a3cd617.png" alt=""></p>
+</li>
+</ul>
+<p>It shows similar spirit. So they partition all routed experts into $D$ groups ${\epsilon_1, \epsilon_2, …, \epsilon_D}$, and deploy each group on a single device. The above is the loss function.</p>
+<h2 id="DeepSeek-Coder-When-the-Large-Language-Model-Meets-Programming-–-The-Rise-of-Code-Intelligence">DeepSeek-Coder: When the Large Language Model Meets Programming – The Rise of Code Intelligence</h2>
+<p><img src="/blogs/joplin_resources/d97cf075b2124bbb04f1c581db763156.png" alt=""></p>
+<table>
+<thead>
+<tr>
+<th>Number of tokens for pretraining</th>
+<th>Model size options</th>
+<th>Training pipeline</th>
+<th>Performance</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2T tokens sourced from 87 programming languages</td>
+<td>DeepSeek-Coder 1.3B, 6.7B, 33B (v1)</td>
+<td>Pretraining,   <br>Instruction tuning</td>
+<td>As shown above</td>
+</tr>
+<tr>
+<td></td>
+<td>DeepSeek-Coder-v1.5 7B</td>
+<td>Pretraining starting from DeepSeek-LLM-7B Base,  <br>only using next token prediction</td>
+<td>Comparing with the v1 models, can increase the performance of math reasoning and natural language categories, with minor degradation on programming.</td>
+</tr>
+</tbody>
+</table>
+<p>So, the innovations in this paper are:</p>
+<ol>
+<li>For training, they also use Fill-In-Middle approach in addition to next token prediction. This method aims to incorporate a fill-in-the-blank pretraining task during the training process. Within the FIM methodology, two distinct modes are employed: PSM (Prefix-Suffix-Middle) and SPM (Suffix-Prefix-Middle). So it means the middle is predicted given both suffix and prefix. It can enhance model’s capability to handle various structural arrangements in code</li>
+<li>They incorporate repository-level data construction instead of file-level. Which means they consider all the files in a project and reorder them to ensure the correct dependencies across files. It can potentially increase the practicality and applicability of the model in handling project-level code scenarios.</li>
+</ol>
+<p> </p>
+<h2 id="DeepSeekMath-Pushing-the-Limits-of-Mathematical-Reasoning-in-Open-Language-Models">DeepSeekMath: Pushing the Limits of Mathematical Reasoning in Open Language Models</h2>
+<p><img src="/blogs/joplin_resources/9ba638166577af14e90c0b92d4a47f6c.png" alt=""></p>
+<table>
+<thead>
+<tr>
+<th>Number of tokens for pretraining</th>
+<th>Model size options</th>
+<th>Training pipeline</th>
+<th>Performance</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>120B</td>
+<td>DeepSeekMath-Base 7B</td>
+<td>Additional pretraining from DeepSeek-Coder-Base-v1.5 7B,  <br>mathematical instruction tuning,  <br>GRPO (Group Relative Policy Optimization, a proposed RL algorithm in the paper)</td>
+<td>Shown above</td>
+</tr>
+</tbody>
+</table>
+<p>Basically, it continues training DeepSeek-Coder-Base-v1.5 7B, with 120B math-related tokens, using mathematical instruction tuning and GRPO.</p>
+<h2 id="DeepSeek-V2-A-Strong-Economical-and-Efficient-Mixture-of-Experts-Language-Model">DeepSeek-V2: A Strong, Economical, and Efficient Mixture-of-Experts Language Model</h2>
+<p><img src="/blogs/joplin_resources/25ca2dbfe9703db53c94864c8dc691ca.png" alt=""></p>
+<table>
+<thead>
+<tr>
+<th>Number of tokens for pretraining</th>
+<th>Model size options</th>
+<th>Training pipeline</th>
+<th>Performance</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>8.1T</td>
+<td>236B / 21B activated (context length 128K tokens)</td>
+<td>Pretraining + SFT + RL (GRPO)</td>
+<td>Comparison with DeepSeek 67B is shown above (right), with others (left)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="Overview-v3">Overview</h3>
+<p>The main idea proposed in this paper is the Multi-head Latent Attention (MLA), in order to reduce the KV cache to save memory and computation. DeepSeek v2 is built based on DeepSeekMoE (using fine-grained expert segmentation and shared expert isolation), using MLA, and introducing extra load balance loss functions, with larger data scale and additional training strategies to reach its goal.</p>
+<blockquote>
+<p>Question: what is the key for the shocking performance of DeepSeek v2?<br>
+I guess from the architectural side, the MLA make DeepSeek v2 efficient in both memory and computation, leading to much less training and inference cost. DeepSeekMoE also provides a good start for effective MoE architecture design considering efficiency and accuracy. From the training perspective, the performance may also comes from some balance loss functions and training pipelines. From the data perspective, 8.1T tokens for pretraining should be definitely playing a role.</p>
+</blockquote>
+<h3 id="Method-v3">Method</h3>
+<h4 id="Multi-head-Latent-Attention-MLA">Multi-head Latent Attention (MLA)</h4>
+<p><img src="/blogs/joplin_resources/f33a2c623ef9ddc06b63864f9e088d1c.png" alt=""></p>
+<p>Since we already has discussed the DeepSeekMoE architecture (in this blog) and KV cache (in another blog), so maybe let’s quickly talk about this MLA approach that aims to further save memory and computations based on the KV cache strategy.</p>
+<p>As shown on the bottom right of the above figure, the spirit is from low-rank compression. The input $h_t$ is first mapped to a feature in a latent space $c_t^{KV}$ where the dimension is small before creating K and V. Then K and V are created based on this latent space by using separate mapping matrix to project the dimension to a larger one. By doing so, only the latent feature is cached which saves a lot of memory and computation. To further speed up the training process, Q is also compressed using the same strategy. The below equation is an example for Q.</p>
+<p><img src="/blogs/joplin_resources/fe798aebaec87e632dec6f34c0153708.png" alt=""></p>
+<p>For the positional embedding, the rotary position embedding (RoPE) is used and cannot be integrated into the above process (two linear projections) since it is nonlinear. Therefore, the authors propose to decouple that like this (taking Q as an example):<br>
+<img src="/blogs/joplin_resources/ddee053120ce99b313fef78cd669415d.png" alt=""><br>
+where, $q^R$ is divided into multi heads, but $k^R$ is shared.</p>
+<h4 id="Auxiliary-Loss-for-Load-Balance">Auxiliary Loss for Load Balance</h4>
+<p>In addition to the two load balance loss functions introduced in DeepSeekMoE, the v2 version further considers a balance loss, namely, communication balance loss:<br>
+<img src="/blogs/joplin_resources/056b37fbdb9b420bbeb57d3a68be7a55.png" alt=""><br>
+This is to encourage each device receives an equal number of tokens.</p>
+<h4 id="Long-Context-Extension">Long Context Extension</h4>
+<p>YaRN method is applied on RoPE to extend the length to 160K (so that the performance on 128K should be expected well).</p>
+<h2 id="DeepSeek-V3-Technical-Report">DeepSeek-V3 Technical Report</h2>
+<p><img src="/blogs/joplin_resources/d649ac45f5554ebdc4b392abb6efa62b.png" alt=""></p>
+<table>
+<thead>
+<tr>
+<th>Number of tokens for pretraining</th>
+<th>Model size options</th>
+<th>Training pipeline</th>
+<th>Performance</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>14.8T</td>
+<td>671B / 37B activated (context length 128K tokens)</td>
+<td>Pretraining + SFT + RL (GRPO)<br>The post-training (SFT, RL) data is curated from DeepSeek-R1, so it means using distillation from R1</td>
+<td>Above figure</td>
+</tr>
+</tbody>
+</table>
+<h3 id="Overview-v4">Overview</h3>
+<p>Main ideas include:<br>
+1. Auxiliary loss free strategy to ensure load balance (no need to design balance loss function anymore);<br>
+2. Multi-token prediction training objective;<br>
+3. DualPipe pipeline parallelism strategy;<br>
+4. Other training and inference optimization strategies like FP8 training.</p>
+<blockquote>
+<p>Why v3 stronger?<br>
+Definitely, the number of training tokens is increased significantly, from 8.1T in V2 to 14.8T in V3. Larger model scale also gives enhancement. In other words, scaling law.</p>
+</blockquote>
+<p>Let’s also take a look at the training cost of V3 (I don’t know other LLMs but I guess V3 is much cheaper right?):<br>
+<img src="/blogs/joplin_resources/9ee3898969e7193667cf725069db74b3.png" alt=""></p>
+<h3 id="Method-v4">Method</h3>
+<p>The architecture still continues with the DeepSeekMoE architecture and MLA strategy for KV cache. So here just introduce the new ideas.</p>
+<h4 id="Auxiliary-Loss-Free-Load-Balancing">Auxiliary-Loss-Free Load Balancing</h4>
+<p><img src="/blogs/joplin_resources/f62603c950185ee0efd3c5185b11528a.png" alt=""></p>
+<p>The motivation is the balance loss will make the model less focused on the loss regarding the accuracy. Here as shown in the equation, $b_i$ is a bias term added to the affinity score (kind of reducing the effect of the affinity scores on the loading). During training, the bias term is decreased if the corresponding expert is overloaded, otherwise increased.</p>
+<p>But actually, the load balancing is not completely loss free, as the authors also introduce a complementary Sequence-wise loss:<br>
+<img src="/blogs/joplin_resources/4255fbbbe4bdbaafb5a6d87a81bc7864.png" alt=""><br>
+to prevent extreme imbalance within any single sequence.</p>
+<h4 id="Multi-Token-Prediction">Multi-Token Prediction</h4>
+<p><img src="/blogs/joplin_resources/72cd5aa9b4cdf445c90599a165268c61.png" alt=""><br>
+As shown above, they use additional $D$ MTP modules to predict D additional tokens, keeping the causal chain. The embedding layer and output head is shared in those MTP modules with the main model. The input of the RMSNorm in the MTP module is from  the previous modules or the main model.</p>
+<p>During training, each MTP module predict some tokens, giving a loss, and all the losses from the main model and MTP modules are combined with some weights. It also means certain tokens are predicted more than once.</p>
+<p>During inference, only the main model is used.</p>
+<h4 id="Other-strategies">Other strategies</h4>
+<p><img src="/blogs/joplin_resources/cd42d666dd2b105257567164e3c25ada.png" alt=""></p>
+<p>The DualPipe is a little complicated, you may need to refer to the paper or code for details. Overall, it carefully divides the structure into smaller segments for each pipeline, and overlaps the communication and computation (to make them happen at the same time) to largely enhance efficiency, and at the same time, to ensure minimum pipeline bubbles.</p>
+<p>For other strategies like FP8 mixed precision training, efficient all-to-all communication, recomputation of certain activations (RMSNorm and MLA Up-Projection), and some inference and deployment tricks, please refer to the original paper.</p>
+<h2 id="DeepSeek-R1-Incentivizing-Reasoning-Capability-in-LLMs-via-Reinforcement-Learning">DeepSeek-R1: Incentivizing Reasoning Capability in LLMs via Reinforcement Learning</h2>
+<p><img src="/blogs/joplin_resources/df6a79e7199fad48c8653f2ff57cc566.png" alt=""><br>
+It’s the reasoning performance of different LLMs.</p>
+<p>DeepSeek-R1 is based on DeepSeek-V3-Base, using a novel pipeline to develop with hundreds of sounds of samples to do RL.</p>
+<h3 id="Overview-v5">Overview</h3>
+<ol>
+<li>They first propose DeepSeek-R1-Zero, where no supervised data is provided. The finetuning data is collected from the base model itself. Zero already shows great reasoning performance compared with other LLMs (e.g., OpenAI-o1-mini).</li>
+<li>Then they propose a novel pipeline to further develop DeepSeek-R1.</li>
+<li>They use the samples curated with R1 to finetune other open-source LLMs like Qwen and Llama. They only use SFT (no RL) to finetune these LLMs, even though they demonstrate that applying RL can further enhance the reasoning performance.</li>
+</ol>
+<h4 id="Method-v5">Method</h4>
+<h4 id="DeepSeek-R1-Zero">DeepSeek-R1-Zero</h4>
+<p><img src="/blogs/joplin_resources/c4b047bf40e48d5bbdf14347019eed7c.png" alt=""><br>
+Zero is based on a DeepSeek base model (not sure which model it refers to in the original paper) and is obtained by using RL, particularly, GRPO (Group Relative Policy Optimization) proposed by the team before. The training data is gathered using the base model by guiding it to adhere to some specific instructions for the output, as shown in the template above.</p>
+<p>The reward for RL is from two sides. One is the accuracy rewards, which can be obtained by comparing the output of the model and the ground truth answer, like math, or code questions (using a compiler to check whether the generated code can pass). The other is the format rewards, enforcing the model to output a thinking process (enforces the model to put its thinking process between ‘&lt;think&gt;’ and ‘&lt;/think&gt;’ tags.)</p>
+<p>During training, Zero shows increasing reasoning abilities.<br>
+<img src="/blogs/joplin_resources/b2211e259db3d82c367ac958607b5efc.png" alt=""><br>
+It is an amazing result, as LLM can evolve to a reasoning model without any supervised fine-tuning data. It underscores the model’s ability to<br>
+learn and generalize effectively through RL alone.</p>
+<h4 id="DeepSeek-R1">DeepSeek-R1</h4>
+<p>The authors further propose two questions:</p>
+<ol>
+<li>Can reasoning performance be further improved or convergence accelerated by incorporating a small amount of high-quality data as a cold start?</li>
+<li>How can we train a user-friendly model that not only produces clear and coherent Chains of Thought (CoT) but also demonstrates strong general capabilities?</li>
+</ol>
+<p>To solve that, they propose a novel pipeline to train DeepSeek-R1:</p>
+<ul>
+<li>Cold Start<br>
+They construct and collect a small amount of long CoT data to fine-tune the model as the initial RL actor, by:
+<ul>
+<li>using few-shot prompting with a long CoT as an example;</li>
+<li>directly prompting the model to generate detailed output with reflection and verification;</li>
+<li>filtering the Zero output, to ensure readability and refine the output by human annotators.</li>
+</ul>
+</li>
+<li>Reasoning-oriented Reinforcement Learning<br>
+After fine-tuning on the cold start data, they combine the following rewards for the RL training.
+<ul>
+<li>Language consistency reward: the proportion of target language words in the CoT;</li>
+<li>Accuracy reward like above.</li>
+</ul>
+</li>
+<li>Rejection Sampling and Supervised Fine-Tuning
+<ul>
+<li>Perform rejection sampling from the above RL training checkpoint to collect fine-tuning data. To evaluate the quality of the data, in addition to the rule-based rewards like accuracy, this step also considers a generative rewards. Particularly, for the prompt, they feed the ground truth and the output of the model (here, I think they are referring to the model after the above RL training) to DeepSeek-V3 for judgement (e.g., I guess to give some match score). They collect 600K reasoning related training samples by doing this step.</li>
+<li>They also collect 200K non-reasoning samples from the SFT dataset of DeepSeek-V3.<br>
+After that, they perform fine-tuning for two epochs using the 800K.</li>
+</ul>
+</li>
+<li>Reinforcement Learning for all Scenarios<br>
+They train the model using a combination of reward signals and diverse prompt distributions. For reasoning data, we adhere to the methodology outlined in DeepSeek-R1-Zero, which utilizes rule-based rewards to guide the learning process in math, code, and logical reasoning domains. For general data, we resort to reward models to capture human preferences in complex and nuanced scenarios.</li>
+</ul>
+<p>After the above four steps, R1 can be obtained.</p>
+<p>About distillation, they use R1 to curate the 800K samples and use the curated data to fine-tune (no RL here) other open-source LLMs, the performances are shown below:<br>
+<img src="/blogs/joplin_resources/afbdd712cf7c486ccb3940d3185412ab.png" alt=""></p>
+<p>They also state that incorporating RL could substantially boost model performance.</p>
+<h3 id="Limitations">Limitations</h3>
+<ul>
+<li>Limitations in function calling, multi-turn, complex role-playing, JSON output, etc.</li>
+<li>Currently optimized for Chinese and English, not good for other languages.</li>
+<li>sensitive to prompts. Few-shot prompting consistently degrades its performance. Recommend to use zero-shot but detailed prompt.</li>
+<li>has not been applied extensively in software engineering tasks.</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/blogs/tags/LLM/" rel="tag"># LLM</a>
+              <a href="/blogs/tags/DeepSeek/" rel="tag"># DeepSeek</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/blogs/2025/01/20/Flash-Attention-1-2/" rel="prev" title="Flash Attention 1 & 2">
+                  <i class="fa fa-angle-left"></i> Flash Attention 1 & 2
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/blogs/2025/04/01/DeepSeek-Series-VLM/" rel="next" title="DeepSeek Series - VLM">
+                  DeepSeek Series - VLM <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+    <div class="comments utterances-container"></div>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2025</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Zhuo ge ge</span>
+  </div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="Back to top">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/blogs/js/comments.js"></script><script src="/blogs/js/utils.js"></script><script src="/blogs/js/motion.js"></script><script src="/blogs/js/sidebar.js"></script><script src="/blogs/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/blogs/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"ams","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/blogs/js/third-party/math/mathjax.js"></script>
+
+
+<script class="next-config" data-name="utterances" type="application/json">{"enable":true,"repo":"hellozhuo/blogs","issue_term":"pathname","theme":"preferred-color-scheme"}</script>
+<script src="/blogs/js/third-party/comments/utterances.js"></script>
+
+</body>
+</html>
